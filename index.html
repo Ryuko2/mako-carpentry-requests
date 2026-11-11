@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mako — Carpentry Project Request</title>
+<style>
+  :root{--bg:#14161a;--panel:#1d2026;--panel2:#24272f;--line:#343845;--txt:#eef0f4;--dim:#a7adbb;--acc:#ffb454;--acc2:#57c785;--bad:#ff6b6b;--radius:12px}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--txt)}
+  header{padding:22px 18px 6px;max-width:1180px;margin:0 auto}
+  h1{font-size:26px;margin:0 0 4px} h1 .mako{color:var(--acc)}
+  header p{color:var(--dim);margin:0;max-width:70ch}
+  main{max-width:1180px;margin:0 auto;padding:14px 18px 60px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:900px){main{grid-template-columns:1fr}}
+  section{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:16px}
+  section h2{font-size:16px;margin:0 0 4px;color:var(--acc)}
+  section .hint{color:var(--dim);font-size:12.5px;margin:0 0 12px}
+  label{display:block;font-size:12.5px;color:var(--dim);margin:10px 0 4px}
+  input,select,textarea{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:9px 10px;font-size:14px}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--acc);outline-offset:0;border-color:transparent}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .check{display:flex;gap:8px;align-items:center;margin:8px 0;font-size:14px;color:var(--txt)}
+  .check input{width:auto}
+  .bay,.obs{border:1px dashed var(--line);border-radius:10px;padding:10px;margin:10px 0;background:#1a1d23}
+  .bayhead{display:flex;justify-content:space-between;align-items:center}
+  .bayhead b{color:var(--acc2)}
+  button{background:var(--acc);color:#1a1206;border:0;border-radius:9px;padding:10px 14px;font-weight:700;font-size:14px;cursor:pointer}
+  button.secondary{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}
+  button.danger{background:transparent;color:var(--bad);border:1px solid var(--bad);padding:5px 9px;font-size:12px}
+  button:active{transform:translateY(1px)}
+  .btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  #previewWrap{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;position:sticky;top:12px}
+  #previewWrap h2{font-size:16px;margin:0 0 8px;color:var(--acc)}
+  svg{width:100%;height:auto;background:#101216;border-radius:8px}
+  pre{background:#101216;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:11.5px;overflow:auto;max-height:300px;white-space:pre-wrap;word-break:break-word}
+  #warnings{margin:10px 0;font-size:13px}
+  #warnings .w{color:var(--acc);margin:3px 0}
+  #warnings .e{color:var(--bad);margin:3px 0}
+  #warnings .ok{color:var(--acc2)}
+  .small{font-size:12px;color:var(--dim)}
+  a{color:var(--acc)}
+  .send{background:#20312a;border:1px solid var(--acc2)}
+</style>
+</head>
+<body>
+<header>
+  <h1>🔨 <span class="mako">MAKO</span> — Carpentry Project Request</h1>
+  <p>Fill this in and Mako (the carpentry CAD specialist) has everything she needs: order sheet, <b>params.json</b>, a live dimensioned drawing, and a one-click send to Ryuko through a GitHub Issue. Nothing is invented — a field you leave blank becomes a flagged question, never a guess.</p>
+</header>
+<main>
+<div id="formCol">
+
+<section>
+  <h2>1 · Project</h2>
+  <div class="row">
+    <div><label>Project type *</label>
+      <select id="ptype">
+        <option value="closet">Closet</option>
+        <option value="kitchen">Kitchen</option>
+        <option value="furniture">Other furniture</option>
+      </select></div>
+    <div><label>Job name (short slug) *</label><input id="jobname" placeholder="e.g. garcia-bedroom-closet"></div>
+  </div>
+  <div class="row">
+    <div><label>Client name</label><input id="client" placeholder="Who is it for?"></div>
+    <div><label>Units you are typing in</label>
+      <select id="units"><option value="mm">millimetres (mm)</option><option value="cm">centimetres (cm)</option><option value="in">inches (in)</option></select></div>
+  </div>
+  <p class="hint">All numbers are converted to mm in the output — Mako works in mm, always.</p>
+</section>
+
+<section>
+  <h2>2 · The room</h2>
+  <div class="row3">
+    <div><label>Room width *</label><input type="number" step="any" id="roomW" placeholder="3800"></div>
+    <div><label>Room length/depth *</label><input type="number" step="any" id="roomD" placeholder="4200"></div>
+    <div><label>Ceiling height *</label><input type="number" step="any" id="roomH" placeholder="2550"></div>
+  </div>
+  <label>Which wall does the piece go on?</label>
+  <select id="wall"><option value="room width wall">The room-width wall</option><option value="room length wall (left)">Length wall — left</option><option value="room length wall (right)">Length wall — right</option><option value="freestanding">Freestanding / island</option></select>
+  <label class="check"><input type="checkbox" id="centered" checked> Piece is centred on that wall</label>
+  <h3 style="margin:14px 0 2px;font-size:13.5px">Obstacles on that wall (door, window, outlet, pipe…)</h3>
+  <div id="obstacles"></div>
+  <div class="btnrow"><button type="button" class="secondary" id="addObs">+ Add obstacle</button></div>
+</section>
+
+<section>
+  <h2>3 · The piece — overall size</h2>
+  <div class="row3">
+    <div><label>Overall width *</label><input type="number" step="any" id="W" placeholder="2400"></div>
+    <div><label>Overall height *</label><input type="number" step="any" id="H" placeholder="2400"></div>
+    <div><label>Overall depth *</label><input type="number" step="any" id="D" placeholder="600"></div>
+  </div>
+  <label class="check"><input type="checkbox" id="depthInclDoors" checked> Depth includes the doors (overall depth)</label>
+  <div class="row">
+    <div><label>Construction</label><select id="construction"><option value="frameless">Frameless (32 mm system)</option><option value="face-frame">Face frame</option></select></div>
+    <div><label>Plinth / toe-kick height (0 = none)</label><input type="number" step="any" id="plinth" value="100"></div>
+  </div>
+</section>
+
+<section>
+  <h2>4 · Materials</h2>
+  <div class="row">
+    <div><label>Carcass material</label><input id="matName" value="white melamine on MDF/aglomerado"></div>
+    <div><label>Carcass thickness</label><select id="tCarcass"><option>15</option><option selected>16</option><option>18</option></select></div>
+  </div>
+  <div class="row3">
+    <div><label>Back thickness</label><select id="tBack"><option>3</option><option selected>6</option><option>9</option></select></div>
+    <div><label>Door thickness</label><select id="tDoor"><option>15</option><option selected>16</option><option>18</option></select></div>
+    <div><label>Front gap (mm)</label><input type="number" step="any" id="gap" value="2"></div>
+  </div>
+  <div class="row3">
+    <div><label>Sheet width (buyable)</label><input type="number" step="any" id="sheetW" value="1220"></div>
+    <div><label>Sheet length (buyable)</label><input type="number" step="any" id="sheetL" value="2440"></div>
+    <div><label>Saw kerf</label><input type="number" step="any" id="kerf" value="3"></div>
+  </div>
+  <label class="check"><input type="checkbox" id="bandAll" checked> Edge-band ALL exposed edges</label>
+</section>
+
+<section>
+  <h2>5 · Layout — sections left → right</h2>
+  <p class="hint">Each section is one vertical bay (closet) or cabinet run segment (kitchen). Leave a section's width blank and the free space is split equally. Rod heights, drawer math and shelf spacing default to Mako's standards unless you override them in Notes.</p>
+  <div id="bays"></div>
+  <div class="btnrow"><button type="button" class="secondary" id="addBay">+ Add section</button></div>
+</section>
+
+<section>
+  <h2>6 · Hardware</h2>
+  <div class="row">
+    <div><label>Hinge type</label><input id="hinge" value="35mm soft-close cup"></div>
+    <div><label>Handles per front</label><input type="number" id="handlesPer" value="1"></div>
+  </div>
+  <div class="row">
+    <div><label>Rod diameter (closets)</label><input type="number" step="any" id="rodD" value="25"></div>
+    <div><label>Drawer slide length</label><input type="number" step="any" id="slideL" value="550"></div>
+  </div>
+</section>
+
+<section>
+  <h2>7 · What Mako must deliver</h2>
+  <label class="check"><input type="checkbox" class="deliv" value="FreeCAD model (.FCStd) + STEP" checked> FreeCAD model (.FCStd) + STEP</label>
+  <label class="check"><input type="checkbox" class="deliv" value="Blender render WITH measures on it" checked> Blender render <b>with measures on it</b></label>
+  <label class="check"><input type="checkbox" class="deliv" value="Dimensioned front + side elevations" checked> Dimensioned front + side elevations</label>
+  <label class="check"><input type="checkbox" class="deliv" value="Cut list (parts.csv)" checked> Cut list (parts.csv)</label>
+  <label class="check"><input type="checkbox" class="deliv" value="Sheet nesting diagrams + sheet count" checked> Sheet nesting diagrams + sheet count</label>
+  <label class="check"><input type="checkbox" class="deliv" value="Materials takeoff (buy list)" checked> Materials takeoff (buy list)</label>
+  <label class="check"><input type="checkbox" class="deliv" value="STL set (mm)"> STL set (mm)</label>
+  <label class="check"><input type="checkbox" class="deliv" value="Quest 3 GLB for Arkio"> Quest 3 GLB for Arkio</label>
+</section>
+
+<section>
+  <h2>8 · Notes &amp; photos</h2>
+  <label>Anything else Mako must know (style, overrides, deadlines…)</label>
+  <textarea id="notes" rows="4" placeholder="e.g. doors must clear the bedroom door swing; client wants shaker fronts later"></textarea>
+  <label>Photo links (Drive/Imgur/etc — photos are for style &amp; obstacles, not measurements)</label>
+  <textarea id="photos" rows="2" placeholder="One link per line"></textarea>
+</section>
+
+</div>
+<div id="previewCol">
+  <div id="previewWrap">
+    <h2>Live drawing — measures on it</h2>
+    <div id="svgBox"></div>
+    <div id="warnings"></div>
+    <h2 style="margin-top:14px">Send it to Ryuko / Mako</h2>
+    <div class="btnrow">
+      <button type="button" id="sendIssue">📨 Send as GitHub Issue</button>
+      <button type="button" class="secondary" id="copyBtn">Copy request text</button>
+    </div>
+    <div class="btnrow">
+      <button type="button" class="secondary" id="dlJson">Download params.json</button>
+      <button type="button" class="secondary" id="dlMd">Download order.md</button>
+      <button type="button" class="secondary" id="loadExample">Load example closet</button>
+    </div>
+    <p class="small">“Send as GitHub Issue” opens a pre-filled issue in <b>Ryuko2/mako-carpentry-requests</b> — that repo is the request inbox. Press <i>Create new issue</i> there, then tell Ryuko in chat “I sent a request” and she picks it up with Mako. The copy/download buttons give you the same request as files/text for chat or WhatsApp. Your draft autosaves in this browser.</p>
+    <h2 style="margin-top:14px">params.json (what Mako eats)</h2>
+    <pre id="jsonOut"></pre>
+    <h2 style="margin-top:14px">Order sheet</h2>
+    <pre id="mdOut"></pre>
+  </div>
+</div>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const REPO="Ryuko2/mako-carpentry-requests";
+const BAY_TYPES=[["double_hang","Double hang (2 rods)"],["single_hang","Single hang (1 rod, long clothes)"],["shelves_drawers","Shelf tower + drawers at bottom"],["shelves","Shelves only"],["drawers","Drawers only"],["cabinet_doors","Cabinet with doors (kitchen/base)"],["sink_base","Sink base (kitchen)"],["stove_space","Stove / hob space (kitchen)"],["fridge_space","Fridge space"],["pantry","Pantry / tall cabinet"],["open","Open / empty"]];
+let bayCount=0, obsCount=0;
+
+function bayRow(data){
+  bayCount++;
+  const d=data||{};
+  const div=document.createElement("div"); div.className="bay"; div.dataset.bay="1";
+  div.innerHTML=`<div class="bayhead"><b>Section ${bayCount}</b><button type="button" class="danger">remove</button></div>
+  <label>Type</label><select class="b-type">${BAY_TYPES.map(([v,t])=>`<option value="${v}"${d.type===v?" selected":""}>${t}</option>`).join("")}</select>
+  <div class="row3">
+    <div><label>Width (blank = equal split)</label><input type="number" step="any" class="b-width" value="${d.width??""}" placeholder="auto"></div>
+    <div><label>Shelves (if any)</label><input type="number" class="b-shelves" value="${d.shelves??""}" placeholder="0"></div>
+    <div><label>Drawers (if any)</label><input type="number" class="b-drawers" value="${d.drawers??""}" placeholder="0"></div>
+  </div>
+  <div class="row">
+    <div><label>Doors over this section</label><select class="b-doors"><option value="0"${d.doors===0?" selected":""}>0 — open</option><option value="1"${d.doors===1?" selected":""}>1</option><option value="2"${d.doors===2?" selected":""}>2</option></select></div>
+    <div><label>Door style</label><select class="b-doorstyle"><option${d.doorstyle==="slab"?" selected":""}>slab</option><option${d.doorstyle==="shaker"?" selected":""}>shaker</option></select></div>
+  </div>`;
+  div.querySelector(".danger").onclick=()=>{div.remove();refresh();};
+  div.querySelectorAll("input,select").forEach(el=>el.addEventListener("input",refresh));
+  $("bays").appendChild(div);
+}
+function obsRow(data){
+  obsCount++;
+  const d=data||{};
+  const div=document.createElement("div"); div.className="obs"; div.dataset.obs="1";
+  div.innerHTML=`<div class="bayhead"><b>Obstacle ${obsCount}</b><button type="button" class="danger">remove</button></div>
+  <div class="row3">
+    <div><label>What</label><input class="o-what" value="${d.what??""}" placeholder="door / window / outlet"></div>
+    <div><label>Starts at (from left corner of that wall)</label><input type="number" step="any" class="o-at" value="${d.at??""}"></div>
+    <div><label>Width</label><input type="number" step="any" class="o-w" value="${d.width??""}"></div>
+  </div>
+  <div class="row">
+    <div><label>Height (floor up, if relevant)</label><input type="number" step="any" class="o-h" value="${d.height??""}"></div>
+    <div><label>Notes</label><input class="o-note" value="${d.note??""}" placeholder="swings inward, keep clear…"></div>
+  </div>`;
+  div.querySelector(".danger").onclick=()=>{div.remove();refresh();};
+  div.querySelectorAll("input").forEach(el=>el.addEventListener("input",refresh));
+  $("obstacles").appendChild(div);
+}
+$("addBay").onclick=()=>{bayRow();refresh();};
+$("addObs").onclick=()=>{obsRow();refresh();};
+
+function uf(){return {mm:1,cm:10,in:25.4}[$("units").value];}
+function num(id){const v=parseFloat($(id).value);return isNaN(v)?null:v*uf();}
+function raw(id){return $(id).value.trim();}
+function gather(){
+  const bays=[...document.querySelectorAll("[data-bay]")].map(b=>({
+    type:b.querySelector(".b-type").value,
+    width_mm:(()=>{const v=parseFloat(b.querySelector(".b-width").value);return isNaN(v)?null:Math.round(v*uf()*10)/10;})(),
+    shelves:parseInt(b.querySelector(".b-shelves").value)||0,
+    drawers:parseInt(b.querySelector(".b-drawers").value)||0,
+    doors:parseInt(b.querySelector(".b-doors").value)||0,
+    door_style:b.querySelector(".b-doorstyle").value
+  }));
+  const obstacles=[...document.querySelectorAll("[data-obs]")].map(o=>({
+    what:o.querySelector(".o-what").value.trim(),
+    at_mm:(()=>{const v=parseFloat(o.querySelector(".o-at").value);return isNaN(v)?null:Math.round(v*uf()*10)/10;})(),
+    width_mm:(()=>{const v=parseFloat(o.querySelector(".o-w").value);return isNaN(v)?null:Math.round(v*uf()*10)/10;})(),
+    height_mm:(()=>{const v=parseFloat(o.querySelector(".o-h").value);return isNaN(v)?null:Math.round(v*uf()*10)/10;})(),
+    note:o.querySelector(".o-note").value.trim()
+  })).filter(o=>o.what||o.at_mm!==null);
+  return {
+    job: raw("jobname")||"unnamed-job",
+    project_type: $("ptype").value,
+    client: raw("client"),
+    units_input: $("units").value, units:"mm",
+    room:{width:num("roomW"),depth:num("roomD"),ceiling:num("roomH"),wall: $("wall").value,centered_on_wall:$("centered").checked,obstacles},
+    piece:{overall_width:num("W"),overall_height:num("H"),overall_depth:num("D"),depth_includes_doors:$("depthInclDoors").checked,construction:$("construction").value,plinth_height:num("plinth")??0},
+    materials:{carcass_material:raw("matName"),carcass_thickness:parseFloat($("tCarcass").value),back_thickness:parseFloat($("tBack").value),door_thickness:parseFloat($("tDoor").value),front_gap_mm:parseFloat($("gap").value)||0,band_all_exposed_edges:$("bandAll").checked},
+    stock:{sheet_width:num("sheetW"),sheet_length:num("sheetL"),kerf:num("kerf")},
+    layout:{sections:bays},
+    hardware:{hinge_type:raw("hinge"),handles_per_front:parseInt($("handlesPer").value)||1,rod_diameter:num("rodD"),drawer_slide_length:num("slideL")},
+    deliverables:[...document.querySelectorAll(".deliv:checked")].map(c=>c.value),
+    notes:raw("notes"),
+    photo_links:raw("photos").split(/\n+/).map(s=>s.trim()).filter(Boolean)
+  };
+}
+function bayWidths(g){
+  const W=g.piece.overall_width,t=g.materials.carcass_thickness;
+  if(!W||!g.layout.sections.length) return [];
+  const inner=W-2*t, divs=Math.max(0,g.layout.sections.length-1)*t, free=inner-divs;
+  const specified=g.layout.sections.reduce((s,b)=>s+(b.width_mm||0),0);
+  const blanks=g.layout.sections.filter(b=>!b.width_mm).length;
+  const each=blanks?Math.max(0,(free-specified)/blanks):0;
+  return g.layout.sections.map(b=>Math.round((b.width_mm||each)*10)/10);
+}
+function warnings(g){
+  const out=[];
+  const need=[["job name",g.job&&g.job!=="unnamed-job"],["room width",g.room.width],["room depth",g.room.depth],["ceiling",g.room.ceiling],["overall width",g.piece.overall_width],["overall height",g.piece.overall_height],["overall depth",g.piece.overall_depth]];
+  need.forEach(([n,v])=>{if(!v)out.push(["e","Missing: "+n+" — Mako will ask, she never guesses."]);});
+  if(!g.layout.sections.length)out.push(["e","No layout sections yet — add at least one."]);
+  if(g.piece.overall_height&&g.room.ceiling&&g.piece.overall_height>g.room.ceiling)out.push(["e",`Piece height ${g.piece.overall_height} exceeds ceiling ${g.room.ceiling}.`]);
+  if(g.piece.overall_width&&g.room.width&&g.piece.overall_width>g.room.width)out.push(["e","Piece is wider than the room."]);
+  const ws=bayWidths(g), t=g.materials.carcass_thickness;
+  const specified=g.layout.sections.reduce((s,b)=>s+(b.width_mm||0),0);
+  if(g.piece.overall_width&&specified>g.piece.overall_width-2*t)out.push(["e","Specified section widths exceed the inside width."]);
+  ws.forEach((w,i)=>{const b=g.layout.sections[i]; if(b.doors&&w/b.doors>650)out.push(["w",`Section ${i+1}: doors would be ~${Math.round(w/b.doors)} mm wide each — over 650 mm doors sag; consider 2 doors or a divider.`]);});
+  if(g.piece.overall_height&&g.piece.overall_height-(g.piece.plinth_height||0)>2350&&g.layout.sections.some(b=>b.doors))out.push(["w","Tall doors (over ~2300 mm of door height) tend to bow in 16 mm — Mako will flag straighteners."]);
+  if(!out.length)out.push(["ok","All key numbers present. Ready to send."]);
+  return out;
+}
+function dimLine(x1,y1,x2,y2,label,vertical){
+  const c="#ffb454",tc="#eef0f4";
+  if(vertical) return `<line x1="${x1-4}" y1="${y1}" x2="${x1+4}" y2="${y1}" stroke="${c}"/><line x1="${x2-4}" y1="${y2}" x2="${x2+4}" y2="${y2}" stroke="${c}"/><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}"/><text x="${x1-6}" y="${(y1+y2)/2}" fill="${tc}" font-size="12" text-anchor="middle" transform="rotate(-90 ${x1-6} ${(y1+y2)/2})">${label}</text>`;
+  return `<line x1="${x1}" y1="${y1-4}" x2="${x1}" y2="${y1+4}" stroke="${c}"/><line x1="${x2}" y1="${y2-4}" x2="${x2}" y2="${y2+4}" stroke="${c}"/><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}"/><text x="${(x1+x2)/2}" y="${y1-6}" fill="${tc}" font-size="12" text-anchor="middle">${label}</text>`;
+}
+function drawSVG(g){
+  const W=g.piece.overall_width,H=g.piece.overall_height,D=g.piece.overall_depth;
+  if(!W||!H){$("svgBox").innerHTML='<p class="small">Type the overall width and height and the dimensioned drawing appears here.</p>';return;}
+  const t=g.materials.carcass_thickness, plinth=g.piece.plinth_height||0;
+  const maxW=620,maxH=380, s=Math.min(maxW/W,maxH/H);
+  const wpx=W*s,hpx=H*s, x0=70,y0=30;
+  const ws=bayWidths(g);
+  let sec="",cx=x0+t*s;
+  g.layout.sections.forEach((b,i)=>{
+    const bw=(ws[i]||0)*s;
+    sec+=`<rect x="${cx}" y="${y0}" width="${bw}" height="${hpx-plinth*s}" fill="none" stroke="#57c785" stroke-width="1"/>`;
+    sec+=`<text x="${cx+bw/2}" y="${y0+16}" fill="#a7adbb" font-size="10" text-anchor="middle">${b.type.replace(/_/g," ")}</text>`;
+    if(b.doors)for(let dIdx=1;dIdx<b.doors;dIdx++)sec+=`<line x1="${cx+bw*dIdx/b.doors}" y1="${y0}" x2="${cx+bw*dIdx/b.doors}" y2="${y0+hpx-plinth*s}" stroke="#7aa2ff" stroke-width="1"/>`;
+    sec+=dimLine(cx,y0+hpx+34,cx+bw,y0+hpx+34,`${ws[i]} mm`);
+    cx+=bw+t*s;
+  });
+  const plinthRect=plinth?`<rect x="${x0}" y="${y0+hpx-plinth*s}" width="${wpx}" height="${plinth*s}" fill="#2a2d34" stroke="#a7adbb"/>`:"";
+  const depth=D?`<g transform="translate(${x0+wpx+90},0)"><rect x="0" y="${y0}" width="${D*s}" height="${hpx}" fill="none" stroke="#eef0f4" stroke-width="2"/>${dimLine(0,y0+hpx+34,D*s,y0+hpx+34,`${D} mm deep`)}</g>`:"";
+  $("svgBox").innerHTML=`<svg viewBox="0 0 ${Math.max(700,x0+wpx+(D?D*s+130:60))} ${y0+hpx+52}" xmlns="http://www.w3.org/2000/svg">
+    <rect x="${x0}" y="${y0}" width="${wpx}" height="${hpx}" fill="#22252d" stroke="#eef0f4" stroke-width="2"/>${plinthRect}${sec}
+    ${dimLine(x0,y0+hpx+18,x0+wpx,y0+hpx+18,`${W} mm wide`)}
+    ${dimLine(x0-24,y0,x0-24,y0+hpx,`${H} mm high`,true)}
+    ${depth}
+  </svg>`;
+}
+function orderMD(g){
+  const L=[];
+  L.push(`# ORDER — ${g.job} (${g.project_type})`);
+  if(g.client)L.push(`Client: ${g.client}`);
+  L.push("", "## Room", `- ${g.room.width} × ${g.room.depth} mm, ceiling ${g.room.ceiling} mm`, `- Piece on: ${g.room.wall}${g.room.centered_on_wall?", centred":""}`);
+  g.room.obstacles.forEach(o=>L.push(`- Obstacle: ${o.what} at ${o.at_mm} mm from left, ${o.width_mm} mm wide${o.height_mm?`, ${o.height_mm} mm high`:""}${o.note?` — ${o.note}`:""}`));
+  L.push("", "## Piece", `- Overall: **${g.piece.overall_width} W × ${g.piece.overall_height} H × ${g.piece.overall_depth} D mm**${g.piece.depth_includes_doors?" (depth includes doors)":""}`, `- Construction: ${g.piece.construction}; plinth ${g.piece.plinth_height} mm`);
+  L.push("", "## Materials", `- Carcass: ${g.materials.carcass_material}, ${g.materials.carcass_thickness} mm; back ${g.materials.back_thickness} mm; doors ${g.materials.door_thickness} mm; front gap ${g.materials.front_gap_mm} mm`, `- Sheets ${g.stock.sheet_width} × ${g.stock.sheet_length} mm, kerf ${g.stock.kerf} mm; band all exposed edges: ${g.materials.band_all_exposed_edges?"YES":"no"}`);
+  const ws=bayWidths(g);
+  L.push("", "## Layout (left → right)");
+  g.layout.sections.forEach((b,i)=>L.push(`- Section ${i+1}: ${b.type} — clear width ${ws[i]} mm${b.shelves?`, ${b.shelves} shelves`:""}${b.drawers?`, ${b.drawers} drawers`:""}${b.doors?`, ${b.doors} ${b.door_style} door(s)`:", open"}`));
+  L.push("", "## Hardware", `- Hinges: ${g.hardware.hinge_type}; handles per front: ${g.hardware.handles_per_front}; rod Ø${g.hardware.rod_diameter} mm; slides ${g.hardware.drawer_slide_length} mm`);
+  L.push("", "## Deliverables", ...g.deliverables.map(d=>`- ${d}`));
+  if(g.notes)L.push("", "## Notes", g.notes);
+  if(g.photo_links.length)L.push("", "## Photos", ...g.photo_links.map(p=>`- ${p}`));
+  L.push("", "---", "Sent from the Mako request form. Missing numbers are QUESTIONS for the client — never guess a dimension.");
+  return L.join("\n");
+}
+function refresh(){
+  const g=gather();
+  drawSVG(g);
+  $("warnings").innerHTML=warnings(g).map(([k,m])=>`<div class="${k}">${k==="e"?"⛔":k==="w"?"⚠️":"✅"} ${m}</div>`).join("");
+  $("jsonOut").textContent=JSON.stringify(g,null,2);
+  $("mdOut").textContent=orderMD(g);
+  try{localStorage.setItem("mako-form-draft",JSON.stringify({v:[...document.querySelectorAll("input,select,textarea")].map(e=>e.type==="checkbox"?e.checked:e.value),bays:g.layout.sections,obs:g.room.obstacles}));}catch(e){}
+  return g;
+}
+function download(name,text,type){
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+$("dlJson").onclick=()=>{const g=refresh();download("params.json",JSON.stringify(g,null,2),"application/json");};
+$("dlMd").onclick=()=>{const g=refresh();download("00-order.md",orderMD(g),"text/markdown");};
+$("copyBtn").onclick=async()=>{const g=refresh();const txt=orderMD(g)+"\n\n```json\n"+JSON.stringify(g,null,2)+"\n```";try{await navigator.clipboard.writeText(txt);$("copyBtn").textContent="Copied ✓ — paste it to Ryuko";setTimeout(()=>$("copyBtn").textContent="Copy request text",2500);}catch(e){prompt("Copy this request:",txt);}};
+$("sendIssue").onclick=()=>{const g=refresh();const title=`[Mako request] ${g.job} — ${g.project_type}`;const body=orderMD(g)+"\n\n<details><summary>params.json</summary>\n\n```json\n"+JSON.stringify(g,null,2)+"\n```\n</details>";
+  window.open(`https://github.com/${REPO}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`,"_blank");};
+$("loadExample").onclick=()=>{
+  const set=(id,v)=>{$(id).value=v;};
+  set("ptype","closet");set("jobname","example-closet-001");set("client","Example — process demo");set("units","mm");
+  set("roomW",3800);set("roomD",4200);set("roomH",2550);set("W",2400);set("H",2400);set("D",600);set("plinth",100);
+  $("bays").innerHTML="";bayCount=0;
+  bayRow({type:"double_hang",doors:2,doorstyle:"slab"});
+  bayRow({type:"shelves_drawers",shelves:4,drawers:3,doors:0});
+  bayRow({type:"single_hang",doors:2,doorstyle:"slab"});
+  refresh();
+};
+document.querySelectorAll("#formCol input,#formCol select,#formCol textarea").forEach(el=>el.addEventListener("input",refresh));
+bayRow({type:"double_hang",doors:2});bayRow({type:"shelves_drawers",shelves:4,drawers:3,doors:0});bayRow({type:"single_hang",doors:2});
+refresh();
+</script>
+</body>
+</html>
