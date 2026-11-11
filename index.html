@@ -5,99 +5,212 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mako — Carpentry Project Request</title>
 <style>
-  :root{--bg:#0e1013;--panel:#171a21;--panel2:#1f232d;--card1:#1d212b;--card2:#14161c;--inset:#101318;--line:#2b303d;--txt:#f2f4f8;--dim:#9aa3b5;--acc:#ffb454;--acc2:#57c785;--bad:#ff6b6b;--acc-ink:#221503;--grad:linear-gradient(135deg,#ffc46b 0%,#ff9a3d 55%,#ff7a45 100%);--radius:15px;--shadow:0 12px 32px rgba(0,0,0,.38),0 2px 6px rgba(0,0,0,.28);--ring:0 0 0 3px rgba(255,180,84,.22)}
+  :root{
+    --bg:#0b0e14; --surface:#121722; --surface-2:#171d2b; --surface-3:#1e2637; --inset:#0d1119; --code:#090c11;
+    --border:rgba(255,255,255,.08); --border-strong:rgba(255,255,255,.14);
+    --text:#e8ecf3; --muted:#9aa5b5; --faint:#8791a5;
+    --acc:#ffb454; --grad:linear-gradient(135deg,#ffc46b,#ff8a3d); --acc-ink:#221503;
+    --acc2:#57c785; --bad:#ff6b6b; --info:#60a5fa; --warn:#fbbf24;
+    --ring:0 0 0 3px rgba(255,180,84,.25);
+    --shadow-float:0 16px 48px -12px rgba(0,0,0,.6); --glow:0 8px 32px -8px rgba(255,154,61,.45);
+    --r-sm:8px; --r-md:12px; --r-lg:16px;
+    --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px; --sp-8:64px;
+    --fs-12:12px; --fs-13:13px; --fs-14:14px; --fs-16:16px; --fs-20:20px; --fs-24:24px;
+    --font:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  }
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
-  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:radial-gradient(1100px 520px at 85% -140px,rgba(255,180,84,.09),transparent 60%),radial-gradient(900px 500px at -10% 0,rgba(87,199,133,.05),transparent 55%),var(--bg);color:var(--txt);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
-  header{position:sticky;top:0;z-index:60;padding:12px 18px;background:rgba(13,15,19,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
-  header .bar{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;gap:6px 22px;align-items:center;justify-content:space-between}
-  .brand{flex:1 1 430px;min-width:250px}
-  h1{font-size:23px;font-weight:800;letter-spacing:-.02em;margin:0;line-height:1.15}
-  h1 .mako{color:var(--acc)}
-  @supports((-webkit-background-clip:text) or (background-clip:text)){h1 .mako{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}}
-  header p{color:var(--dim);margin:3px 0 0;font-size:12.5px;max-width:64ch}
-  .authbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-  #authStatus{background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:6px 12px}
-  .topband{max-width:1180px;margin:16px auto 0;padding:0 18px}
+  body{margin:0;font-family:var(--font);background:var(--bg);color:var(--text);font-size:var(--fs-16);line-height:1.5;-webkit-font-smoothing:antialiased}
+  :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+  .ic{width:18px;height:18px;flex:none}
+  .icf{width:22px;height:22px;flex:none}
+
+  /* ---------- app bar (template 01) ---------- */
+  header{position:sticky;top:0;z-index:60;padding:var(--sp-3) var(--sp-4);background:rgba(11,14,20,.82);backdrop-filter:blur(12px) saturate(1.4);-webkit-backdrop-filter:blur(12px) saturate(1.4);border-bottom:1px solid var(--border)}
+  header .bar{max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-5);align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:var(--sp-3);min-width:0}
+  .mark{width:40px;height:40px;flex:none;display:grid;place-items:center;border-radius:var(--r-md);background:var(--grad);color:var(--acc-ink);box-shadow:var(--glow)}
+  .brand-tx{display:flex;flex-direction:column;line-height:1.2}
+  h1.brand-name{font-size:var(--fs-24);font-weight:700;letter-spacing:-.02em;margin:0;line-height:1.2}
+  h1.brand-name .word{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  h1.brand-name .sub{font-size:var(--fs-16);font-weight:600;color:var(--text);letter-spacing:0}
+  .brand-tag{font-size:var(--fs-12);color:var(--faint)}
+  .authbar{display:flex;flex-wrap:wrap;gap:var(--sp-2);align-items:center}
+  #authStatus{display:inline-flex;align-items:center;gap:var(--sp-2);background:var(--surface-2);border:1px solid var(--border);border-radius:999px;padding:var(--sp-2) var(--sp-3)}
+  #authStatus::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--acc);flex:none}
+
+  /* ---------- layout ---------- */
+  .topband{max-width:1200px;margin:var(--sp-4) auto 0;padding:0 var(--sp-4)}
   .topband section{margin-bottom:0}
-  #historySection{scroll-margin-top:120px}
-  main{max-width:1180px;margin:0 auto;padding:18px 18px 64px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  @media(max-width:900px){main{grid-template-columns:1fr}}
-  section{background:linear-gradient(180deg,var(--card1),var(--card2));border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}
-  section h2{font-size:15px;font-weight:700;letter-spacing:-.01em;margin:0 0 4px;color:var(--acc)}
-  section .hint{color:var(--dim);font-size:12.5px;margin:0 0 12px}
-  label{display:block;font-size:12.5px;font-weight:600;letter-spacing:.01em;color:var(--dim);margin:12px 0 5px}
-  input,select,textarea{width:100%;background:var(--inset);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 12px;font-size:14px;transition:border-color .15s ease,box-shadow .15s ease}
+  #historySection{scroll-margin-top:88px}
+  main{max-width:1200px;margin:0 auto;padding:var(--sp-4) var(--sp-4) var(--sp-8);display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4)}
+  @media(max-width:1024px){main{grid-template-columns:1fr}}
+  .lead{color:var(--muted);font-size:var(--fs-16);max-width:65ch;margin:0 0 var(--sp-4)}
+  .lead b{color:var(--text)}
+
+  /* ---------- cards & section heads ---------- */
+  section{background:linear-gradient(180deg,var(--surface-2),var(--surface));border:1px solid var(--border);border-radius:var(--r-lg);padding:var(--sp-5);margin-bottom:var(--sp-4)}
+  section h2{font-size:var(--fs-20);font-weight:600;letter-spacing:-.01em;margin:0;color:var(--text);display:flex;align-items:center;gap:var(--sp-3)}
+  section h2 .ic{color:var(--acc)}
+  #formCol{counter-reset:step}
+  #formCol section{counter-increment:step}
+  #formCol section>h2::before{content:counter(step,decimal-leading-zero);flex:none;width:32px;height:32px;display:grid;place-items:center;border-radius:var(--r-sm);background:var(--surface-3);border:1px solid var(--border);color:var(--acc);font-size:var(--fs-13);font-weight:700;font-variant-numeric:tabular-nums}
+  section .hint{color:var(--muted);font-size:var(--fs-13);margin:var(--sp-1) 0 var(--sp-4)}
+  #formCol h3{font-size:var(--fs-14);font-weight:600;color:var(--text);margin:var(--sp-4) 0 var(--sp-2)}
+
+  /* ---------- forms (template 05) ---------- */
+  label{display:block;font-size:var(--fs-14);font-weight:600;color:var(--text);margin:var(--sp-4) 0 var(--sp-2)}
+  input,select,textarea{width:100%;background:var(--inset);border:1px solid var(--border-strong);border-radius:var(--r-md);color:var(--text);padding:var(--sp-3);font-size:var(--fs-16);font-family:var(--font);min-height:44px;transition:border-color .18s ease,box-shadow .18s ease}
+  textarea{min-height:0}
+  input:hover,select:hover,textarea:hover{border-color:var(--muted)}
   input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc);box-shadow:var(--ring)}
-  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-  .check{display:flex;gap:9px;align-items:center;margin:9px 0;font-size:14px;color:var(--txt)}
-  .check input{width:16px;height:16px;accent-color:var(--acc)}
-  .bay,.obs{border:1px dashed var(--line);border-radius:12px;padding:12px;margin:10px 0;background:var(--inset)}
-  .bayhead{display:flex;justify-content:space-between;align-items:center}
-  .bayhead b{color:var(--acc2)}
-  button{background:var(--grad);color:var(--acc-ink);border:1px solid transparent;border-radius:10px;padding:10px 16px;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 4px 14px rgba(255,154,61,.25);transition:transform .12s ease,box-shadow .12s ease,filter .12s ease}
-  button:hover{filter:brightness(1.06);transform:translateY(-1px);box-shadow:0 7px 20px rgba(255,154,61,.32)}
-  button:active{transform:translateY(0)}
-  button:disabled{opacity:.55;cursor:wait;transform:none}
-  button:focus-visible{outline:none;box-shadow:var(--ring)}
-  button.secondary{background:transparent;color:var(--txt);border:1px solid var(--line);box-shadow:none}
-  button.secondary:hover{border-color:var(--acc);color:var(--acc);filter:none;box-shadow:none}
-  button.danger{background:transparent;color:var(--bad);border:1px solid rgba(255,107,107,.55);padding:5px 10px;font-size:12px;box-shadow:none}
-  button.danger:hover{background:rgba(255,107,107,.08);border-color:var(--bad);filter:none;box-shadow:none}
-  button.mini{padding:6px 12px;font-size:12px;border-radius:999px}
-  .btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;align-items:center}
-  #previewWrap{background:linear-gradient(180deg,var(--card1),var(--card2));border:1px solid var(--line);border-radius:var(--radius);padding:18px;position:sticky;top:120px;box-shadow:var(--shadow)}
-  #previewWrap h2{font-size:15px;font-weight:700;letter-spacing:-.01em;margin:0 0 8px;color:var(--acc)}
-  #sendBlock{border:1px solid rgba(87,199,133,.35);background:linear-gradient(180deg,rgba(87,199,133,.09),rgba(87,199,133,.02));border-radius:12px;padding:14px;margin-bottom:16px}
-  #sendBlock h2{color:var(--acc2)}
-  svg{width:100%;height:auto;background:#0c0e12;border:1px solid var(--line);border-radius:10px}
-  pre{background:#0c0e12;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:11.5px;overflow:auto;max-height:300px;white-space:pre-wrap;word-break:break-word}
-  #warnings{margin:10px 0;font-size:13px}
-  #warnings .w{color:var(--acc);margin:3px 0}
-  #warnings .e{color:var(--bad);margin:3px 0}
-  #warnings .ok{color:var(--acc2)}
-  .small{font-size:12px;color:var(--dim)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3)}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--sp-3)}
+  .row>div,.row3>div{display:flex;flex-direction:column}
+  .row>div>label,.row3>div>label{flex:1}
+  .row>div>label:first-child,.row3>div>label:first-child{margin-top:0}
+  .check{display:flex;gap:var(--sp-3);align-items:center;margin:var(--sp-2) 0;padding:var(--sp-2) var(--sp-3);min-height:44px;font-size:var(--fs-14);color:var(--text);border:1px solid transparent;border-radius:var(--r-md);cursor:pointer;transition:background .18s ease,border-color .18s ease}
+  .check:hover{background:var(--surface-2);border-color:var(--border)}
+  .check input{width:18px;height:18px;min-height:0;padding:0;flex:none;accent-color:var(--acc)}
+  .bay,.obs{border:1px solid var(--border);border-radius:var(--r-md);padding:var(--sp-4);margin:var(--sp-3) 0;background:var(--surface)}
+  .bay .row>div>label:first-child,.bay .row3>div>label:first-child,.obs .row>div>label:first-child,.obs .row3>div>label:first-child{margin-top:var(--sp-3)}
+  .bayhead{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-3)}
+  .bayhead b{color:var(--text);font-size:var(--fs-14);font-weight:600}
+
+  /* ---------- buttons (template 04) ---------- */
+  button{font-family:var(--font);display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-2);background:var(--surface-2);color:var(--text);border:1px solid var(--border-strong);border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4);min-height:44px;font-weight:600;font-size:var(--fs-14);cursor:pointer;transition:all .18s cubic-bezier(.4,0,.2,1)}
+  button:hover{border-color:var(--muted)}
+  button:active{transform:translateY(1px)}
+  button:disabled{opacity:.45;cursor:not-allowed;transform:none}
+  button.primary{background:var(--grad);color:var(--acc-ink);border-color:transparent;font-weight:700;box-shadow:var(--glow)}
+  button.primary:hover{filter:brightness(1.08);border-color:transparent}
+  button.secondary{background:var(--surface-2);color:var(--text);border:1px solid var(--border-strong)}
+  button.secondary:hover{border-color:var(--acc);color:var(--acc)}
+  button.danger{background:transparent;color:var(--bad);border:1px solid rgba(255,107,107,.45)}
+  button.danger:hover{background:rgba(255,107,107,.08);border-color:var(--bad)}
+  button.mini{padding:var(--sp-2) var(--sp-3);min-height:36px;font-size:var(--fs-13);border-radius:999px}
+  button.confirm-del{background:var(--bad);color:#2b0d0d;border-color:transparent;font-weight:700}
+  button.confirm-del:hover{filter:brightness(1.1);border-color:transparent}
+  button.loading{pointer-events:none;opacity:.8}
+  button.loading::before{content:"";width:14px;height:14px;flex:none;border-radius:50%;border:2px solid rgba(34,21,3,.35);border-top-color:var(--acc-ink);animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .btnrow{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin:var(--sp-3) 0;align-items:center}
+
+  /* ---------- preview column & send bar ---------- */
+  #previewWrap{background:linear-gradient(180deg,var(--surface-2),var(--surface));border:1px solid var(--border);border-radius:var(--r-lg);padding:var(--sp-5);position:sticky;top:88px}
+  #previewWrap h2{font-size:var(--fs-20);font-weight:600;letter-spacing:-.01em;margin:0 0 var(--sp-3);color:var(--text)}
+  #previewWrap h2.code-label{font-size:var(--fs-12);font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);margin:var(--sp-5) 0 var(--sp-2)}
+  #sendBlock{border:1px solid rgba(87,199,133,.35);background:linear-gradient(180deg,rgba(87,199,133,.09),rgba(87,199,133,.02));border-radius:var(--r-md);padding:var(--sp-4);margin-bottom:var(--sp-5)}
+  #sendBlock h2{color:var(--text)}
+  #sendBlock h2 .ic{color:var(--acc2)}
+  #sendBlock .btnrow{margin:var(--sp-2) 0}
+  #svgBox svg{width:100%;height:auto;background:var(--code);border:1px solid var(--border);border-radius:var(--r-md)}
+  pre{background:var(--code);border:1px solid var(--border);border-radius:var(--r-md);padding:var(--sp-3);font-family:var(--mono);font-size:var(--fs-13);line-height:1.45;overflow:auto;max-height:320px;white-space:pre-wrap;word-break:break-word;margin:0}
+  #warnings{margin:var(--sp-3) 0 0;font-size:var(--fs-13)}
+  #warnings div{padding:var(--sp-2) var(--sp-3);border-radius:var(--r-sm);margin:var(--sp-1) 0}
+  #warnings .w{color:var(--warn);background:rgba(251,191,36,.07)}
+  #warnings .e{color:var(--bad);background:rgba(255,107,107,.07)}
+  #warnings .ok{color:var(--acc2);background:rgba(87,199,133,.07)}
+  .small{font-size:var(--fs-12);color:var(--muted)}
+  #sendBlock .small{color:var(--muted)}
   a{color:var(--acc)}
-  #cloudMsg{min-height:1.2em;margin:4px 0 0}
-  .req{border:1px solid var(--line);border-left:3px solid var(--acc2);border-radius:12px;padding:12px 14px;margin:10px 0;background:var(--inset)}
-  .req-head{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline;justify-content:space-between}
-  .req-head b{color:var(--acc2)}
-  .req-meta{color:var(--dim);font-size:12.5px}
-  .req .btnrow{align-items:center;margin:8px 0 0}
-  .req select{width:auto;border-radius:999px;padding:6px 10px;font-size:12.5px;font-weight:600;background:rgba(87,199,133,.12);border:1px solid rgba(87,199,133,.45)}
-  .req-details{margin-top:8px}
-  .req-details pre{max-height:220px}
-  @media(max-width:900px){#previewWrap{position:static}}
-  @media(max-width:700px){header{padding:10px 14px}.brand p{display:none}h1{font-size:20px}.topband{padding:0 14px;margin-top:12px}main{padding:14px 14px 48px}section{padding:14px}#previewWrap{padding:14px}}
+  #cloudMsg{min-height:1.5em;margin:var(--sp-2) 0 0;font-size:var(--fs-13)}
+
+  /* ---------- history dashboard strip (template 06) ---------- */
+  #historyHint{margin:var(--sp-1) 0 0}
+  .req{border:1px solid var(--border);border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4);margin:var(--sp-2) 0;background:var(--surface);transition:background .18s ease}
+  #historyList .req:last-child{margin-bottom:0}
+  .req:hover{background:var(--surface-2)}
+  .req-head{display:flex;flex-wrap:wrap;gap:var(--sp-1) var(--sp-3);align-items:baseline;justify-content:space-between}
+  .req-head b{color:var(--text);font-size:var(--fs-16);font-weight:600}
+  .req-meta{color:var(--faint);font-size:var(--fs-12)}
+  .req .btnrow{align-items:center;margin:var(--sp-2) 0 0}
+  .req select.status-sel{width:auto;min-height:36px;border-radius:999px;padding:var(--sp-2) var(--sp-3);font-size:var(--fs-13);font-weight:600;background:var(--surface-3);border:1px solid var(--border-strong);color:var(--text);cursor:pointer}
+  .req select.status-sel[data-status="new"]{color:var(--info);border-color:rgba(96,165,250,.45);background:rgba(96,165,250,.10)}
+  .req select.status-sel[data-status="in-progress"]{color:var(--warn);border-color:rgba(251,191,36,.45);background:rgba(251,191,36,.10)}
+  .req select.status-sel[data-status="done"]{color:var(--acc2);border-color:rgba(87,199,133,.45);background:rgba(87,199,133,.10)}
+  .req-details{margin-top:var(--sp-2);display:grid;gap:var(--sp-2)}
+  .req-details pre{max-height:224px}
+  .skel{height:72px;border:1px solid var(--border);border-radius:var(--r-md);margin:var(--sp-2) 0;background:linear-gradient(90deg,var(--surface) 25%,var(--surface-2) 50%,var(--surface) 75%);background-size:200% 100%;animation:sh 1.4s infinite}
+  @keyframes sh{to{background-position:-200% 0}}
+  .hist-empty{border:1px dashed var(--border-strong);border-radius:var(--r-md);padding:var(--sp-6);margin-top:var(--sp-3);text-align:center;color:var(--muted)}
+  .hist-empty b{display:block;color:var(--text);font-size:var(--fs-16);font-weight:600}
+  .hist-empty p{margin:var(--sp-2) auto var(--sp-4);max-width:52ch;font-size:var(--fs-13)}
+  .hist-error{display:flex;flex-wrap:wrap;gap:var(--sp-3);align-items:center;justify-content:space-between;border:1px solid rgba(255,107,107,.4);background:rgba(255,107,107,.07);border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4);margin-top:var(--sp-3);font-size:var(--fs-13);color:var(--text)}
+
+  /* ---------- delete modal (template 07) ---------- */
+  .backdrop{position:fixed;inset:0;background:rgba(4,6,10,.66);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:none;place-items:center;padding:var(--sp-4);z-index:80}
+  .backdrop.open{display:grid}
+  .dialog{background:linear-gradient(180deg,var(--surface-2),var(--surface));border:1px solid var(--border-strong);border-radius:var(--r-lg);box-shadow:var(--shadow-float);max-width:440px;width:100%;padding:var(--sp-5);animation:rise .25s cubic-bezier(.4,0,.2,1) both}
+  @keyframes rise{from{opacity:0;transform:translateY(8px) scale(.98)}}
+  .dialog h3{margin:0 0 var(--sp-2);font-size:var(--fs-20);font-weight:600;color:var(--text)}
+  .dialog p{color:var(--muted);font-size:var(--fs-16);margin:0 0 var(--sp-5)}
+  .dialog .actions{display:flex;gap:var(--sp-3);justify-content:flex-end;flex-wrap:wrap}
+
+  /* ---------- footer (template 08) ---------- */
+  footer{border-top:1px solid var(--border);background:var(--surface);margin-top:var(--sp-6)}
+  .foot{max-width:1200px;margin:0 auto;padding:var(--sp-7) var(--sp-4) var(--sp-6);display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:var(--sp-6)}
+  .foot .brand-name-f{font-size:var(--fs-20);font-weight:700;letter-spacing:-.02em;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .foot p{color:var(--faint);font-size:var(--fs-13);max-width:34em;margin:var(--sp-2) 0 0}
+  .foot h4{font-size:var(--fs-12);font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);margin:0 0 var(--sp-3)}
+  .foot ul{list-style:none;margin:0;padding:0;display:grid;gap:var(--sp-2)}
+  .foot a{color:var(--muted);text-decoration:none;font-size:var(--fs-14)}
+  .foot a:hover{color:var(--text)}
+  .foot-facts li{color:var(--muted);font-size:var(--fs-14)}
+  .base{max-width:1200px;margin:0 auto;padding:var(--sp-4);border-top:1px solid var(--border);display:flex;gap:var(--sp-2) var(--sp-4);flex-wrap:wrap;justify-content:space-between;color:var(--faint);font-size:var(--fs-12)}
+
+  @media(max-width:1024px){#previewWrap{position:static}}
+  @media(max-width:700px){
+    header{padding:var(--sp-2) var(--sp-3)}
+    .brand-tag{display:none}
+    h1.brand-name{font-size:var(--fs-20)}
+    h1.brand-name .sub{display:none}
+    #authStatus{font-size:var(--fs-12)}
+    .topband{padding:0 var(--sp-3);margin-top:var(--sp-3)}
+    main{padding:var(--sp-3) var(--sp-3) var(--sp-7)}
+    section{padding:var(--sp-4)}
+    #previewWrap{padding:var(--sp-4)}
+    .row,.row3{grid-template-columns:1fr}
+    .foot{grid-template-columns:1fr}
+    #sendBlock .btnrow button{flex:1 1 auto}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important}
+    html{scroll-behavior:auto}
+  }
 </style>
 </head>
 <body>
 <header>
  <div class="bar">
   <div class="brand">
-   <h1>🔨 <span class="mako">MAKO</span> — Carpentry Project Request</h1>
-  <p>Fill this in and Mako (the carpentry CAD specialist) has everything she needs: order sheet, <b>params.json</b>, a live dimensioned drawing, and a one-click send to Ryuko through a GitHub Issue. Nothing is invented — a field you leave blank becomes a flagged question, never a guess.</p>
+    <span class="mark" aria-hidden="true"><svg class="icf" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5.5 3A1.5 1.5 0 0 0 4 4.5v15A1.5 1.5 0 0 0 5.5 21h15a1.5 1.5 0 0 0 1.5-1.5v-3.5a1.5 1.5 0 0 0-1.5-1.5H11V4.5A1.5 1.5 0 0 0 9.5 3h-4Z"/></svg></span>
+    <span class="brand-tx">
+      <h1 class="brand-name"><span class="word">MAKO</span> <span class="sub">Carpentry Requests</span></h1>
+      <span class="brand-tag">Request console — the form Mako builds from</span>
+    </span>
   </div>
   <div class="authbar">
     <span id="authStatus" class="small">Cloud sync: not configured yet.</span>
-    <button type="button" class="secondary" id="signInBtn" style="display:none">Sign in with Google</button>
-    <button type="button" class="secondary" id="signOutBtn" style="display:none">Sign out</button>
+    <button type="button" class="secondary" id="signInBtn" style="display:none"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/></svg>Sign in with Google</button>
+    <button type="button" class="secondary" id="signOutBtn" style="display:none"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</button>
   </div>
  </div>
 </header>
 <div class="topband">
  <section id="historySection">
-    <h2>My requests · History</h2>
+    <h2><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>My requests · History</h2>
     <p class="hint" id="historyHint">Sign in to see your request history.</p>
     <div id="historyList"></div>
   </section>
 </div>
 <main>
 <div id="formCol">
+<p class="lead">Fill this in and <b>Mako</b> — the carpentry CAD specialist — has everything she needs: the order sheet, <b>params.json</b>, a live dimensioned drawing, and a one-click send to Ryuko. Nothing is invented: a field you leave blank becomes a flagged question, never a guess.</p>
 
 <section>
-  <h2>1 · Project</h2>
+  <h2>Project</h2>
   <div class="row">
     <div><label>Project type *</label>
       <select id="ptype">
@@ -116,7 +229,7 @@
 </section>
 
 <section>
-  <h2>2 · The room</h2>
+  <h2>The room</h2>
   <div class="row3">
     <div><label>Room width *</label><input type="number" step="any" id="roomW" placeholder="3800"></div>
     <div><label>Room length/depth *</label><input type="number" step="any" id="roomD" placeholder="4200"></div>
@@ -125,13 +238,13 @@
   <label>Which wall does the piece go on?</label>
   <select id="wall"><option value="room width wall">The room-width wall</option><option value="room length wall (left)">Length wall — left</option><option value="room length wall (right)">Length wall — right</option><option value="freestanding">Freestanding / island</option></select>
   <label class="check"><input type="checkbox" id="centered" checked> Piece is centred on that wall</label>
-  <h3 style="margin:14px 0 2px;font-size:13.5px">Obstacles on that wall (door, window, outlet, pipe…)</h3>
+  <h3>Obstacles on that wall (door, window, outlet, pipe…)</h3>
   <div id="obstacles"></div>
-  <div class="btnrow"><button type="button" class="secondary" id="addObs">+ Add obstacle</button></div>
+  <div class="btnrow"><button type="button" class="secondary" id="addObs"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add obstacle</button></div>
 </section>
 
 <section>
-  <h2>3 · The piece — overall size</h2>
+  <h2>The piece — overall size</h2>
   <div class="row3">
     <div><label>Overall width *</label><input type="number" step="any" id="W" placeholder="2400"></div>
     <div><label>Overall height *</label><input type="number" step="any" id="H" placeholder="2400"></div>
@@ -145,7 +258,7 @@
 </section>
 
 <section>
-  <h2>4 · Materials</h2>
+  <h2>Materials</h2>
   <div class="row">
     <div><label>Carcass material</label><input id="matName" value="white melamine on MDF/aglomerado"></div>
     <div><label>Carcass thickness</label><select id="tCarcass"><option>15</option><option selected>16</option><option>18</option></select></div>
@@ -164,14 +277,14 @@
 </section>
 
 <section>
-  <h2>5 · Layout — sections left → right</h2>
+  <h2>Layout — sections left → right</h2>
   <p class="hint">Each section is one vertical bay (closet) or cabinet run segment (kitchen). Leave a section's width blank and the free space is split equally. Rod heights, drawer math and shelf spacing default to Mako's standards unless you override them in Notes.</p>
   <div id="bays"></div>
-  <div class="btnrow"><button type="button" class="secondary" id="addBay">+ Add section</button></div>
+  <div class="btnrow"><button type="button" class="secondary" id="addBay"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add section</button></div>
 </section>
 
 <section>
-  <h2>6 · Hardware</h2>
+  <h2>Hardware</h2>
   <div class="row">
     <div><label>Hinge type</label><input id="hinge" value="35mm soft-close cup"></div>
     <div><label>Handles per front</label><input type="number" id="handlesPer" value="1"></div>
@@ -183,7 +296,7 @@
 </section>
 
 <section>
-  <h2>7 · What Mako must deliver</h2>
+  <h2>What Mako must deliver</h2>
   <label class="check"><input type="checkbox" class="deliv" value="FreeCAD model (.FCStd) + STEP" checked> FreeCAD model (.FCStd) + STEP</label>
   <label class="check"><input type="checkbox" class="deliv" value="Blender render WITH measures on it" checked> Blender render <b>with measures on it</b></label>
   <label class="check"><input type="checkbox" class="deliv" value="Dimensioned front + side elevations" checked> Dimensioned front + side elevations</label>
@@ -195,7 +308,7 @@
 </section>
 
 <section>
-  <h2>8 · Notes &amp; photos</h2>
+  <h2>Notes &amp; photos</h2>
   <label>Anything else Mako must know (style, overrides, deadlines…)</label>
   <textarea id="notes" rows="4" placeholder="e.g. doors must clear the bedroom door swing; client wants shaker fronts later"></textarea>
   <label>Photo links (Drive/Imgur/etc — photos are for style &amp; obstacles, not measurements)</label>
@@ -208,15 +321,15 @@
     <div id="sendBlock">
     <h2>Send it to Ryuko / Mako</h2>
     <div class="btnrow">
-      <button type="button" id="saveCloud">☁️ Save request to cloud</button>
-      <button type="button" id="sendIssue">📨 Send as GitHub Issue</button>
+      <button type="button" class="primary" id="saveCloud"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg>Save request to cloud</button>
+      <button type="button" id="sendIssue"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>Send as GitHub Issue</button>
       <button type="button" class="secondary" id="copyBtn">Copy request text</button>
     </div>
     <p class="small" id="cloudMsg"></p>
     <div class="btnrow">
-      <button type="button" class="secondary" id="dlJson">Download params.json</button>
-      <button type="button" class="secondary" id="dlMd">Download order.md</button>
-      <button type="button" class="secondary" id="loadExample">Load example closet</button>
+      <button type="button" class="secondary" id="dlJson"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>Download params.json</button>
+      <button type="button" class="secondary" id="dlMd"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>Download order.md</button>
+      <button type="button" class="secondary" id="loadExample"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8Z"/></svg>Load example closet</button>
     </div>
     <p class="small">“Send as GitHub Issue” opens a pre-filled issue in <b>Ryuko2/mako-carpentry-requests</b> — that repo is the request inbox. Press <i>Create new issue</i> there, then tell Ryuko in chat “I sent a request” and she picks it up with Mako. The copy/download buttons give you the same request as files/text for chat or WhatsApp. Your draft autosaves in this browser.</p>
     </div>
@@ -224,13 +337,44 @@
     <div id="svgBox"></div>
     <div id="warnings"></div>
 
-    <h2 style="margin-top:14px">params.json (what Mako eats)</h2>
+    <h2 class="code-label">params.json — what Mako eats</h2>
     <pre id="jsonOut"></pre>
-    <h2 style="margin-top:14px">Order sheet</h2>
+    <h2 class="code-label">Order sheet</h2>
     <pre id="mdOut"></pre>
   </div>
 </div>
 </main>
+<footer>
+  <div class="foot">
+    <div>
+      <span class="brand-name-f">MAKO</span>
+      <p>Carpentry requests in, professional plans out: cut lists, sheet counts, hardware and a LEGO-style assembly manual.</p>
+    </div>
+    <nav aria-label="Product"><h4>Product</h4><ul>
+      <li><a href="#formCol">New request</a></li>
+      <li><a href="#historySection">My requests</a></li>
+      <li><a href="https://github.com/Ryuko2/mako-carpentry-requests" target="_blank" rel="noopener">Request inbox (GitHub)</a></li>
+    </ul></nav>
+    <div><h4>Build</h4><ul class="foot-facts">
+      <li>Single-file site · GitHub Pages</li>
+      <li>Data · Firebase (free tier)</li>
+      <li>Access · owner-locked rules</li>
+      <li>Pipeline · FreeCAD + Blender</li>
+    </ul></div>
+  </div>
+  <div class="base"><span>© 2026 Mako — Kevin's carpentry request console.</span><span>Blank fields are questions, never guesses.</span></div>
+</footer>
+<div class="backdrop" id="delBackdrop">
+  <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="delTitle" aria-describedby="delText">
+    <h3 id="delTitle">Delete this request?</h3>
+    <p id="delText">This removes the saved request from your history. It can't be undone.</p>
+    <div class="actions">
+      <button type="button" class="secondary" id="delCancel">Keep it</button>
+      <button type="button" class="confirm-del" id="delConfirm">Delete request</button>
+    </div>
+  </div>
+</div>
+
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
@@ -476,7 +620,7 @@ let auth=null, db=null, currentUser=null, unsubHistory=null;
 function cloudSay(text,ok){
   if(!cloudMsg)return;
   cloudMsg.textContent=text||"";
-  cloudMsg.style.color=ok===true?"var(--acc2)":ok===false?"var(--bad)":"var(--dim)";
+  cloudMsg.style.color=ok===true?"var(--acc2)":ok===false?"var(--bad)":"var(--muted)";
 }
 function stopHistory(){ if(unsubHistory){try{unsubHistory();}catch(e){} unsubHistory=null;} }
 
@@ -516,6 +660,7 @@ if(auth&&db){
     const dims=[pc.overall_width,pc.overall_height,pc.overall_depth].map(v=>(v===null||v===undefined)?"?":v).join("×");
     const summary=(params.project_type||"project")+" · "+dims+" mm · "+(params.job||"unnamed-job");
     saveBtn.disabled=true;
+    saveBtn.classList.add("loading");
     try{
       await addDoc(collection(db,"requests"),{
         createdAt:serverTimestamp(),
@@ -532,7 +677,31 @@ if(auth&&db){
       cloudSay("Save failed: "+(e.message||e),false);
     }
     saveBtn.disabled=false;
+    saveBtn.classList.remove("loading");
   });
+
+  // Styled delete confirmation (template 07 pattern) — replaces window.confirm.
+  const delBackdrop=byId("delBackdrop"), delTitle=byId("delTitle"), delText=byId("delText"),
+        delCancel=byId("delCancel"), delConfirm=byId("delConfirm");
+  let delResolve=null, delLastFocus=null;
+  function confirmDelete(name){
+    return new Promise(res=>{
+      delResolve=res; delLastFocus=document.activeElement;
+      delTitle.textContent="Delete \u201C"+name+"\u201D?";
+      delText.textContent="This removes the saved request and its measurements from your history. It can't be undone.";
+      delBackdrop.classList.add("open");
+      delCancel.focus();
+    });
+  }
+  function closeDelete(val){
+    delBackdrop.classList.remove("open");
+    if(delResolve){ const r=delResolve; delResolve=null; r(val); }
+    if(delLastFocus&&delLastFocus.focus)delLastFocus.focus();
+  }
+  delCancel.addEventListener("click",()=>closeDelete(false));
+  delConfirm.addEventListener("click",()=>closeDelete(true));
+  delBackdrop.addEventListener("click",e=>{ if(e.target===delBackdrop)closeDelete(false); });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&delBackdrop.classList.contains("open"))closeDelete(false); });
 
   function renderRequest(id,data){
     const p=data.params||{};
@@ -547,10 +716,10 @@ if(auth&&db){
     meta.textContent=[when,data.projectType||p.project_type||"",dims+" mm"].filter(Boolean).join(" · ");
     head.appendChild(title); head.appendChild(meta);
     const row=document.createElement("div"); row.className="btnrow";
-    const statusSel=document.createElement("select"); statusSel.title="Status";
+    const statusSel=document.createElement("select"); statusSel.title="Status"; statusSel.className="status-sel"; statusSel.dataset.status=data.status||"new";
     ["new","in-progress","done"].forEach(s=>{ const o=document.createElement("option"); o.value=s; o.textContent=s; if((data.status||"new")===s)o.selected=true; statusSel.appendChild(o); });
     statusSel.addEventListener("change",async()=>{
-      try{ await updateDoc(doc(db,"requests",id),{status:statusSel.value}); cloudSay("Status updated to “"+statusSel.value+"”.",true); }
+      try{ await updateDoc(doc(db,"requests",id),{status:statusSel.value}); statusSel.dataset.status=statusSel.value; cloudSay("Status updated to “"+statusSel.value+"”.",true); }
       catch(e){ cloudSay("Status update failed: "+(e.message||e),false); }
     });
     const viewBtn=document.createElement("button"); viewBtn.type="button"; viewBtn.className="secondary mini"; viewBtn.textContent="View";
@@ -566,7 +735,7 @@ if(auth&&db){
       else cloudSay("Form is not ready — reload the page and try again.",false);
     });
     delBtn.addEventListener("click",async()=>{
-      if(!confirm("Delete this saved request? This cannot be undone."))return;
+      if(!await confirmDelete(data.jobName||p.job||"this request"))return;
       try{ await deleteDoc(doc(db,"requests",id)); cloudSay("Request deleted.",true); }
       catch(e){ cloudSay("Delete failed: "+(e.message||e),false); }
     });
@@ -577,13 +746,34 @@ if(auth&&db){
 
   function startHistory(){
     stopHistory();
+    historyList.innerHTML='<div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div>';
+    historyHint.textContent="Loading your requests\u2026";
     const q=query(collection(db,"requests"),orderBy("createdAt","desc"));
     unsubHistory=onSnapshot(q,snap=>{
       historyList.innerHTML="";
-      if(snap.empty){ historyHint.textContent="No requests yet."; return; }
-      historyHint.textContent=snap.size+" saved request"+(snap.size===1?"":"s")+" — newest first.";
+      if(snap.empty){
+        historyHint.textContent="No requests yet.";
+        const empty=document.createElement("div"); empty.className="hist-empty";
+        const h=document.createElement("b"); h.textContent="No requests yet";
+        const p1=document.createElement("p"); p1.textContent="Every request you save to the cloud lands here, with its status \u2014 so you can re-open it, flip its status, or load it back into the form any time.";
+        const cta=document.createElement("button"); cta.type="button"; cta.className="primary"; cta.textContent="Start a request";
+        cta.addEventListener("click",()=>{ const j=byId("jobname"); if(j){ j.scrollIntoView({behavior:"smooth",block:"center"}); j.focus(); } });
+        empty.appendChild(h); empty.appendChild(p1); empty.appendChild(cta);
+        historyList.appendChild(empty);
+        return;
+      }
+      historyHint.textContent=snap.size+" saved request"+(snap.size===1?"":"s")+" \u2014 newest first.";
       snap.forEach(d=>historyList.appendChild(renderRequest(d.id,d.data())));
-    },err=>{ historyHint.textContent="Could not load history: "+(err.message||err); });
+    },err=>{
+      historyList.innerHTML="";
+      const box=document.createElement("div"); box.className="hist-error";
+      const tx=document.createElement("span"); tx.textContent="Couldn't load your requests ("+(err.message||err)+"). Check your connection, then try again.";
+      const retry=document.createElement("button"); retry.type="button"; retry.className="secondary mini"; retry.textContent="Retry";
+      retry.addEventListener("click",()=>startHistory());
+      box.appendChild(tx); box.appendChild(retry);
+      historyList.appendChild(box);
+      historyHint.textContent="History couldn't load.";
+    });
   }
 
   onAuthStateChanged(auth,user=>{
