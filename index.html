@@ -5,66 +5,94 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mako — Carpentry Project Request</title>
 <style>
-  :root{--bg:#14161a;--panel:#1d2026;--panel2:#24272f;--line:#343845;--txt:#eef0f4;--dim:#a7adbb;--acc:#ffb454;--acc2:#57c785;--bad:#ff6b6b;--radius:12px}
+  :root{--bg:#0e1013;--panel:#171a21;--panel2:#1f232d;--card1:#1d212b;--card2:#14161c;--inset:#101318;--line:#2b303d;--txt:#f2f4f8;--dim:#9aa3b5;--acc:#ffb454;--acc2:#57c785;--bad:#ff6b6b;--acc-ink:#221503;--grad:linear-gradient(135deg,#ffc46b 0%,#ff9a3d 55%,#ff7a45 100%);--radius:15px;--shadow:0 12px 32px rgba(0,0,0,.38),0 2px 6px rgba(0,0,0,.28);--ring:0 0 0 3px rgba(255,180,84,.22)}
   *{box-sizing:border-box}
-  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--txt)}
-  header{padding:22px 18px 6px;max-width:1180px;margin:0 auto}
-  h1{font-size:26px;margin:0 0 4px} h1 .mako{color:var(--acc)}
-  header p{color:var(--dim);margin:0;max-width:70ch}
-  main{max-width:1180px;margin:0 auto;padding:14px 18px 60px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:radial-gradient(1100px 520px at 85% -140px,rgba(255,180,84,.09),transparent 60%),radial-gradient(900px 500px at -10% 0,rgba(87,199,133,.05),transparent 55%),var(--bg);color:var(--txt);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+  header{position:sticky;top:0;z-index:60;padding:12px 18px;background:rgba(13,15,19,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  header .bar{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;gap:6px 22px;align-items:center;justify-content:space-between}
+  .brand{flex:1 1 430px;min-width:250px}
+  h1{font-size:23px;font-weight:800;letter-spacing:-.02em;margin:0;line-height:1.15}
+  h1 .mako{color:var(--acc)}
+  @supports((-webkit-background-clip:text) or (background-clip:text)){h1 .mako{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}}
+  header p{color:var(--dim);margin:3px 0 0;font-size:12.5px;max-width:64ch}
+  .authbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  #authStatus{background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:6px 12px}
+  .topband{max-width:1180px;margin:16px auto 0;padding:0 18px}
+  .topband section{margin-bottom:0}
+  #historySection{scroll-margin-top:120px}
+  main{max-width:1180px;margin:0 auto;padding:18px 18px 64px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
   @media(max-width:900px){main{grid-template-columns:1fr}}
-  section{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:16px}
-  section h2{font-size:16px;margin:0 0 4px;color:var(--acc)}
+  section{background:linear-gradient(180deg,var(--card1),var(--card2));border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}
+  section h2{font-size:15px;font-weight:700;letter-spacing:-.01em;margin:0 0 4px;color:var(--acc)}
   section .hint{color:var(--dim);font-size:12.5px;margin:0 0 12px}
-  label{display:block;font-size:12.5px;color:var(--dim);margin:10px 0 4px}
-  input,select,textarea{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:9px 10px;font-size:14px}
-  input:focus,select:focus,textarea:focus{outline:2px solid var(--acc);outline-offset:0;border-color:transparent}
+  label{display:block;font-size:12.5px;font-weight:600;letter-spacing:.01em;color:var(--dim);margin:12px 0 5px}
+  input,select,textarea{width:100%;background:var(--inset);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 12px;font-size:14px;transition:border-color .15s ease,box-shadow .15s ease}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc);box-shadow:var(--ring)}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-  .check{display:flex;gap:8px;align-items:center;margin:8px 0;font-size:14px;color:var(--txt)}
-  .check input{width:auto}
-  .bay,.obs{border:1px dashed var(--line);border-radius:10px;padding:10px;margin:10px 0;background:#1a1d23}
+  .check{display:flex;gap:9px;align-items:center;margin:9px 0;font-size:14px;color:var(--txt)}
+  .check input{width:16px;height:16px;accent-color:var(--acc)}
+  .bay,.obs{border:1px dashed var(--line);border-radius:12px;padding:12px;margin:10px 0;background:var(--inset)}
   .bayhead{display:flex;justify-content:space-between;align-items:center}
   .bayhead b{color:var(--acc2)}
-  button{background:var(--acc);color:#1a1206;border:0;border-radius:9px;padding:10px 14px;font-weight:700;font-size:14px;cursor:pointer}
-  button.secondary{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}
-  button.danger{background:transparent;color:var(--bad);border:1px solid var(--bad);padding:5px 9px;font-size:12px}
-  button:active{transform:translateY(1px)}
-  .btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
-  #previewWrap{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;position:sticky;top:12px}
-  #previewWrap h2{font-size:16px;margin:0 0 8px;color:var(--acc)}
-  svg{width:100%;height:auto;background:#101216;border-radius:8px}
-  pre{background:#101216;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:11.5px;overflow:auto;max-height:300px;white-space:pre-wrap;word-break:break-word}
+  button{background:var(--grad);color:var(--acc-ink);border:1px solid transparent;border-radius:10px;padding:10px 16px;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 4px 14px rgba(255,154,61,.25);transition:transform .12s ease,box-shadow .12s ease,filter .12s ease}
+  button:hover{filter:brightness(1.06);transform:translateY(-1px);box-shadow:0 7px 20px rgba(255,154,61,.32)}
+  button:active{transform:translateY(0)}
+  button:disabled{opacity:.55;cursor:wait;transform:none}
+  button:focus-visible{outline:none;box-shadow:var(--ring)}
+  button.secondary{background:transparent;color:var(--txt);border:1px solid var(--line);box-shadow:none}
+  button.secondary:hover{border-color:var(--acc);color:var(--acc);filter:none;box-shadow:none}
+  button.danger{background:transparent;color:var(--bad);border:1px solid rgba(255,107,107,.55);padding:5px 10px;font-size:12px;box-shadow:none}
+  button.danger:hover{background:rgba(255,107,107,.08);border-color:var(--bad);filter:none;box-shadow:none}
+  button.mini{padding:6px 12px;font-size:12px;border-radius:999px}
+  .btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;align-items:center}
+  #previewWrap{background:linear-gradient(180deg,var(--card1),var(--card2));border:1px solid var(--line);border-radius:var(--radius);padding:18px;position:sticky;top:120px;box-shadow:var(--shadow)}
+  #previewWrap h2{font-size:15px;font-weight:700;letter-spacing:-.01em;margin:0 0 8px;color:var(--acc)}
+  #sendBlock{border:1px solid rgba(87,199,133,.35);background:linear-gradient(180deg,rgba(87,199,133,.09),rgba(87,199,133,.02));border-radius:12px;padding:14px;margin-bottom:16px}
+  #sendBlock h2{color:var(--acc2)}
+  svg{width:100%;height:auto;background:#0c0e12;border:1px solid var(--line);border-radius:10px}
+  pre{background:#0c0e12;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:11.5px;overflow:auto;max-height:300px;white-space:pre-wrap;word-break:break-word}
   #warnings{margin:10px 0;font-size:13px}
   #warnings .w{color:var(--acc);margin:3px 0}
   #warnings .e{color:var(--bad);margin:3px 0}
   #warnings .ok{color:var(--acc2)}
   .small{font-size:12px;color:var(--dim)}
   a{color:var(--acc)}
-  .send{background:#20312a;border:1px solid var(--acc2)}
-  .authbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:12px 0 2px}
-  button.mini{padding:5px 9px;font-size:12px}
   #cloudMsg{min-height:1.2em;margin:4px 0 0}
-  .req{border:1px solid var(--line);border-radius:10px;padding:10px;margin:10px 0;background:var(--panel2)}
+  .req{border:1px solid var(--line);border-left:3px solid var(--acc2);border-radius:12px;padding:12px 14px;margin:10px 0;background:var(--inset)}
   .req-head{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline;justify-content:space-between}
   .req-head b{color:var(--acc2)}
   .req-meta{color:var(--dim);font-size:12.5px}
   .req .btnrow{align-items:center;margin:8px 0 0}
-  .req select{width:auto}
+  .req select{width:auto;border-radius:999px;padding:6px 10px;font-size:12.5px;font-weight:600;background:rgba(87,199,133,.12);border:1px solid rgba(87,199,133,.45)}
   .req-details{margin-top:8px}
   .req-details pre{max-height:220px}
+  @media(max-width:900px){#previewWrap{position:static}}
+  @media(max-width:700px){header{padding:10px 14px}.brand p{display:none}h1{font-size:20px}.topband{padding:0 14px;margin-top:12px}main{padding:14px 14px 48px}section{padding:14px}#previewWrap{padding:14px}}
 </style>
 </head>
 <body>
 <header>
-  <h1>🔨 <span class="mako">MAKO</span> — Carpentry Project Request</h1>
+ <div class="bar">
+  <div class="brand">
+   <h1>🔨 <span class="mako">MAKO</span> — Carpentry Project Request</h1>
   <p>Fill this in and Mako (the carpentry CAD specialist) has everything she needs: order sheet, <b>params.json</b>, a live dimensioned drawing, and a one-click send to Ryuko through a GitHub Issue. Nothing is invented — a field you leave blank becomes a flagged question, never a guess.</p>
+  </div>
   <div class="authbar">
     <span id="authStatus" class="small">Cloud sync: not configured yet.</span>
     <button type="button" class="secondary" id="signInBtn" style="display:none">Sign in with Google</button>
     <button type="button" class="secondary" id="signOutBtn" style="display:none">Sign out</button>
   </div>
+ </div>
 </header>
+<div class="topband">
+ <section id="historySection">
+    <h2>My requests · History</h2>
+    <p class="hint" id="historyHint">Sign in to see your request history.</p>
+    <div id="historyList"></div>
+  </section>
+</div>
 <main>
 <div id="formCol">
 
@@ -177,10 +205,8 @@
 </div>
 <div id="previewCol">
   <div id="previewWrap">
-    <h2>Live drawing — measures on it</h2>
-    <div id="svgBox"></div>
-    <div id="warnings"></div>
-    <h2 style="margin-top:14px">Send it to Ryuko / Mako</h2>
+    <div id="sendBlock">
+    <h2>Send it to Ryuko / Mako</h2>
     <div class="btnrow">
       <button type="button" id="saveCloud">☁️ Save request to cloud</button>
       <button type="button" id="sendIssue">📨 Send as GitHub Issue</button>
@@ -193,16 +219,16 @@
       <button type="button" class="secondary" id="loadExample">Load example closet</button>
     </div>
     <p class="small">“Send as GitHub Issue” opens a pre-filled issue in <b>Ryuko2/mako-carpentry-requests</b> — that repo is the request inbox. Press <i>Create new issue</i> there, then tell Ryuko in chat “I sent a request” and she picks it up with Mako. The copy/download buttons give you the same request as files/text for chat or WhatsApp. Your draft autosaves in this browser.</p>
+    </div>
+    <h2>Live drawing — measures on it</h2>
+    <div id="svgBox"></div>
+    <div id="warnings"></div>
+
     <h2 style="margin-top:14px">params.json (what Mako eats)</h2>
     <pre id="jsonOut"></pre>
     <h2 style="margin-top:14px">Order sheet</h2>
     <pre id="mdOut"></pre>
   </div>
-  <section id="historySection">
-    <h2>My requests · History</h2>
-    <p class="hint" id="historyHint">Sign in to see your request history.</p>
-    <div id="historyList"></div>
-  </section>
 </div>
 </main>
 <script>
