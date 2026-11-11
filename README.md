@@ -25,13 +25,15 @@ Firebase (Auth + Firestore), loaded from the page itself — no build step.
 - **Sign in with Google** — the auth bar at the top of the page. Signing in
   unlocks the cloud save and your history; the form works fully offline
   without it.
-- **Save request to cloud** — next to *Send as GitHub Issue*. Writes the
-  request (full `params`, the generated order sheet, job name, project type,
-  client, a one-line summary and a timestamp) to Firestore as one document,
-  with status starting at `new`.
+- **Save request to cloud** — next to *Send as GitHub Issue*, in the send
+  panel at the **top of the right-hand column** (above the live drawing).
+  Writes the request (full `params`, the generated order sheet, job name,
+  project type, client, a one-line summary and a timestamp) to Firestore as
+  one document, with status starting at `new`.
 - **My requests · History** — a live-updating list of every saved request,
-  newest first: date, job name, type and overall dimensions. Per request you
-  can:
+  newest first, in its own full-width panel **directly under the page
+  header**, above the form: date, job name, type and overall dimensions.
+  Per request you can:
   - change its **status** — `new` / `in-progress` / `done`;
   - **View** the full stored order text and `params.json`;
   - **Load into form** — pushes the stored params back into the form so you
