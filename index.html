@@ -106,6 +106,17 @@
   #sendBlock h2 .ic{color:var(--acc2)}
   #sendBlock .btnrow{margin:var(--sp-2) 0}
   #svgBox svg{width:100%;height:auto;background:var(--code);border:1px solid var(--border);border-radius:var(--r-md)}
+  /* ---------- per-step live previews + pickers (v5) ---------- */
+  .pv{margin-top:var(--sp-5);border-top:1px solid var(--border);padding-top:var(--sp-4)}
+  .pv svg{width:100%;height:auto;background:var(--code);border:1px solid var(--border);border-radius:var(--r-md)}
+  .pv .small{margin-top:var(--sp-2)}
+  .swrow{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin:var(--sp-2) 0 var(--sp-3)}
+  .swatch{width:44px;height:44px;min-height:44px;padding:0;flex:none;border-radius:var(--r-md);border:2px solid var(--border-strong)}
+  .swatch[aria-pressed="true"]{border-color:var(--acc);box-shadow:var(--ring)}
+  .glyphrow{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin:var(--sp-2) 0 var(--sp-1)}
+  .glyph{width:52px;height:58px;min-height:44px;padding:var(--sp-1);flex:none;border-radius:var(--r-md);border:2px solid var(--border-strong);background:var(--surface)}
+  .glyph svg{width:100%;height:100%;display:block}
+  .glyph[aria-pressed="true"]{border-color:var(--acc);box-shadow:var(--ring)}
   pre{background:var(--code);border:1px solid var(--border);border-radius:var(--r-md);padding:var(--sp-3);font-family:var(--mono);font-size:var(--fs-13);line-height:1.45;overflow:auto;max-height:320px;white-space:pre-wrap;word-break:break-word;margin:0}
   #warnings{margin:var(--sp-3) 0 0;font-size:var(--fs-13)}
   #warnings div{padding:var(--sp-2) var(--sp-3);border-radius:var(--r-sm);margin:var(--sp-1) 0}
@@ -241,10 +252,24 @@
   <h3>Obstacles on that wall (door, window, outlet, pipe…)</h3>
   <div id="obstacles"></div>
   <div class="btnrow"><button type="button" class="secondary" id="addObs"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add obstacle</button></div>
+  <div class="pv">
+    <h3>Live preview — room plan (top view)</h3>
+    <div id="pvRoom"></div>
+  </div>
 </section>
 
 <section>
   <h2>The piece — overall size</h2>
+  <label>Furniture style — switch it and watch the previews change</label>
+  <select id="pieceStyle">
+    <option value="modern">Modern / Minimalist</option>
+    <option value="shaker">Shaker / Classic</option>
+    <option value="rustic">Rustic / Farmhouse</option>
+    <option value="industrial">Industrial</option>
+    <option value="scandinavian">Scandinavian</option>
+    <option value="traditional">Traditional</option>
+  </select>
+  <div class="glyphrow" id="styleGlyphs" role="group" aria-label="Furniture style quick pick"></div>
   <div class="row3">
     <div><label>Overall width *</label><input type="number" step="any" id="W" placeholder="2400"></div>
     <div><label>Overall height *</label><input type="number" step="any" id="H" placeholder="2400"></div>
@@ -255,10 +280,21 @@
     <div><label>Construction</label><select id="construction"><option value="frameless">Frameless (32 mm system)</option><option value="face-frame">Face frame</option></select></div>
     <div><label>Plinth / toe-kick height (0 = none)</label><input type="number" step="any" id="plinth" value="100"></div>
   </div>
+  <div class="pv">
+    <h3>Live preview — the piece, front + depth</h3>
+    <div id="pvPiece"></div>
+  </div>
 </section>
 
 <section>
   <h2>Materials</h2>
+  <label>Pick the carcass material (Home Depot regulars — tap a swatch or use the list)</label>
+  <select id="matPick" aria-label="Carcass material picker"></select>
+  <div class="swrow" id="matSwatches" role="group" aria-label="Carcass material swatches"></div>
+  <label>Pick the door / front material</label>
+  <select id="doorMatPick" aria-label="Door and front material picker"><option value="">Same as carcass</option></select>
+  <div class="swrow" id="doorSwatches" role="group" aria-label="Door material swatches"></div>
+  <p class="hint">Picking fills the material name below and repaints every preview. Prefer typing? The name field still wins — type anything and the renders fall back gracefully.</p>
   <div class="row">
     <div><label>Carcass material</label><input id="matName" value="white melamine on MDF/aglomerado"></div>
     <div><label>Carcass thickness</label><select id="tCarcass"><option>15</option><option selected>16</option><option>18</option></select></div>
@@ -274,6 +310,10 @@
     <div><label>Saw kerf</label><input type="number" step="any" id="kerf" value="3"></div>
   </div>
   <label class="check"><input type="checkbox" id="bandAll" checked> Edge-band ALL exposed edges</label>
+  <div class="pv">
+    <h3>Live preview — panel build-up &amp; the stock sheet</h3>
+    <div id="pvMaterials"></div>
+  </div>
 </section>
 
 <section>
@@ -281,6 +321,10 @@
   <p class="hint">Each section is one vertical bay (closet) or cabinet run segment (kitchen). Leave a section's width blank and the free space is split equally. Rod heights, drawer math and shelf spacing default to Mako's standards unless you override them in Notes.</p>
   <div id="bays"></div>
   <div class="btnrow"><button type="button" class="secondary" id="addBay"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add section</button></div>
+  <div class="pv">
+    <h3>Live preview — sections with their insides</h3>
+    <div id="pvLayout"></div>
+  </div>
 </section>
 
 <section>
@@ -292,6 +336,10 @@
   <div class="row">
     <div><label>Rod diameter (closets)</label><input type="number" step="any" id="rodD" value="25"></div>
     <div><label>Drawer slide length</label><input type="number" step="any" id="slideL" value="550"></div>
+  </div>
+  <div class="pv">
+    <h3>Live preview — hardware details</h3>
+    <div id="pvHardware"></div>
   </div>
 </section>
 
@@ -399,6 +447,9 @@ function bayRow(data){
   </div>`;
   div.querySelector(".danger").onclick=()=>{div.remove();refresh();};
   div.querySelectorAll("input,select").forEach(el=>el.addEventListener("input",refresh));
+  preserveSelectValue(div.querySelector(".b-type"),d.type);
+  if(d.doors!==undefined&&d.doors!==null)preserveSelectValue(div.querySelector(".b-doors"),String(d.doors));
+  preserveSelectValue(div.querySelector(".b-doorstyle"),d.doorstyle);
   $("bays").appendChild(div);
 }
 function obsRow(data){
@@ -447,8 +498,8 @@ function gather(){
     client: raw("client"),
     units_input: $("units").value, units:"mm",
     room:{width:num("roomW"),depth:num("roomD"),ceiling:num("roomH"),wall: $("wall").value,centered_on_wall:$("centered").checked,obstacles},
-    piece:{overall_width:num("W"),overall_height:num("H"),overall_depth:num("D"),depth_includes_doors:$("depthInclDoors").checked,construction:$("construction").value,plinth_height:num("plinth")??0},
-    materials:{carcass_material:raw("matName"),carcass_thickness:parseFloat($("tCarcass").value),back_thickness:parseFloat($("tBack").value),door_thickness:parseFloat($("tDoor").value),front_gap_mm:parseFloat($("gap").value)||0,band_all_exposed_edges:$("bandAll").checked},
+    piece:{overall_width:num("W"),overall_height:num("H"),overall_depth:num("D"),depth_includes_doors:$("depthInclDoors").checked,construction:$("construction").value,plinth_height:num("plinth")??0,style:($("pieceStyle")?$("pieceStyle").value:"modern")},
+    materials:{carcass_material:raw("matName"),door_material:(()=>{const dp=$("doorMatPick");return (dp&&dp.value)?dp.value:raw("matName");})(),carcass_thickness:parseFloat($("tCarcass").value),back_thickness:parseFloat($("tBack").value),door_thickness:parseFloat($("tDoor").value),front_gap_mm:parseFloat($("gap").value)||0,band_all_exposed_edges:$("bandAll").checked},
     stock:{sheet_width:num("sheetW"),sheet_length:num("sheetL"),kerf:num("kerf")},
     layout:{sections:bays},
     hardware:{hinge_type:raw("hinge"),handles_per_front:parseInt($("handlesPer").value)||1,rod_diameter:num("rodD"),drawer_slide_length:num("slideL")},
@@ -486,26 +537,64 @@ function dimLine(x1,y1,x2,y2,label,vertical){
   if(vertical) return `<line x1="${x1-4}" y1="${y1}" x2="${x1+4}" y2="${y1}" stroke="${c}"/><line x1="${x2-4}" y1="${y2}" x2="${x2+4}" y2="${y2}" stroke="${c}"/><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}"/><text x="${x1-6}" y="${(y1+y2)/2}" fill="${tc}" font-size="12" text-anchor="middle" transform="rotate(-90 ${x1-6} ${(y1+y2)/2})">${label}</text>`;
   return `<line x1="${x1}" y1="${y1-4}" x2="${x1}" y2="${y1+4}" stroke="${c}"/><line x1="${x2}" y1="${y2-4}" x2="${x2}" y2="${y2+4}" stroke="${c}"/><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}"/><text x="${(x1+x2)/2}" y="${y1-6}" fill="${tc}" font-size="12" text-anchor="middle">${label}</text>`;
 }
-function drawSVG(g){
+function drawSVG(g){const html=frontSVG(g,false);$("svgBox").innerHTML=html||'<p class="small">Type the overall width and height and the dimensioned drawing appears here.</p>';}
+function frontSVG(g,internals){
   const W=g.piece.overall_width,H=g.piece.overall_height,D=g.piece.overall_depth;
-  if(!W||!H){$("svgBox").innerHTML='<p class="small">Type the overall width and height and the dimensioned drawing appears here.</p>';return;}
-  const t=g.materials.carcass_thickness, plinth=g.piece.plinth_height||0;
+  if(!W||!H||W<=0||H<=0)return "";
+  const t=g.materials.carcass_thickness||16, plinth=g.piece.plinth_height||0;
+  const st=STYLES[g.piece.style]||STYLES.modern;
+  const carc=matStyle(g.materials.carcass_material), doorM=matStyle(g.materials.door_material||g.materials.carcass_material);
+  const sfx=internals?"L":"F";
+  const baseH=st.base==="plinth"?plinth:Math.max(plinth,90);
+  const topPx=st.top==="crown"?18:(st.top==="cap"?11:0);
   const maxW=620,maxH=380, s=Math.min(maxW/W,maxH/H);
-  const wpx=W*s,hpx=H*s, x0=70,y0=30;
+  const wpx=W*s,hpx=H*s, x0=70,y0=30+topPx;
+  const secTop=y0, secBot=y0+hpx-baseH*s, secH=Math.max(0,secBot-secTop);
   const ws=bayWidths(g);
   let sec="",cx=x0+t*s;
   g.layout.sections.forEach((b,i)=>{
     const bw=(ws[i]||0)*s;
-    sec+=`<rect x="${cx}" y="${y0}" width="${bw}" height="${hpx-plinth*s}" fill="none" stroke="#57c785" stroke-width="1"/>`;
-    sec+=`<text x="${cx+bw/2}" y="${y0+16}" fill="#a7adbb" font-size="10" text-anchor="middle">${b.type.replace(/_/g," ")}</text>`;
-    if(b.doors)for(let dIdx=1;dIdx<b.doors;dIdx++)sec+=`<line x1="${cx+bw*dIdx/b.doors}" y1="${y0}" x2="${cx+bw*dIdx/b.doors}" y2="${y0+hpx-plinth*s}" stroke="#7aa2ff" stroke-width="1"/>`;
-    sec+=dimLine(cx,y0+hpx+34,cx+bw,y0+hpx+34,`${ws[i]} mm`);
+    if(bw>0){
+      sec+=`<rect x="${cx}" y="${secTop}" width="${bw}" height="${secH}" fill="rgba(0,0,0,.16)" stroke="#57c785" stroke-width="1"/>`;
+      if(internals)sec+=drawInternals(b,cx,secTop,bw,secH);
+      if(b.doors){
+        const gapPx=Math.max(1,(g.materials.front_gap_mm||2)*s/2), dw=bw/b.doors;
+        for(let dIdx=0;dIdx<b.doors;dIdx++){
+          const dx=cx+dw*dIdx, doorW=Math.max(0,dw-2*gapPx), doorH=Math.max(0,secH-2*gapPx);
+          sec+=`<rect x="${dx+gapPx}" y="${secTop+gapPx}" width="${doorW}" height="${doorH}" fill="${fillFor(doorM,sfx+"d")}" stroke="#101319" stroke-width="1"/>`;
+          sec+=doorProfile(effProfile(b,st),dx+gapPx,secTop+gapPx,doorW,doorH);
+          if(internals)sec+=doorHandle(st,dx+dw/2,secTop+Math.min(30,secH*0.16));
+        }
+      }
+      sec+=`<text x="${cx+bw/2}" y="${secTop+13}" fill="#c6cdd9" font-size="10" text-anchor="middle" style="paint-order:stroke" stroke="#22252d" stroke-width="3">${b.type.replace(/_/g," ")}</text>`;
+      sec+=dimLine(cx,y0+hpx+34,cx+bw,y0+hpx+34,`${ws[i]} mm`);
+    }
     cx+=bw+t*s;
   });
-  const plinthRect=plinth?`<rect x="${x0}" y="${y0+hpx-plinth*s}" width="${wpx}" height="${plinth*s}" fill="#2a2d34" stroke="#a7adbb"/>`:"";
-  const depth=D?`<g transform="translate(${x0+wpx+90},0)"><rect x="0" y="${y0}" width="${D*s}" height="${hpx}" fill="none" stroke="#eef0f4" stroke-width="2"/>${dimLine(0,y0+hpx+34,D*s,y0+hpx+34,`${D} mm deep`)}</g>`:"";
-  $("svgBox").innerHTML=`<svg viewBox="0 0 ${Math.max(700,x0+wpx+(D?D*s+130:60))} ${y0+hpx+52}" xmlns="http://www.w3.org/2000/svg">
-    <rect x="${x0}" y="${y0}" width="${wpx}" height="${hpx}" fill="#22252d" stroke="#eef0f4" stroke-width="2"/>${plinthRect}${sec}
+  let base="";
+  if(baseH>0){
+    if(st.base==="plinth"){base=`<rect x="${x0}" y="${secBot}" width="${wpx}" height="${baseH*s}" fill="#2a2d34" stroke="#a7adbb"/>`;}
+    else{
+      const anchors=[x0+t*s/2]; let ax=x0+t*s;
+      ws.forEach((w,i)=>{ax+=(w||0)*s; if(i<ws.length-1){anchors.push(ax+t*s/2); ax+=t*s;}});
+      anchors.push(x0+wpx-t*s/2);
+      anchors.forEach(px=>{
+        if(st.base==="legs")base+=`<polygon points="${px-7},${secBot} ${px+7},${secBot} ${px+3.5},${y0+hpx} ${px-3.5},${y0+hpx}" fill="#8a6b4a" stroke="#5d4630"/>`;
+        else if(st.base==="feet")base+=`<rect x="${px-11}" y="${secBot+1}" width="22" height="${Math.max(2,baseH*s-2)}" fill="#5d4630" stroke="#3c2d1e"/>`;
+        else if(st.base==="metal")base+=`<rect x="${px-4}" y="${secBot}" width="8" height="${baseH*s}" fill="#24272e" stroke="#4a4f59"/>`;
+      });
+    }
+  }
+  let top="";
+  if(st.top==="crown")top=`<rect x="${x0-4}" y="${y0-16}" width="${wpx+8}" height="7" fill="${fillFor(doorM,sfx+"d")}"/><rect x="${x0-2}" y="${y0-8}" width="${wpx+4}" height="8" fill="${fillFor(doorM,sfx+"d")}"/>`;
+  else if(st.top==="cap"){const ov=Math.max(4,10*s);top=`<rect x="${x0-ov}" y="${y0-9}" width="${wpx+2*ov}" height="9" fill="${fillFor(doorM,sfx+"d")}" stroke="#101319" stroke-width=".5"/>`;}
+  let frame="";
+  if(st.frame)frame=`<rect x="${x0+4}" y="${secTop+4}" width="${Math.max(0,wpx-8)}" height="${Math.max(0,secH-8)}" fill="none" stroke="rgba(238,240,244,.28)" stroke-width="2"/>`;
+  if(st.rivets)[[x0+9,secTop+9],[x0+wpx-9,secTop+9],[x0+9,secBot-9],[x0+wpx-9,secBot-9]].forEach(([rx,ry])=>{frame+=`<circle cx="${rx}" cy="${ry}" r="2.2" fill="#9aa5b5"/>`;});
+  const depth=(D&&D>0)?`<g transform="translate(${x0+wpx+90},0)"><rect x="0" y="${y0}" width="${D*s}" height="${hpx}" fill="${fillFor(carc,sfx+"c")}" fill-opacity=".3" stroke="#eef0f4" stroke-width="2"/>${dimLine(0,y0+hpx+34,D*s,y0+hpx+34,`${D} mm deep`)}</g>`:"";
+  return `<svg viewBox="0 0 ${Math.max(700,x0+wpx+(D?D*s+130:60))} ${y0+hpx+52}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Front elevation of the piece, ${W} by ${H} millimetres">
+    <defs>${matDefs(carc,sfx+"c")}${matDefs(doorM,sfx+"d")}</defs>
+    <rect x="${x0}" y="${y0}" width="${wpx}" height="${hpx}" fill="${fillFor(carc,sfx+"c")}" stroke="#eef0f4" stroke-width="2"/>${base}${sec}${frame}${top}
     ${dimLine(x0,y0+hpx+18,x0+wpx,y0+hpx+18,`${W} mm wide`)}
     ${dimLine(x0-24,y0,x0-24,y0+hpx,`${H} mm high`,true)}
     ${depth}
@@ -517,8 +606,8 @@ function orderMD(g){
   if(g.client)L.push(`Client: ${g.client}`);
   L.push("", "## Room", `- ${g.room.width} × ${g.room.depth} mm, ceiling ${g.room.ceiling} mm`, `- Piece on: ${g.room.wall}${g.room.centered_on_wall?", centred":""}`);
   g.room.obstacles.forEach(o=>L.push(`- Obstacle: ${o.what} at ${o.at_mm} mm from left, ${o.width_mm} mm wide${o.height_mm?`, ${o.height_mm} mm high`:""}${o.note?` — ${o.note}`:""}`));
-  L.push("", "## Piece", `- Overall: **${g.piece.overall_width} W × ${g.piece.overall_height} H × ${g.piece.overall_depth} D mm**${g.piece.depth_includes_doors?" (depth includes doors)":""}`, `- Construction: ${g.piece.construction}; plinth ${g.piece.plinth_height} mm`);
-  L.push("", "## Materials", `- Carcass: ${g.materials.carcass_material}, ${g.materials.carcass_thickness} mm; back ${g.materials.back_thickness} mm; doors ${g.materials.door_thickness} mm; front gap ${g.materials.front_gap_mm} mm`, `- Sheets ${g.stock.sheet_width} × ${g.stock.sheet_length} mm, kerf ${g.stock.kerf} mm; band all exposed edges: ${g.materials.band_all_exposed_edges?"YES":"no"}`);
+  L.push("", "## Piece", `- Overall: **${g.piece.overall_width} W × ${g.piece.overall_height} H × ${g.piece.overall_depth} D mm**${g.piece.depth_includes_doors?" (depth includes doors)":""}`, `- Construction: ${g.piece.construction}; plinth ${g.piece.plinth_height} mm`, `- Style: ${(typeof STYLES!=="undefined"&&STYLES[g.piece.style])?STYLES[g.piece.style].label:(g.piece.style||"modern")}`);
+  L.push("", "## Materials", `- Carcass: ${g.materials.carcass_material}, ${g.materials.carcass_thickness} mm; back ${g.materials.back_thickness} mm; doors ${g.materials.door_thickness} mm — fronts: ${g.materials.door_material||g.materials.carcass_material}; front gap ${g.materials.front_gap_mm} mm`, `- Sheets ${g.stock.sheet_width} × ${g.stock.sheet_length} mm, kerf ${g.stock.kerf} mm; band all exposed edges: ${g.materials.band_all_exposed_edges?"YES":"no"}`);
   const ws=bayWidths(g);
   L.push("", "## Layout (left → right)");
   g.layout.sections.forEach((b,i)=>L.push(`- Section ${i+1}: ${b.type} — clear width ${ws[i]} mm${b.shelves?`, ${b.shelves} shelves`:""}${b.drawers?`, ${b.drawers} drawers`:""}${b.doors?`, ${b.doors} ${b.door_style} door(s)`:", open"}`));
@@ -529,9 +618,291 @@ function orderMD(g){
   L.push("", "---", "Sent from the Mako request form. Missing numbers are QUESTIONS for the client — never guess a dimension.");
   return L.join("\n");
 }
+/* ================= v5 render layer: materials, styles, per-step previews =================
+   Everything below is render-only. gather()/orderMD()/warnings()/bayWidths() stay the
+   single source of truth; these functions only read the gathered params. */
+const MATERIALS=[
+ {name:"Melamine — Blanco",kind:"flat",base:"#f0eee8",streak:"#d8d4c8"},
+ {name:"Melamine — Blanco Polar",kind:"flat",base:"#edf0f3",streak:"#d5dbe2"},
+ {name:"Melamine — Gris",kind:"flat",base:"#9aa0a6",streak:"#7e858d"},
+ {name:"Melamine — Negro",kind:"flat",base:"#26262b",streak:"#17171b"},
+ {name:"Melamine — Roble",kind:"wood",base:"#c9a26b",streak:"#a37c46"},
+ {name:"Melamine — Nogal",kind:"wood",base:"#7d543a",streak:"#5b3a24"},
+ {name:"Melamine — Encino",kind:"wood",base:"#bb9160",streak:"#99703f"},
+ {name:"Melamine — Cerezo",kind:"wood",base:"#9d5c3d",streak:"#7a4227"},
+ {name:"Melamine — Wengué",kind:"wood",base:"#4b3527",streak:"#2f2015"},
+ {name:"Triplay (plywood) — Pine face",kind:"ply",base:"#dec08e",streak:"#c09c60"},
+ {name:"Triplay (plywood) — Oak / Encino face",kind:"ply",base:"#c2995f",streak:"#9d743d"},
+ {name:"MDF — Natural",kind:"flat",base:"#c7a878",streak:"#b08e58"},
+ {name:"Aglomerado — Natural",kind:"flat",base:"#d2b98d",streak:"#bfa06c"},
+ {name:"Solid pine (madera sólida)",kind:"wood",base:"#e2c28c",streak:"#c6a15f"}
+];
+const NEUTRAL_MAT={kind:"flat",base:"#262b36",streak:"#1d2129"};
+function matByName(n){return MATERIALS.find(m=>m.name===n)||NEUTRAL_MAT;}
+function matStyle(str){
+  const s=(str||"").trim().toLowerCase();
+  const exact=MATERIALS.find(m=>m.name.toLowerCase()===s);
+  if(exact)return exact;
+  const has=(...ws)=>ws.some(w=>s.includes(w));
+  if(has("wengu"))return matByName("Melamine — Wengué");
+  if(has("nogal","walnut"))return matByName("Melamine — Nogal");
+  if(has("triplay","plywood"))return has("encino","oak")?matByName("Triplay (plywood) — Oak / Encino face"):matByName("Triplay (plywood) — Pine face");
+  if(has("roble"))return matByName("Melamine — Roble");
+  if(has("encino"))return matByName("Melamine — Encino");
+  if(has("cerezo","cherry"))return matByName("Melamine — Cerezo");
+  if(has("negro","black"))return matByName("Melamine — Negro");
+  if(has("gris","grey","gray"))return matByName("Melamine — Gris");
+  if(has("polar"))return matByName("Melamine — Blanco Polar");
+  if(has("melamin"))return matByName("Melamine — Blanco");
+  if(has("aglomerado","particleboard","particle"))return matByName("Aglomerado — Natural");
+  if(has("mdf"))return matByName("MDF — Natural");
+  if(has("pino","pine"))return matByName("Solid pine (madera sólida)");
+  if(has("blanco","white"))return matByName("Melamine — Blanco");
+  return NEUTRAL_MAT;
+}
+function matDefs(style,sfx){
+  if(!style||style.kind==="flat")return "";
+  let d=`<pattern id="gp-${sfx}" width="72" height="18" patternUnits="userSpaceOnUse"><rect width="72" height="18" fill="${style.base}"/><path d="M0 4 Q18 2 36 4 T72 4" stroke="${style.streak}" stroke-width="1.1" fill="none" opacity=".55"/><path d="M0 10 Q18 12 36 10 T72 10" stroke="${style.streak}" stroke-width=".8" fill="none" opacity=".4"/><path d="M0 15 Q18 13 36 15 T72 15" stroke="${style.streak}" stroke-width="1" fill="none" opacity=".35"/></pattern>`;
+  if(style.kind==="ply")d+=`<pattern id="pe-${sfx}" width="8" height="12" patternUnits="userSpaceOnUse"><rect width="8" height="12" fill="${style.base}"/><rect width="8" height="2" fill="${style.streak}"/><rect y="4" width="8" height="2" fill="${style.streak}" opacity=".65"/><rect y="8" width="8" height="2" fill="${style.streak}"/></pattern>`;
+  return d;
+}
+function fillFor(style,sfx){if(!style)return NEUTRAL_MAT.base;return style.kind==="flat"?style.base:`url(#gp-${sfx})`;}
+function esc(s){return String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+/* Style delta table — one row per style; every render reads its deltas from here. */
+const STYLES={
+ modern:{label:"Modern / Minimalist",door:"slab",top:"flat",base:"plinth",handle:"bar",frame:false,rivets:false},
+ shaker:{label:"Shaker / Classic",door:"shaker",top:"flat",base:"plinth",handle:"knob",frame:true,rivets:false},
+ rustic:{label:"Rustic / Farmhouse",door:"planks",top:"cap",base:"feet",handle:"knob",frame:false,rivets:false},
+ industrial:{label:"Industrial",door:"frame",top:"flat",base:"metal",handle:"pull",frame:false,rivets:true},
+ scandinavian:{label:"Scandinavian",door:"slab",top:"flat",base:"legs",handle:"bar",frame:false,rivets:false},
+ traditional:{label:"Traditional",door:"raised",top:"crown",base:"feet",handle:"knob",frame:true,rivets:false}
+};
+function effProfile(b,st){return b.door_style==="shaker"?"shaker":st.door;}
+function doorProfile(p,x,y,w,h){
+  if(w<8||h<8)return "";
+  const inset=f=>`<rect x="${x+w*f}" y="${y+h*f}" width="${w*(1-2*f)}" height="${h*(1-2*f)}" fill="none" stroke="rgba(16,19,25,.55)" stroke-width="2"/>`;
+  if(p==="shaker")return inset(.13);
+  if(p==="raised")return inset(.09)+inset(.19);
+  if(p==="planks"){let o="";const n=Math.max(2,Math.round(w/46));for(let i=1;i<n;i++)o+=`<line x1="${x+w*i/n}" y1="${y+2}" x2="${x+w*i/n}" y2="${y+h-2}" stroke="rgba(16,19,25,.45)" stroke-width="1.5"/>`;return o;}
+  if(p==="frame")return `<rect x="${x+3}" y="${y+3}" width="${Math.max(0,w-6)}" height="${Math.max(0,h-6)}" fill="none" stroke="#22252d" stroke-width="3"/>`+[[x+8,y+8],[x+w-8,y+8],[x+8,y+h-8],[x+w-8,y+h-8]].map(([a,b2])=>`<circle cx="${a}" cy="${b2}" r="1.8" fill="#9aa5b5"/>`).join("");
+  return "";
+}
+function doorHandle(st,cx,cy){
+  if(st.handle==="knob")return `<circle cx="${cx}" cy="${cy}" r="3.6" fill="#cfd6e4" stroke="#79849a"/>`;
+  if(st.handle==="pull")return `<rect x="${cx-13}" y="${cy-3}" width="26" height="6" fill="#22252d" stroke="#9aa5b5"/>`;
+  return `<rect x="${cx-15}" y="${cy-2}" width="30" height="4" rx="2" fill="#cfd6e4"/>`;
+}
+function doorHandleBig(st,cx,cy){
+  if(st.handle==="knob")return `<circle cx="${cx}" cy="${cy}" r="7" fill="#cfd6e4" stroke="#79849a" stroke-width="1.5"/>`;
+  if(st.handle==="pull")return `<rect x="${cx-24}" y="${cy-5}" width="48" height="10" fill="#22252d" stroke="#9aa5b5"/>`;
+  return `<rect x="${cx-27}" y="${cy-3.5}" width="54" height="7" rx="3.5" fill="#cfd6e4"/>`;
+}
+function drawInternals(b,x,y,w,h){
+  const rod="#d7dde8", line="#8b93a5", board="#c8cfdd";
+  const hang=(fy,len)=>{let o=`<line x1="${x+5}" y1="${y+h*fy}" x2="${x+w-5}" y2="${y+h*fy}" stroke="${rod}" stroke-width="2.5"/><circle cx="${x+5}" cy="${y+h*fy}" r="2" fill="${rod}"/><circle cx="${x+w-5}" cy="${y+h*fy}" r="2" fill="${rod}"/>`;const n=Math.max(2,Math.floor(w/34));for(let i=0;i<n;i++){const hx=x+10+(w-20)*(n===1?.5:i/(n-1));o+=`<line x1="${hx}" y1="${y+h*fy}" x2="${hx}" y2="${y+h*(fy+len)}" stroke="${line}" stroke-width="1"/>`;}return o;};
+  const shelves=(n,y0f,y1f)=>{let o="";for(let i=1;i<=n;i++){const yy=y+h*(y0f+(y1f-y0f)*i/(n+.5));o+=`<rect x="${x+3}" y="${yy}" width="${Math.max(0,w-6)}" height="3" fill="${board}"/>`;}return o;};
+  const drawers=(n,zoneF)=>{let o="";const zh=h*zoneF, dh=zh/Math.max(1,n);for(let i=0;i<n;i++){const yy=y+h-dh*(i+1);o+=`<rect x="${x+3}" y="${yy+2}" width="${Math.max(0,w-6)}" height="${Math.max(0,dh-4)}" fill="rgba(200,207,221,.13)" stroke="#aeb6c6"/><line x1="${x+w/2-11}" y1="${yy+dh/2}" x2="${x+w/2+11}" y2="${yy+dh/2}" stroke="#cfd6e4" stroke-width="2.5"/>`;}return o;};
+  switch(b.type){
+    case "double_hang": return hang(.16,.30)+hang(.52,.30);
+    case "single_hang": return hang(.12,.62);
+    case "shelves": return shelves(b.shelves||4,.02,.94);
+    case "drawers": return drawers(b.drawers||3,.94);
+    case "shelves_drawers": return drawers(b.drawers||3,.34)+shelves(b.shelves||4,.02,.58);
+    case "cabinet_doors": return shelves(1,.1,.8);
+    case "pantry": return shelves(3,.02,.9);
+    case "stove_space": {let o=`<line x1="${x+4}" y1="${y+12}" x2="${x+w-4}" y2="${y+12}" stroke="${board}" stroke-width="2"/>`;[[.3,6],[.68,4.6],[.48,3.4]].forEach(([fx,r])=>{o+=`<circle cx="${x+w*fx}" cy="${y+12}" r="${r}" fill="none" stroke="${line}"/>`;});return o;}
+    case "fridge_space": return `<rect x="${x+5}" y="${y+5}" width="${Math.max(0,w-10)}" height="${Math.max(0,h-10)}" fill="none" stroke="${line}"/><line x1="${x+5}" y1="${y+h*.3}" x2="${x+w-5}" y2="${y+h*.3}" stroke="${line}"/><line x1="${x+w-11}" y1="${y+h*.36}" x2="${x+w-11}" y2="${y+h*.55}" stroke="${rod}" stroke-width="2.5"/>`;
+    case "sink_base": return `<path d="M ${x+w/2-9} ${y+16} v-6 a9 6 0 0 1 18 0 v6" fill="none" stroke="${rod}" stroke-width="2"/><path d="M ${x+8} ${y+22} h${Math.max(0,w-16)} l-6 12 h-${Math.max(0,w-28)} z" fill="none" stroke="${line}"/>`;
+    default: return "";
+  }
+}
+function drawRoomSVG(g){
+  const box=$("pvRoom"); if(!box)return;
+  const rw=g.room.width, rd=g.room.depth;
+  if(!rw||!rd||rw<=0||rd<=0){box.innerHTML='<p class="small">Type the room width and depth and the plan appears here — walls, the piece on its wall, and every obstacle, live as you type.</p>';return;}
+  const W=(g.piece.overall_width>0)?g.piece.overall_width:null, D=(g.piece.overall_depth>0)?g.piece.overall_depth:null;
+  const x0=66,y0=42, s=Math.min(640/rw,330/rd);
+  const wpx=rw*s, hpx=rd*s, wall=g.room.wall;
+  const carc=matStyle(g.materials.carcass_material);
+  let fp="";
+  if(W&&D){
+    let fx,fy,fw,fh;
+    if(wall==="room length wall (left)"){fw=D*s;fh=W*s;fx=x0;fy=g.room.centered_on_wall?y0+(hpx-fh)/2:y0;}
+    else if(wall==="room length wall (right)"){fw=D*s;fh=W*s;fx=x0+wpx-fw;fy=g.room.centered_on_wall?y0+(hpx-fh)/2:y0;}
+    else if(wall==="freestanding"){fw=W*s;fh=D*s;fx=x0+(wpx-fw)/2;fy=y0+(hpx-fh)/2;}
+    else{fw=W*s;fh=D*s;fx=g.room.centered_on_wall?x0+(wpx-fw)/2:x0;fy=y0+hpx-fh;}
+    fp=`<rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" fill="${fillFor(carc,"R")}" stroke="#eef0f4" stroke-width="1.5"/><text x="${fx+fw/2}" y="${fy+fh/2+4}" fill="#eef0f4" font-size="11" text-anchor="middle" style="paint-order:stroke" stroke="#22252d" stroke-width="3">${W} × ${D}</text>`;
+  }
+  const wallLine=wall==="room length wall (left)"?`<line x1="${x0}" y1="${y0}" x2="${x0}" y2="${y0+hpx}" stroke="#ffb454" stroke-width="4"/>`
+    :wall==="room length wall (right)"?`<line x1="${x0+wpx}" y1="${y0}" x2="${x0+wpx}" y2="${y0+hpx}" stroke="#ffb454" stroke-width="4"/>`
+    :wall==="freestanding"?"":`<line x1="${x0}" y1="${y0+hpx}" x2="${x0+wpx}" y2="${y0+hpx}" stroke="#ffb454" stroke-width="4"/>`;
+  let obs="";
+  (g.room.obstacles||[]).forEach(o=>{
+    if(o.at_mm===null||o.at_mm===undefined||wall==="freestanding")return;
+    const ow=Math.max(6,(o.width_mm||300)*s);
+    let ox,oy,owd=ow,oh=10;
+    if(wall==="room length wall (left)"){ox=x0;oy=y0+o.at_mm*s;owd=10;oh=ow;}
+    else if(wall==="room length wall (right)"){ox=x0+wpx-10;oy=y0+o.at_mm*s;owd=10;oh=ow;}
+    else{ox=x0+o.at_mm*s;oy=y0+hpx-10;}
+    const label=esc(o.what||"obstacle")+(o.height_mm?` · h ${o.height_mm}`:"");
+    const side=wall.includes("(left)")?"left":(wall.includes("(right)")?"right":"bottom");
+    const lx=side==="left"?ox+14:(side==="right"?ox-6:ox+owd/2), anchor=side==="left"?"start":(side==="right"?"end":"middle");
+    const ly=side==="bottom"?oy-6:oy+oh/2+4;
+    obs+=`<rect x="${ox}" y="${oy}" width="${owd}" height="${oh}" fill="#ff6b6b" opacity=".85"/><text x="${lx}" y="${ly}" fill="#eef0f4" font-size="10" text-anchor="${anchor}" style="paint-order:stroke" stroke="#22252d" stroke-width="3">${label}</text>`;
+  });
+  const ceil=`<text x="${x0+wpx}" y="${y0-26}" fill="#9aa5b5" font-size="11" text-anchor="end">${g.room.ceiling?`ceiling ${g.room.ceiling} mm · `:""}amber line = the piece's wall</text>`;
+  const noPiece=(!W||!D)?`<text x="${x0+wpx/2}" y="${y0+hpx/2}" fill="#9aa5b5" font-size="12" text-anchor="middle">Add the piece width + depth to see its footprint here.</text>`:"";
+  box.innerHTML=`<svg viewBox="0 0 720 ${y0+hpx+56}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Top-down room plan, ${rw} by ${rd} millimetres"><defs>${matDefs(carc,"R")}</defs><rect x="${x0}" y="${y0}" width="${wpx}" height="${hpx}" fill="#141926" stroke="#eef0f4" stroke-width="2"/>${wallLine}${fp}${obs}${ceil}${noPiece}${dimLine(x0,y0+hpx+30,x0+wpx,y0+hpx+30,`${rw} mm`)}${dimLine(x0-24,y0,x0-24,y0+hpx,`${rd} mm`,true)}</svg>`;
+}
+function drawMaterialsSVG(g){
+  const box=$("pvMaterials"); if(!box)return;
+  const m=g.materials, carc=matStyle(m.carcass_material), doorM=matStyle(m.door_material||m.carcass_material);
+  const rows=[
+    ["Door / front",m.door_thickness,doorM,(m.door_material||m.carcass_material),"Md"],
+    ["Carcass",m.carcass_thickness,carc,m.carcass_material,"Mc"],
+    ["Back",m.back_thickness,carc,m.carcass_material,"Mc"]
+  ];
+  let y=36, bars="";
+  rows.forEach(([label,t2,style,name,sfx])=>{
+    const bh=Math.min(46,Math.max(7,(t2||0)*2.4));
+    bars+=`<text x="30" y="${y+13}" fill="#9aa5b5" font-size="11">${label}</text>`;
+    bars+=`<rect x="118" y="${y}" width="250" height="${bh}" fill="${fillFor(style,sfx)}" stroke="#101319"/>`;
+    if(style.kind==="ply")bars+=`<rect x="356" y="${y}" width="12" height="${bh}" fill="url(#pe-${sfx})"/>`;
+    if(m.band_all_exposed_edges)bars+=`<rect x="113" y="${y}" width="5" height="${bh}" fill="#ffb454"/><rect x="368" y="${y}" width="5" height="${bh}" fill="#ffb454"/>`;
+    bars+=`<text x="386" y="${y+13}" fill="#eef0f4" font-size="11">${t2} mm · ${esc(name)}</text>`;
+    y+=bh+16;
+  });
+  const bandNote=m.band_all_exposed_edges?`<text x="30" y="${y+2}" fill="#ffb454" font-size="11">Amber edges = edge banding on exposed edges</text>`:`<text x="30" y="${y+2}" fill="#9aa5b5" font-size="11">Edge banding: off</text>`;
+  y+=24;
+  let sheet="";
+  const sw0=g.stock.sheet_width, sl0=g.stock.sheet_length;
+  if(sw0&&sl0){
+    const sw=Math.max(sw0,sl0), sh=Math.min(sw0,sl0);
+    const s2=Math.min(640/sw,140/sh), swp=sw*s2, shp=sh*s2, sx=30, sy=y+18;
+    sheet+=`<text x="30" y="${y+2}" fill="#9aa5b5" font-size="11">Stock sheet — piece front overlaid to the same scale</text>`;
+    sheet+=`<rect x="${sx}" y="${sy}" width="${swp}" height="${shp}" fill="#171c29" stroke="#a7adbb"/>`;
+    sheet+=`<text x="${sx+swp/2}" y="${sy+shp+15}" fill="#9aa5b5" font-size="11" text-anchor="middle">Sheet ${sw0} × ${sl0} mm · kerf ${g.stock.kerf??"—"} mm</text>`;
+    const W=g.piece.overall_width,H=g.piece.overall_height;
+    if(W&&H&&W>0&&H>0){
+      if(W<=sw&&H<=sh)sheet+=`<rect x="${sx+6}" y="${sy+6}" width="${W*s2}" height="${H*s2}" fill="${fillFor(carc,"Mc")}" fill-opacity=".45" stroke="#ffb454" stroke-dasharray="5 3"/><text x="${sx+10}" y="${sy+20}" fill="#eef0f4" font-size="11" style="paint-order:stroke" stroke="#22252d" stroke-width="3">piece front ${W} × ${H}</text>`;
+      else if(H<=sw&&W<=sh)sheet+=`<rect x="${sx+6}" y="${sy+6}" width="${H*s2}" height="${W*s2}" fill="${fillFor(carc,"Mc")}" fill-opacity=".45" stroke="#ffb454" stroke-dasharray="5 3"/><text x="${sx+10}" y="${sy+20}" fill="#eef0f4" font-size="11" style="paint-order:stroke" stroke="#22252d" stroke-width="3">piece front ${W} × ${H} (rotated)</text>`;
+      else sheet+=`<text x="${sx+6}" y="${sy+20}" fill="#fbbf24" font-size="11">Piece front ${W} × ${H} is bigger than one sheet — Mako nests it across sheets.</text>`;
+    } else sheet+=`<text x="${sx+6}" y="${sy+20}" fill="#9aa5b5" font-size="11">Add the piece width + height to overlay its front on the sheet.</text>`;
+    y=sy+shp+32;
+  } else { sheet=`<text x="30" y="${y+2}" fill="#9aa5b5" font-size="11">Add the sheet width + length to see the piece front on a sheet.</text>`; y+=20; }
+  box.innerHTML=`<svg viewBox="0 0 700 ${y+8}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Materials detail: panel thicknesses and the stock sheet"><defs>${matDefs(carc,"Mc")}${matDefs(doorM,"Md")}</defs><text x="30" y="18" fill="#eef0f4" font-size="12">Panel build-up — thickness to relative scale</text>${bars}${bandNote}${sheet}</svg>`;
+}
+function drawHardwareSVG(g){
+  const box=$("pvHardware"); if(!box)return;
+  const hw=g.hardware, st=STYLES[g.piece.style]||STYLES.modern;
+  const doorM=matStyle(g.materials.door_material||g.materials.carcass_material);
+  const carc=matStyle(g.materials.carcass_material);
+  const n=Math.min(4,Math.max(1,hw.handles_per_front||1));
+  let handles="";
+  for(let i=0;i<n;i++)handles+=doorHandleBig(st,127+(i-(n-1)/2)*52,64);
+  const door=`<rect x="34" y="36" width="186" height="226" fill="${fillFor(doorM,"Hd")}" stroke="#101319" stroke-width="1.5"/>${doorProfile(st.door,34,36,186,226)}${handles}<text x="127" y="284" fill="#9aa5b5" font-size="11" text-anchor="middle">Door front · ${esc(g.materials.door_material||g.materials.carcass_material)}</text><text x="127" y="300" fill="#9aa5b5" font-size="11" text-anchor="middle">Hinges: ${esc(hw.hinge_type||"—")}</text>`;
+  const rodD=hw.rod_diameter;
+  const rod=rodD?`<circle cx="330" cy="118" r="${Math.min(42,Math.max(7,rodD*.85))}" fill="none" stroke="#d7dde8" stroke-width="3.5"/><circle cx="330" cy="118" r="2.5" fill="#d7dde8"/><text x="330" y="192" fill="#eef0f4" font-size="12" text-anchor="middle">Closet rod Ø ${rodD} mm</text><text x="330" y="208" fill="#9aa5b5" font-size="11" text-anchor="middle">(end view, to scale)</text>`:`<text x="330" y="118" fill="#9aa5b5" font-size="12" text-anchor="middle">Rod Ø — not set</text>`;
+  const sl=hw.drawer_slide_length;
+  const slideW=sl?Math.min(215,Math.max(60,sl*.36)):0;
+  const slide=sl?`<rect x="452" y="84" width="${slideW}" height="52" fill="${fillFor(carc,"Hc")}" stroke="#101319"/><rect x="460" y="100" width="${Math.max(0,slideW-16)}" height="5" fill="#9aa5b5"/><rect x="460" y="114" width="${Math.max(0,slideW-16)}" height="5" fill="#79849a"/><text x="${452+slideW/2}" y="160" fill="#eef0f4" font-size="12" text-anchor="middle">Drawer slide ${sl} mm</text><text x="${452+slideW/2}" y="176" fill="#9aa5b5" font-size="11" text-anchor="middle">(drawer side, length to scale)</text>`:`<text x="545" y="118" fill="#9aa5b5" font-size="12" text-anchor="middle">Slide — not set</text>`;
+  box.innerHTML=`<svg viewBox="0 0 700 312" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hardware details: door front with handles, closet rod diameter, drawer slide length"><defs>${matDefs(doorM,"Hd")}${matDefs(carc,"Hc")}</defs>${door}${rod}${slide}</svg>`;
+}
+function drawPieceSVG(g){const box=$("pvPiece");if(!box)return;const h=frontSVG(g,false);box.innerHTML=h||'<p class="small">Type the overall width and height and this step shows the piece front + depth, in the materials and style you picked.</p>';}
+function drawLayoutSVG(g){const box=$("pvLayout");if(!box)return;const h=frontSVG(g,true);box.innerHTML=h||'<p class="small">Type the overall width and height and this step draws every section with its rods, shelves and drawers inside.</p>';}
+let matPickPrev=null;
+function syncMatUI(g){
+  const cs=matStyle(g.materials.carcass_material||"");
+  const mp=$("matPick");
+  if(mp){
+    if(mp.value!==matPickPrev){matPickPrev=mp.value;} // a pick is in flight — the picker's own handler moves it into the name field; never stomp it here
+    else{const target=MATERIALS.includes(cs)?cs.name:"__custom";mp.value=target;matPickPrev=target;}
+  }
+  document.querySelectorAll("#matSwatches .swatch").forEach(b=>b.setAttribute("aria-pressed",b.dataset.name===cs.name?"true":"false"));
+  const ds=matStyle(g.materials.door_material||g.materials.carcass_material||"");
+  document.querySelectorAll("#doorSwatches .swatch").forEach(b=>b.setAttribute("aria-pressed",b.dataset.name===ds.name?"true":"false"));
+}
+function syncStyleUI(g){
+  document.querySelectorAll("#styleGlyphs .glyph").forEach(b=>b.setAttribute("aria-pressed",b.dataset.style===g.piece.style?"true":"false"));
+}
+/* ============ Select round-trip preservation (EVE-002 / EVE-003 fix) ============
+   A <select> silently drops any value that is not among its options, so loading
+   a stored request whose value sits outside a picker's catalogue (a custom door
+   material, a style written by another tool, a 19 mm panel…) used to lose that
+   value on the very next collect — load→collect was lossy. preserveSelectValue
+   parks an unknown stored value in a real, visible option ("<value> — stored
+   custom") so it rides through gather() unchanged; the parked option is removed
+   the moment Kevin deliberately picks a different value (change event, or the
+   swatch / style-glyph handlers below), so preservation never fights a choice. */
+function preserveSelectValue(sel,value){
+  if(!sel||value===null||value===undefined||value==="")return;
+  const v=String(value);
+  [...sel.options].forEach(o=>{if(o.dataset&&o.dataset.storedCustom&&o.value!==v)o.remove();});
+  if([...sel.options].some(o=>o.value===v)){sel.value=v;return;}
+  const o=document.createElement("option");
+  o.value=v;o.textContent=v+" — stored custom";o.dataset.storedCustom="1";
+  sel.appendChild(o);sel.value=v;
+}
+function dropStoredOption(sel){
+  if(!sel)return;
+  [...sel.options].forEach(o=>{if(o.dataset&&o.dataset.storedCustom&&o.value!==sel.value)o.remove();});
+}
+document.addEventListener("change",e=>{const t=e.target;if(t&&t.tagName==="SELECT")dropStoredOption(t);});
+function buildMatUI(){
+  const mp=$("matPick"), dmp=$("doorMatPick"), ms=$("matSwatches"), ds=$("doorSwatches");
+  if(!mp||!dmp)return;
+  MATERIALS.forEach(m=>{
+    const o=document.createElement("option");o.value=m.name;o.textContent=m.name;mp.appendChild(o);
+    const o2=document.createElement("option");o2.value=m.name;o2.textContent=m.name;dmp.appendChild(o2);
+  });
+  const oc=document.createElement("option");oc.value="__custom";oc.textContent="Custom — type the name below";mp.appendChild(oc);
+  const mkRow=(row,target)=>{if(!row)return;MATERIALS.forEach(m=>{
+    const b=document.createElement("button");b.type="button";b.className="swatch";b.dataset.name=m.name;b.title=m.name;b.setAttribute("aria-label",m.name);b.setAttribute("aria-pressed","false");
+    b.style.background=m.kind==="flat"?m.base:`repeating-linear-gradient(93deg, ${m.base} 0 7px, ${m.streak} 7px 8px)`;
+    b.addEventListener("click",()=>{if(target==="carcass"){$("matName").value=m.name;mp.value=m.name;}else{dmp.value=m.name;dropStoredOption(dmp);}refresh();});
+    row.appendChild(b);
+  });};
+  mkRow(ms,"carcass"); mkRow(ds,"door");
+  const pickCarcass=()=>{if(mp.value&&mp.value!=="__custom")$("matName").value=mp.value;refresh();};
+  mp.addEventListener("input",pickCarcass);
+  mp.addEventListener("change",pickCarcass);
+  dmp.addEventListener("input",()=>refresh());
+  dmp.addEventListener("change",()=>refresh());
+}
+function styleGlyphSVG(key){
+  const st=STYLES[key]; if(!st)return "";
+  let inner=`<rect x="7" y="4" width="22" height="30" fill="#2a3040" stroke="#9aa5b5"/>`;
+  if(st.door==="shaker")inner+=`<rect x="11" y="8" width="14" height="22" fill="none" stroke="#9aa5b5"/>`;
+  else if(st.door==="raised")inner+=`<rect x="10" y="7" width="16" height="24" fill="none" stroke="#9aa5b5"/><rect x="13" y="10" width="10" height="18" fill="none" stroke="#9aa5b5"/>`;
+  else if(st.door==="planks")inner+=`<line x1="14" y1="5" x2="14" y2="33" stroke="#9aa5b5"/><line x1="22" y1="5" x2="22" y2="33" stroke="#9aa5b5"/>`;
+  else if(st.door==="frame")inner+=`<rect x="9" y="6" width="18" height="26" fill="none" stroke="#565e6e" stroke-width="2"/>`;
+  if(st.top==="crown")inner+=`<rect x="5" y="1" width="26" height="3" fill="#9aa5b5"/>`;
+  if(st.top==="cap")inner+=`<rect x="4" y="2" width="28" height="2.5" fill="#9aa5b5"/>`;
+  if(st.base==="legs")inner+=`<line x1="10" y1="34" x2="9" y2="40" stroke="#9aa5b5" stroke-width="2"/><line x1="26" y1="34" x2="27" y2="40" stroke="#9aa5b5" stroke-width="2"/>`;
+  if(st.base==="feet")inner+=`<rect x="8" y="34" width="5" height="5" fill="#9aa5b5"/><rect x="23" y="34" width="5" height="5" fill="#9aa5b5"/>`;
+  if(st.base==="metal")inner+=`<line x1="10" y1="34" x2="10" y2="40" stroke="#565e6e" stroke-width="2.5"/><line x1="26" y1="34" x2="26" y2="40" stroke="#565e6e" stroke-width="2.5"/>`;
+  return `<svg viewBox="0 0 36 42" aria-hidden="true">${inner}</svg>`;
+}
+function applyStylePresets(){
+  const key=($("pieceStyle")||{}).value||"modern";
+  const preset=key==="shaker"?"shaker":"slab";
+  document.querySelectorAll(".b-doorstyle").forEach(sel=>{if(!sel.dataset.touched)sel.value=preset;});
+}
+function buildStyleUI(){
+  const row=$("styleGlyphs"), sel=$("pieceStyle"); if(!row||!sel)return;
+  Object.keys(STYLES).forEach(k=>{
+    const b=document.createElement("button");b.type="button";b.className="glyph";b.dataset.style=k;b.title=STYLES[k].label;b.setAttribute("aria-label",STYLES[k].label);b.setAttribute("aria-pressed","false");b.innerHTML=styleGlyphSVG(k);
+    b.addEventListener("click",()=>{sel.value=k;dropStoredOption(sel);applyStylePresets();refresh();});
+    row.appendChild(b);
+  });
+  sel.addEventListener("change",()=>{applyStylePresets();refresh();});
+}
+document.addEventListener("change",e=>{const t=e.target;if(t&&t.classList&&t.classList.contains("b-doorstyle"))t.dataset.touched="1";});
 function refresh(){
   const g=gather();
   drawSVG(g);
+  [[drawRoomSVG,"pvRoom"],[drawPieceSVG,"pvPiece"],[drawMaterialsSVG,"pvMaterials"],[drawLayoutSVG,"pvLayout"],[drawHardwareSVG,"pvHardware"]].forEach(([fn,id])=>{try{fn(g);}catch(e){const b=$(id);if(b)b.innerHTML='<p class="small">This preview could not draw — the rest of the form is unaffected.</p>';}});
+  try{syncMatUI(g);syncStyleUI(g);}catch(e){}
   $("warnings").innerHTML=warnings(g).map(([k,m])=>`<div class="${k}">${k==="e"?"⛔":k==="w"?"⚠️":"✅"} ${m}</div>`).join("");
   $("jsonOut").textContent=JSON.stringify(g,null,2);
   $("mdOut").textContent=orderMD(g);
@@ -561,19 +932,23 @@ function loadParams(p){
   const set=(id,v)=>{const el=$(id);if(el)el.value=(v===null||v===undefined)?"":v;};
   const setChk=(id,v)=>{const el=$(id);if(el)el.checked=!!v;};
   set("units","mm"); // stored params are always in mm (gather converts on save)
-  set("ptype",p.project_type);set("jobname",p.job);set("client",p.client||"");
+  set("ptype",p.project_type);preserveSelectValue($("ptype"),p.project_type);set("jobname",p.job);set("client",p.client||"");
   const r=p.room||{};
-  set("roomW",r.width);set("roomD",r.depth);set("roomH",r.ceiling);set("wall",r.wall);setChk("centered",r.centered_on_wall);
+  set("roomW",r.width);set("roomD",r.depth);set("roomH",r.ceiling);set("wall",r.wall);preserveSelectValue($("wall"),r.wall);setChk("centered",r.centered_on_wall);
   $("obstacles").innerHTML="";obsCount=0;
   (r.obstacles||[]).forEach(o=>obsRow({what:o.what,at:o.at_mm,width:o.width_mm,height:o.height_mm,note:o.note}));
   const pc=p.piece||{};
-  set("W",pc.overall_width);set("H",pc.overall_height);set("D",pc.overall_depth);setChk("depthInclDoors",pc.depth_includes_doors);set("construction",pc.construction);set("plinth",pc.plinth_height??0);
+  set("W",pc.overall_width);set("H",pc.overall_height);set("D",pc.overall_depth);setChk("depthInclDoors",pc.depth_includes_doors);set("construction",pc.construction);preserveSelectValue($("construction"),pc.construction);set("plinth",pc.plinth_height??0);preserveSelectValue($("pieceStyle"),pc.style||"modern");
   const m=p.materials||{};
-  set("matName",m.carcass_material||"");set("tCarcass",m.carcass_thickness);set("tBack",m.back_thickness);set("tDoor",m.door_thickness);set("gap",m.front_gap_mm);setChk("bandAll",m.band_all_exposed_edges);
+  set("matName",m.carcass_material||"");set("tCarcass",m.carcass_thickness);preserveSelectValue($("tCarcass"),m.carcass_thickness);set("tBack",m.back_thickness);preserveSelectValue($("tBack"),m.back_thickness);set("tDoor",m.door_thickness);preserveSelectValue($("tDoor"),m.door_thickness);set("gap",m.front_gap_mm);setChk("bandAll",m.band_all_exposed_edges);
+  {const dm=$("doorMatPick");if(dm){const dv=m.door_material;
+    [...dm.options].forEach(o=>{if(o.dataset&&o.dataset.storedCustom)o.remove();}); // clear any parked value from a previous load
+    if(!dv||dv===m.carcass_material)dm.value="";else preserveSelectValue(dm,dv);}}
   const st=p.stock||{};
   set("sheetW",st.sheet_width);set("sheetL",st.sheet_length);set("kerf",st.kerf);
   $("bays").innerHTML="";bayCount=0;
   ((p.layout&&p.layout.sections)||[]).forEach(s=>bayRow({type:s.type,width:(s.width_mm===null||s.width_mm===undefined)?"":s.width_mm,shelves:s.shelves?s.shelves:"",drawers:s.drawers?s.drawers:"",doors:s.doors||0,doorstyle:s.door_style}));
+  document.querySelectorAll(".b-doorstyle").forEach(sel=>{sel.dataset.touched="1";}); // loaded values are Kevin's — style presets must not stomp them
   const hw=p.hardware||{};
   set("hinge",hw.hinge_type||"");set("handlesPer",hw.handles_per_front);set("rodD",hw.rod_diameter);set("slideL",hw.drawer_slide_length);
   const delivs=new Set(p.deliverables||[]);
@@ -589,6 +964,7 @@ window.__makoCollectParams=function(){const g=refresh();return {params:g,orderMd
 window.__makoLoadParams=loadParams;
 document.querySelectorAll("#formCol input,#formCol select,#formCol textarea").forEach(el=>el.addEventListener("input",refresh));
 bayRow({type:"double_hang",doors:2});bayRow({type:"shelves_drawers",shelves:4,drawers:3,doors:0});bayRow({type:"single_hang",doors:2});
+buildMatUI();buildStyleUI();
 refresh();
 </script>
 <script type="module">
