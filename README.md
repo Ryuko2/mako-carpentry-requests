@@ -73,6 +73,19 @@ token system throughout.
 
 ## Changelog
 
+### v7.1 — 2026-11-13 (Lux — Eve HOLD fix: EVE-011)
+
+- **Undo is scoped to its request.** The preset Undo snapshot no longer survives loading a different request: `loadParams` (the single funnel for History open / cloud reopen) clears it alongside the design field, exactly as the example loader already did. Before this fix, applying a design on one request and then opening another left the first request's Undo armed — clicking it would silently replace the opened request's state (and a cloud save would have written the wrong content over its record). Within a request nothing changes: apply → Undo still restores the pre-apply layout byte-for-byte.
+
+### v7 — 2026-11-13 (Lux — the design gallery: catalogue presets + Vary)
+
+- **Start from a design.** The Layout step now opens with a gallery of **19 catalogue presets** — 12 closets (The Balanced Three, Max Hang, Esencial, The Dresser Wall, Shoe Gallery, Para Dos, Long-Hang Gallery, Walk-In L, Walk-In U, His & Hers U, Vestidor Abierto, Corredizo Urbano) and 7 kitchens (One-Wall Flow, Pantry Bookend, L Classic, Cook's Triangle L, Galley Wet Side, U Family Kitchen, U Chef) — researched from IKEA PAX/METOD, California Closets, ClosetMaid/Elfa kits, Home Depot and Mexican a-medida shops (`preset-catalog.md`). Each card shows a mini elevation drawn from its own recipe in its own skin, its shapes and size range; the gallery filters by project type, badges presets that will switch the layout shape, and flags ones too small for the piece on screen.
+- **One tap applies the whole layout.** Style + materials from the preset's pairing, shape set, and every run rebuilt from the recipe: section percentages convert to millimetres on the run's real inside-width basis (Run 1 = width − carcass; side runs = clear length past the corner), largest-remainder rounding so widths sum exactly, applied as custom widths Kevin can then nudge. Room, overall size and hardware mechanisms are untouched. The order sheet gains a `Design: <name>` line and params an additive `design` field (null for hand-built layouts — every v6.1/v5.1/v4 save still loads losslessly).
+- **Too small squeezes, never amputates.** Below a design's sensible size the sections scale proportionally (250 mm floor per section), nothing is dropped or reordered, and a warning through the existing channel names the design and the shortfall; height and side-run minimums warn the same way.
+- **Non-destructive.** Applying snapshots the current layout first — **Undo** in the gallery bar restores it exactly. Preset side runs are real runs: the shape-switch stash keeps them across Straight ↔ L/U switches.
+- **Vary this design.** One click spins a fresh, still-legal take on the applied (or structurally matched) design: a skin swap from the project's pairing pool, a mirror of the section order (**closets only — kitchen order is never shuffled**), and a density jitter (drawer/shelf counts ±1 within their legal ranges, hinged-pair ↔ sliding rotation on sections ≥600 mm). The order sheet notes it: `Design: Para Dos (variation 2)`.
+- **K5 Galley Wet Side** carries its note on the card and after applying: a true galley is two facing runs — this preset is the complete wet side; model the facing run as a second piece.
+
 ### v6.1 — 2026-11-13 (Lux — Eve HOLD fix: EVE-005 … EVE-010)
 
 - **3D renders the actual piece.** The back panel is the real back-panel thickness at the back of the carcass (it was an unscaled 4 m slab), and the box builder's minimum-size clamp is at scene scale (it was clamping every panel, shelf and drawer front to a minimum of 1 m per dimension).
