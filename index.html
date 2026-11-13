@@ -171,6 +171,26 @@
   .foot-facts li{color:var(--muted);font-size:var(--fs-14)}
   .base{max-width:1200px;margin:0 auto;padding:var(--sp-4);border-top:1px solid var(--border);display:flex;gap:var(--sp-2) var(--sp-4);flex-wrap:wrap;justify-content:space-between;color:var(--faint);font-size:var(--fs-12)}
 
+  /* ---------- v7: design gallery ---------- */
+  .gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:var(--sp-3);margin:var(--sp-3) 0}
+  .preset-card{border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);padding:var(--sp-3);display:flex;flex-direction:column;gap:var(--sp-2)}
+  .preset-card h4{margin:0;font-size:var(--fs-14);color:var(--text);line-height:1.3}
+  .preset-card .why{font-size:var(--fs-12);color:var(--muted);margin:0;line-height:1.45}
+  .preset-card .thumb svg{width:100%;height:auto;display:block;background:var(--code);border:1px solid var(--border);border-radius:var(--r-sm)}
+  .preset-card .meta{font-size:var(--fs-12);color:var(--faint);line-height:1.45}
+  .preset-card .badges{display:flex;flex-wrap:wrap;gap:var(--sp-1)}
+  .badge{font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--border-strong);color:var(--muted);line-height:1.5}
+  .badge.warnb{color:var(--warn);border-color:rgba(251,191,36,.45);background:rgba(251,191,36,.08)}
+  .badge.okb{color:var(--acc2);border-color:rgba(87,199,133,.4)}
+  .preset-card.off{opacity:.72}
+  .preset-card>button{margin-top:auto}
+  .gal-filters{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin:var(--sp-2) 0}
+  .gal-filters button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc);box-shadow:var(--ring)}
+  .preset-bar{display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-3);align-items:center;justify-content:space-between;border:1px solid rgba(87,199,133,.35);background:rgba(87,199,133,.06);border-radius:var(--r-md);padding:var(--sp-3);margin:var(--sp-3) 0}
+  .preset-bar .small{color:var(--text)}
+  .preset-bar .btnrow{margin:0}
+  @media(max-width:700px){.gal{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}}
+
   /* ---------- v6: runs, door types, 3D ---------- */
   .run-panel{border:1px solid var(--border-strong);border-radius:var(--r-md);padding:var(--sp-4);margin:var(--sp-3) 0;background:var(--surface-2)}
   .run-panel .runhead{display:flex;flex-wrap:wrap;gap:var(--sp-2);align-items:center;justify-content:space-between}
@@ -328,6 +348,21 @@
 
 <section>
   <h2>Layout — modular runs &amp; sections</h2>
+  <h3>Start from a design — proven layouts, one tap</h3>
+  <p class="hint">Real catalogue layouts (IKEA PAX/METOD, California Closets, ClosetMaid, Mexican a-medida shops). Picking one fills the runs, sections, doors and drawers below and pairs its style + materials — scaled to the overall size typed in “The piece”. Your room, overall size and hardware stay untouched, and Undo brings your own layout back.</p>
+  <div class="gal-filters" role="group" aria-label="Design gallery filter">
+    <button type="button" class="secondary mini" data-galfilter="closet" aria-pressed="true">Closet designs</button>
+    <button type="button" class="secondary mini" data-galfilter="kitchen" aria-pressed="false">Kitchen designs</button>
+  </div>
+  <div id="presetGallery" class="gal"></div>
+  <div id="presetBar" class="preset-bar" hidden>
+    <span id="presetBarText" class="small"></span>
+    <span class="btnrow">
+      <button type="button" class="secondary mini" id="varyBtn">Vary this design</button>
+      <button type="button" class="secondary mini" id="presetUndoBtn">Undo — restore my layout</button>
+    </span>
+  </div>
+  <p class="small" id="presetNote" hidden></p>
   <label>Layout shape — how the piece wraps the room</label>
   <select id="layoutShape">
     <option value="straight">Straight — one run on the main wall</option>
@@ -604,7 +639,8 @@ function gather(){
     hardware:{hinge_type:$("hinge")?$("hinge").value:raw("hinge"),hinge_label:(()=>{const v=$("hinge")?$("hinge").value:"";return HINGE_LABEL[v]||v;})(),sliding_system:$("slidingSystem")?$("slidingSystem").value:"top_hung_bypass",sliding_label:(()=>{const v=$("slidingSystem")?$("slidingSystem").value:"";return SLIDING_LABEL[v]||v;})(),drawer_slide_type:$("slideType")?$("slideType").value:"undermount_soft_close",drawer_slide_label:(()=>{const v=$("slideType")?$("slideType").value:"";return SLIDE_LABEL[v]||v;})(),handles_per_front:parseInt($("handlesPer").value)||1,rod_diameter:num("rodD"),drawer_slide_length:num("slideL")},
     deliverables:[...document.querySelectorAll(".deliv:checked")].map(c=>c.value),
     notes:raw("notes"),
-    photo_links:raw("photos").split(/\n+/).map(s=>s.trim()).filter(Boolean)
+    photo_links:raw("photos").split(/\n+/).map(s=>s.trim()).filter(Boolean),
+    design:__design?JSON.parse(JSON.stringify(__design)):null
   };
 }
 function bayWidths(g){
@@ -651,6 +687,7 @@ function warnings(g){
         :`Run ${ri+1}: specified section widths exceed the run's inside width.`]);
     }
   });
+  try{out.push(...presetFitWarnings(g));}catch(e){}
   if(!out.length)out.push(["ok","All key numbers present. Ready to send."]);
   return out;
 }
@@ -758,6 +795,7 @@ function orderMD(g){
   const L=[];
   L.push(`# ORDER — ${g.job} (${g.project_type})`);
   if(g.client)L.push(`Client: ${g.client}`);
+  if(g.design&&g.design.label)L.push(`Design: ${g.design.label}`);
   L.push("", "## Room", `- ${g.room.width} × ${g.room.depth} mm, ceiling ${g.room.ceiling} mm`, `- Piece on: ${g.room.wall}${g.room.centered_on_wall?", centred":""}`);
   g.room.obstacles.forEach(o=>L.push(`- Obstacle: ${o.what} at ${o.at_mm} mm from left, ${o.width_mm} mm wide${o.height_mm?`, ${o.height_mm} mm high`:""}${o.note?` — ${o.note}`:""}`));
   L.push("", "## Piece", `- Overall: **${g.piece.overall_width} W × ${g.piece.overall_height} H × ${g.piece.overall_depth} D mm**${g.piece.depth_includes_doors?" (depth includes doors)":""}`, `- Construction: ${g.piece.construction}; plinth ${g.piece.plinth_height} mm`, `- Style: ${(typeof STYLES!=="undefined"&&STYLES[g.piece.style])?STYLES[g.piece.style].label:(g.piece.style||"modern")}`);
@@ -1207,6 +1245,7 @@ function refresh(){
   drawSVG(g);
   [[drawRoomSVG,"pvRoom"],[drawPieceSVG,"pvPiece"],[drawMaterialsSVG,"pvMaterials"],[drawLayoutSVG,"pvLayout"],[drawHardwareSVG,"pvHardware"]].forEach(([fn,id])=>{try{fn(g);}catch(e){const b=$(id);if(b)b.innerHTML='<p class="small">This preview could not draw — the rest of the form is unaffected.</p>';}});
   try{syncMatUI(g);syncStyleUI(g);}catch(e){}
+  try{syncPresetGallery(g);}catch(e){}
   try{syncRunSwitcher(g);syncRunCounts(g);}catch(e){}
   try{draw3D(g);}catch(e){const b3=$("pv3d");if(b3&&!window.__threeFailed)b3.innerHTML='<p class="small">3D preview could not draw — the 2D previews are unaffected.</p>';}
   $("warnings").innerHTML=warnings(g).map(([k,m])=>`<div class="${k}">${k==="e"?"⛔":k==="w"?"⚠️":"✅"} ${m}</div>`).join("");
@@ -1227,6 +1266,7 @@ $("loadExample").onclick=()=>{
   const set=(id,v)=>{$(id).value=v;};
   set("ptype","closet");set("jobname","example-closet-001");set("client","Example — process demo");set("units","mm");
   set("roomW",3800);set("roomD",4200);set("roomH",2550);set("W",2400);set("H",2400);set("D",600);set("plinth",100);
+  __design=null; __presetUndo=null;
   {const shSel=$("layoutShape"); if(shSel)shSel.value="straight"; __runStash={}; ensureRunPanels("straight",null); activeRun=0;}
   $("bays").innerHTML="";bayCount=0;
   bayRow({type:"double_hang",doors:2,doorstyle:"slab"});
@@ -1253,6 +1293,8 @@ function loadParams(p){
     if(!dv||dv===m.carcass_material)dm.value="";else preserveSelectValue(dm,dv);}}
   const st=p.stock||{};
   set("sheetW",st.sheet_width);set("sheetL",st.sheet_length);set("kerf",st.kerf);
+  __design=(p.design&&p.design.name)?p.design:null;
+  __presetUndo=null; // the Undo snapshot is scoped to THIS request — a load starts a fresh undo lifecycle (EVE-011; the example loader clears it the same way). undoPreset() nulls it before calling loadParams, so within-request Undo is unaffected.
   const lay=p.layout||{};
   const layShape=lay.shape||"straight";
   {const shSel=$("layoutShape"); if(shSel){shSel.value=layShape; preserveSelectValue(shSel,layShape);}}
@@ -1283,6 +1325,296 @@ function loadParams(p){
   refresh();
   window.scrollTo({top:0,behavior:"smooth"});
 }
+/* ================= v7: design gallery — preset catalogue =================
+   The catalogue from preset-catalog.md, in the form's own vocabulary. A preset
+   is a LAYOUT, not a resize: applying one writes style + materials + runs
+   (sections scaled % → mm on the run's real inside-width basis, largest-
+   remainder rounding, applied as custom widths) and leaves room, overall
+   W/H/D and hardware untouched. Apply snapshots the current layout first
+   (Undo), refreshes the EVE-008 stash with the preset's runs, and records an
+   additive `design` field in params (null for hand-built layouts; old saves
+   load with design null). Too-small pieces squeeze proportionally — no
+   section is ever dropped — and presetFitWarnings() names the shortfall. */
+let __design=null, __presetUndo=null, __galFilter="closet", __galSig=null;
+const SECTION_MIN_MM={double_hang:550,single_hang:450,shelves:300,drawers:400,shelves_drawers:450,cabinet_doors:300,sink_base:600,stove_space:560,fridge_space:600,pantry:300,open:250};
+const S=(t,pct,x)=>Object.assign({t,pct},x||{});
+const PRESETS=[
+ {id:"c1",name:"The Balanced Three",tag:"Three near-equal modules — hang, tower, hang. The reach-in every kit seller converges on.",project:"closet",shape:"straight",shapes:["straight"],style:"modern",carcass:"Melamine — Blanco",door:"Melamine — Blanco",minW:1800,recW:[1800,3000],minH:2000,width_mm:2400,thumbH:2100,runs:[{sections:[S("double_hang",33,{dt:"hinged_pair"}),S("shelves_drawers",34,{sh:4,dc:3}),S("single_hang",33,{dt:"hinged_pair"})]}]},
+ {id:"c2",name:"Max Hang",tag:"Two double-hang bays double the rail metres; a slim centre tower keeps folded knits in reach.",project:"closet",shape:"straight",shapes:["straight"],style:"modern",carcass:"Melamine — Blanco Polar",door:"Melamine — Blanco Polar",minW:2000,recW:[2000,3200],minH:2000,width_mm:2600,thumbH:2100,runs:[{sections:[S("double_hang",38,{dt:"sliding"}),S("shelves",24,{sh:6}),S("double_hang",38,{dt:"sliding"})]}]},
+ {id:"c3",name:"Esencial",tag:"The armable starter: double hang plus one tower with two drawers. The cheapest honest closet.",project:"closet",shape:"straight",shapes:["straight"],style:"modern",carcass:"Aglomerado — Natural",door:"Aglomerado — Natural",minW:1200,recW:[1200,1800],minH:1900,width_mm:1500,thumbH:2000,runs:[{sections:[S("double_hang",55,{dt:"sliding"}),S("shelves_drawers",45,{sh:3,dc:2})]}]},
+ {id:"c4",name:"The Dresser Wall",tag:"A wide 6-drawer bank replaces the bedroom dresser entirely; hanging left, folded goods right.",project:"closet",shape:"straight",shapes:["straight"],style:"shaker",carcass:"Melamine — Roble",door:"Melamine — Roble",minW:2200,recW:[2200,3600],minH:2000,width_mm:2800,thumbH:2100,runs:[{sections:[S("double_hang",28,{dt:"hinged_pair",ds:"shaker"}),S("drawers",44,{dc:6}),S("shelves",28,{sh:5,dt:"hinged_single",ds:"shaker"})]}]},
+ {id:"c5",name:"Shoe Gallery",tag:"One whole bay is an 8-shelf shoe wall, face-forward, flanked by everyday hang and a small tower.",project:"closet",shape:"straight",shapes:["straight"],style:"modern",carcass:"Melamine — Negro",door:"Melamine — Negro",minW:2000,recW:[2000,3000],minH:2000,width_mm:2500,thumbH:2100,runs:[{sections:[S("double_hang",30,{dt:"hinged_pair"}),S("shelves_drawers",26,{sh:3,dc:3}),S("shelves",44,{sh:8})]}]},
+ {id:"c6",name:"Para Dos",tag:"A real Mexican maker's two-person split: zapatero, shared double hang, drawer column, long hang.",project:"closet",shape:"straight",shapes:["straight"],style:"modern",carcass:"Melamine — Encino",door:"Melamine — Encino",minW:2600,recW:[2600,3600],minH:2100,width_mm:3000,thumbH:2200,runs:[{sections:[S("shelves",23,{sh:6}),S("double_hang",34,{dt:"sliding"}),S("shelves_drawers",23,{sh:3,dc:4}),S("single_hang",20,{dt:"sliding"})]}]},
+ {id:"c7",name:"Long-Hang Gallery",tag:"Nearly half the wall is full-height single hang — dresses and coats first, the rest around them.",project:"closet",shape:"straight",shapes:["straight"],style:"traditional",carcass:"Melamine — Cerezo",door:"Melamine — Cerezo",minW:2200,recW:[2200,3000],minH:2000,width_mm:2600,thumbH:2100,runs:[{sections:[S("single_hang",45,{dt:"hinged_pair",ds:"shaker"}),S("shelves_drawers",25,{sh:4,dc:3}),S("double_hang",30,{dt:"hinged_pair",ds:"shaker"})]}]},
+ {id:"c8",name:"Walk-In L",tag:"The corner is shelving — rods collide in blind corners. Main wall hangs; the side wall finishes.",project:"closet",shape:"l",shapes:["l"],style:"scandinavian",carcass:"Melamine — Blanco",door:"Triplay (plywood) — Pine face",minW:2400,recW:[2400,3600],minH:2000,minSide:1800,width_mm:3000,thumbH:2100,runs:[{sections:[S("double_hang",40),S("shelves_drawers",30,{sh:4,dc:3}),S("single_hang",30)]},{len:2100,sections:[S("shelves",50,{sh:5}),S("double_hang",50)]}]},
+ {id:"c9",name:"Walk-In U",tag:"Three walls, three jobs: dresser composition behind, long garments left, hang + drawer bank right.",project:"closet",shape:"u",shapes:["u"],style:"modern",carcass:"Melamine — Nogal",door:"Melamine — Nogal",minW:2600,recW:[2600,4000],minH:2100,minSide:1800,width_mm:3200,thumbH:2200,runs:[{sections:[S("double_hang",34),S("shelves_drawers",32,{sh:4,dc:4}),S("double_hang",34)]},{len:2000,sections:[S("single_hang",60),S("shelves",40,{sh:6})]},{len:2000,sections:[S("double_hang",50),S("drawers",50,{dc:5})]}]},
+ {id:"c10",name:"His & Hers U",tag:"One whole side per person around a shared dresser tower. Nobody's rod creeps.",project:"closet",shape:"u",shapes:["u"],style:"traditional",carcass:"Melamine — Roble",door:"Melamine — Roble",minW:2800,recW:[2800,4200],minH:2100,minSide:1800,width_mm:3400,thumbH:2200,runs:[{sections:[S("double_hang",30),S("shelves_drawers",40,{sh:4,dc:4}),S("double_hang",30)]},{len:2000,sections:[S("single_hang",55),S("shelves",45,{sh:7})]},{len:2000,sections:[S("double_hang",55),S("drawers",45,{dc:5})]}]},
+ {id:"c11",name:"Vestidor Abierto",tag:"The open Mexican dressing wall: no doors at all — the organisation is the design.",project:"closet",shape:"straight",shapes:["straight","l"],style:"modern",carcass:"Melamine — Wengué",door:"Melamine — Wengué",minW:2400,recW:[2400,4000],minH:2100,minSide:1800,width_mm:3000,thumbH:2200,runs:[{sections:[S("double_hang",30),S("shelves",24,{sh:6}),S("drawers",22,{dc:4}),S("single_hang",24)]},{len:2100,sections:[S("shelves",50,{sh:6}),S("double_hang",50)]}]},
+ {id:"c12",name:"Corredizo Urbano",tag:"Two wide bypass sections and nothing that swings — sliding hands the swing zone back to the room.",project:"closet",shape:"straight",shapes:["straight"],style:"modern",carcass:"Melamine — Blanco",door:"Melamine — Gris",minW:1600,recW:[1600,2800],minH:2000,width_mm:2200,thumbH:2100,runs:[{sections:[S("double_hang",50,{dt:"sliding"}),S("shelves_drawers",50,{sh:4,dc:3,dt:"sliding"})]}]},
+ {id:"k1",name:"One-Wall Flow",tag:"The sellers' zone order — storage, sink, prep, stove — in four honest 60 cm modules.",project:"kitchen",shape:"straight",shapes:["straight"],style:"modern",carcass:"Melamine — Blanco",door:"Melamine — Gris",minW:2400,recW:[2400,3600],minH:null,width_mm:2400,thumbH:2200,runs:[{sections:[S("fridge_space",25),S("sink_base",25),S("cabinet_doors",25,{dt:"hinged_pair"}),S("stove_space",25)]}]},
+ {id:"k2",name:"Pantry Bookend",tag:"A full-height pantry bookends the run; then fridge, sink, prep and stove follow the same flow.",project:"kitchen",shape:"straight",shapes:["straight"],style:"shaker",carcass:"Melamine — Blanco",door:"Melamine — Blanco Polar",minW:3200,recW:[3200,4800],minH:null,width_mm:3600,thumbH:2200,runs:[{sections:[S("pantry",16,{dt:"hinged_single",ds:"shaker"}),S("fridge_space",20),S("sink_base",24),S("cabinet_doors",20,{dt:"hinged_pair",ds:"shaker"}),S("stove_space",20)]}]},
+ {id:"k3",name:"L Classic",tag:"Sink centred on the window wall, fridge closing that leg; prep runs into the stove, pantry at the end.",project:"kitchen",shape:"l",shapes:["l"],style:"shaker",carcass:"Melamine — Blanco",door:"Melamine — Encino",minW:2400,recW:[2400,3600],minH:null,minSide:2000,width_mm:3000,thumbH:2200,runs:[{sections:[S("fridge_space",25),S("sink_base",40),S("cabinet_doors",35,{dt:"hinged_pair",ds:"shaker"})]},{len:2600,sections:[S("cabinet_doors",45,{dt:"hinged_pair",ds:"shaker"}),S("stove_space",30),S("pantry",25,{dt:"hinged_single",ds:"shaker"})]}]},
+ {id:"k4",name:"Cook's Triangle L",tag:"Hob and sink on the same wall — IKEA's safety rule — with the fridge at its end; leg two is storage.",project:"kitchen",shape:"l",shapes:["l"],style:"modern",carcass:"Melamine — Blanco",door:"Melamine — Roble",minW:2800,recW:[2800,4200],minH:null,minSide:1800,width_mm:3400,thumbH:2200,runs:[{sections:[S("fridge_space",22),S("sink_base",28),S("cabinet_doors",20,{dt:"hinged_pair"}),S("stove_space",30)]},{len:2400,sections:[S("cabinet_doors",60,{dt:"hinged_pair"}),S("pantry",40,{dt:"hinged_single"})]}]},
+ {id:"k5",name:"Galley Wet Side",tag:"One complete side of a galley: fridge, sink, dish + prep cupboards. The stove faces it — see the note.",project:"kitchen",shape:"straight",shapes:["straight"],style:"modern",carcass:"Melamine — Blanco",door:"Melamine — Blanco",minW:2400,recW:[2400,3600],minH:null,width_mm:3000,thumbH:2200,runs:[{sections:[S("fridge_space",25),S("sink_base",35),S("cabinet_doors",40,{dt:"hinged_pair"})]}]},
+ {id:"k6",name:"U Family Kitchen",tag:"Sink centred on the base wall, stove leg to the left, fridge + tall pantry bank closing the right.",project:"kitchen",shape:"u",shapes:["u"],style:"modern",carcass:"Melamine — Blanco",door:"Melamine — Roble",minW:2600,recW:[2600,4000],minH:null,minSide:2000,width_mm:3200,thumbH:2200,runs:[{sections:[S("cabinet_doors",30,{dt:"hinged_pair"}),S("sink_base",40),S("cabinet_doors",30,{dt:"hinged_pair"})]},{len:2600,sections:[S("stove_space",35),S("cabinet_doors",65,{dt:"hinged_pair"})]},{len:2600,sections:[S("fridge_space",30),S("cabinet_doors",30,{dt:"hinged_pair"}),S("pantry",40,{dt:"hinged_single"})]}]},
+ {id:"k7",name:"U Chef",tag:"The whole working wall in sequence, one long prep leg, and a tall bank you can see across the room.",project:"kitchen",shape:"u",shapes:["u"],style:"traditional",carcass:"Melamine — Blanco",door:"Melamine — Encino",minW:3000,recW:[3000,4800],minH:null,minSide:2200,width_mm:3800,thumbH:2200,runs:[{sections:[S("fridge_space",20),S("sink_base",30),S("cabinet_doors",20,{dt:"hinged_pair",ds:"shaker"}),S("stove_space",30)]},{len:2800,sections:[S("cabinet_doors",60,{dt:"hinged_pair",ds:"shaker"}),S("pantry",40,{dt:"hinged_single",ds:"shaker"})]},{len:2800,sections:[S("pantry",50,{dt:"hinged_single",ds:"shaker"}),S("cabinet_doors",50,{dt:"hinged_pair",ds:"shaker"})]}]}
+];
+const PRESET_BY_ID={}; PRESETS.forEach(p=>{PRESET_BY_ID[p.id]=p;});
+const PRESET_SKINS={
+ closet:[["modern","Melamine — Blanco","Melamine — Blanco"],["modern","Melamine — Blanco Polar","Melamine — Blanco Polar"],["shaker","Melamine — Roble","Melamine — Roble"],["modern","Melamine — Nogal","Melamine — Nogal"],["scandinavian","Melamine — Blanco","Triplay (plywood) — Pine face"],["traditional","Melamine — Cerezo","Melamine — Cerezo"],["modern","Melamine — Negro","Melamine — Negro"],["modern","Melamine — Wengué","Melamine — Wengué"],["modern","Melamine — Encino","Melamine — Encino"],["rustic","Triplay (plywood) — Oak / Encino face","Triplay (plywood) — Oak / Encino face"]],
+ kitchen:[["modern","Melamine — Blanco","Melamine — Gris"],["shaker","Melamine — Blanco","Melamine — Blanco Polar"],["shaker","Melamine — Blanco","Melamine — Encino"],["modern","Melamine — Blanco","Melamine — Roble"],["modern","Melamine — Blanco","Melamine — Blanco"],["scandinavian","Melamine — Blanco","Triplay (plywood) — Pine face"],["traditional","Melamine — Blanco","Melamine — Cerezo"]]
+};
+function recipeRequiredMM(rr){return (rr.sections||[]).reduce((sm,s)=>sm+(SECTION_MIN_MM[s.t]||300),0);}
+function largestRemainder(raws,total){
+  const out=raws.map(r=>Math.floor(r));
+  let rem=total-out.reduce((a,b)=>a+b,0);
+  const order=raws.map((r,i)=>[r-Math.floor(r),i]).sort((a,b)=>b[0]-a[0]);
+  let k=0;
+  while(rem>0&&order.length){out[order[k%order.length][1]]++;rem--;k++;}
+  let guard=0;
+  while(rem<0&&guard++<100000){let mi=0;out.forEach((w,i)=>{if(w>out[mi])mi=i;});if(out[mi]<=0)break;out[mi]--;rem++;}
+  return out;
+}
+function scaleRecipe(sections,basis){
+  const B=Math.max(0,Math.round(basis||0));
+  let ws=largestRemainder(sections.map(s=>(s.pct/100)*B),B);
+  let deficit=0;
+  ws=ws.map(w=>{if(w<250){deficit+=250-w;return 250;}return w;});
+  let guard=0;
+  while(deficit>0&&guard++<10000){
+    let mi=-1,mv=250;
+    ws.forEach((w,i)=>{if(w>mv){mv=w;mi=i;}});
+    if(mi<0)break;
+    const take=Math.min(deficit,mv-250); ws[mi]-=take; deficit-=take;
+  }
+  return sections.map((s,i)=>{
+    const dt=s.dt||"none";
+    const o={type:s.t,width_mm:ws[i],shelves:s.sh||0,drawers:0,doors:DOORS_FROM_TYPE[dt]||0,door_style:s.ds||"slab",door_type:dt};
+    if(s.dc)o.drawer_count=s.dc;
+    return o;
+  });
+}
+function runBasisMM(g,ri,rr,t,fallbackW){
+  if(ri===0){const W=g.piece.overall_width; return (W&&W>0)?W-2*t:(fallbackW||2400)-2*t;}
+  const cur=((g.layout.runs||[])[ri]||{}).length_mm;
+  const len=cur||(rr&&rr.len)||1800, D=g.piece.overall_depth||600;
+  return Math.max(0,len-D)-2*t;
+}
+function designLabel(p,v){return p.name+(v?` (variation ${v})`:"");}
+/* Write a preset/variation params object into the form through the same DOM
+   paths loadParams uses (style + materials via the v5.1 preservation path,
+   runs via ensureRunPanels/fillRunPanel) — minus the page scroll, which
+   belongs to full request loads, not to a tap in the Layout step. */
+function commitDesignLayout(params){
+  const set=(id,v)=>{const el=$(id);if(el)el.value=(v===null||v===undefined)?"":v;};
+  set("ptype",params.project_type); preserveSelectValue($("ptype"),params.project_type);
+  const pc=params.piece||{};
+  set("pieceStyle",pc.style||"modern"); preserveSelectValue($("pieceStyle"),pc.style);
+  const m=params.materials||{};
+  if(m.carcass_material){
+    $("matName").value=m.carcass_material;
+    const mp=$("matPick");
+    if(mp){const cs=matStyle(m.carcass_material); if(MATERIALS.includes(cs)){mp.value=cs.name; matPickPrev=cs.name;}}
+  }
+  {const dm=$("doorMatPick"); if(dm){
+    [...dm.options].forEach(o=>{if(o.dataset&&o.dataset.storedCustom)o.remove();});
+    if(!m.door_material||m.door_material===m.carcass_material)dm.value=""; else preserveSelectValue(dm,m.door_material);
+  }}
+  const lay=params.layout||{}; const shape=lay.shape||"straight";
+  {const shSel=$("layoutShape"); if(shSel){shSel.value=shape; preserveSelectValue(shSel,shape);}}
+  const runsData=(lay.runs&&lay.runs.length)?lay.runs:[{wall:"main wall",length_mm:pc.overall_width,divide_mode:"custom",sections:lay.sections||[]}];
+  __runStash={}; stashExtraRunsFrom({layout:{runs:runsData}}); // preset runs are real runs — the shape-switch stash keeps them (EVE-008)
+  ensureRunPanels(shape,runsData);
+  $("bays").innerHTML=""; bayCount=0;
+  ((runsData[0]&&runsData[0].sections)||[]).forEach(s2=>bayRow({type:s2.type,width:(s2.width_mm===null||s2.width_mm===undefined)?"":s2.width_mm,shelves:s2.shelves?s2.shelves:"",drawers:s2.drawers?s2.drawers:"",doors:s2.doors||0,doorstyle:s2.door_style,door_type:s2.door_type,drawer_count:s2.drawer_count}));
+  runPanels().forEach((panel,i)=>{
+    const rd=runsData[i]; if(!rd)return;
+    const divSel=panel.querySelector(".r-divide"); if(divSel&&rd.divide_mode){divSel.value=rd.divide_mode; preserveSelectValue(divSel,rd.divide_mode);}
+    const lenEl=panel.querySelector(".r-length"); if(lenEl&&i>0&&rd.length_mm!==null&&rd.length_mm!==undefined)lenEl.value=rd.length_mm;
+  });
+  document.querySelectorAll(".b-doorstyle").forEach(sel=>{sel.dataset.touched="1";}); // the preset's per-section styles are deliberate — style presets must not stomp them
+  __design=params.design||null;
+  activeRun=0;
+  refresh();
+}
+function applyPresetById(id){
+  const p=PRESET_BY_ID[id]; if(!p)return;
+  const g0=gather();
+  __presetUndo={params:JSON.parse(JSON.stringify(g0))};
+  const t=g0.materials.carcass_thickness||16;
+  const curShape=g0.layout.shape||"straight";
+  const shape=p.shapes.includes(curShape)?curShape:p.shape;
+  const nRuns=SHAPE_RUNS[shape]||1;
+  const params=JSON.parse(JSON.stringify(g0));
+  params.project_type=p.project;
+  params.piece.style=p.style;
+  params.materials.carcass_material=p.carcass;
+  params.materials.door_material=p.door;
+  const runs=[];
+  for(let ri=0;ri<nRuns;ri++){
+    const rr=p.runs[ri]||p.runs[p.runs.length-1];
+    runs.push({
+      wall:(RUN_WALLS[shape]||RUN_WALLS.straight)[ri]||"main wall",
+      length_mm:ri===0?(g0.piece.overall_width||p.width_mm):(((g0.layout.runs||[])[ri]||{}).length_mm||rr.len||1800),
+      divide_mode:"custom", is_corner_owner:ri===0,
+      sections:scaleRecipe(rr.sections,runBasisMM(g0,ri,rr,t,p.width_mm))
+    });
+  }
+  params.layout.shape=shape; params.layout.runs=runs; params.layout.sections=runs[0].sections; params.layout.corner_owner="run_1";
+  params.design={id:p.id,name:p.name,variation:0,label:p.name,min_width_mm:p.minW,min_height_mm:p.minH||null,min_side_mm:p.minSide||null,runs_required:p.runs.slice(0,nRuns).map(rr=>recipeRequiredMM(rr))};
+  commitDesignLayout(params);
+}
+function matchPreset(g){
+  if(g.design&&PRESET_BY_ID[g.design.id])return PRESET_BY_ID[g.design.id];
+  const runs=g.layout.runs||[];
+  return PRESETS.find(p=>p.project===g.project_type&&p.shapes.includes(g.layout.shape||"straight")&&runs.length<=(SHAPE_RUNS[p.shape]||1)&&runs.every((r,ri)=>{const rr=p.runs[ri];return rr&&rr.sections.length===r.sections.length&&rr.sections.every((s,si)=>s.t===r.sections[si].type);}))||null;
+}
+function varyDesign(){
+  const g=gather();
+  const p=matchPreset(g); if(!p)return;
+  const cur=(g.design&&g.design.id===p.id)?g.design:null;
+  const v=(cur?(cur.variation||0):0)+1;
+  __presetUndo={params:JSON.parse(JSON.stringify(g))};
+  const params=JSON.parse(JSON.stringify(g));
+  // Axis 1 — skin swap: cycle the project's skin pool past the current skin.
+  const pool=PRESET_SKINS[p.project]||PRESET_SKINS.closet;
+  const curIdx=pool.findIndex(s=>s[0]===params.piece.style&&s[1]===params.materials.carcass_material&&s[2]===params.materials.door_material);
+  const skin=pool[(((curIdx<0?-1:curIdx)+v)%pool.length+pool.length)%pool.length];
+  params.piece.style=skin[0]; params.materials.carcass_material=skin[1]; params.materials.door_material=skin[2];
+  // Axis 2 — mirror (closets only; kitchen section ORDER is sacred, never shuffled).
+  if(p.project==="closet"){
+    params.layout.runs.forEach(r=>{r.sections.reverse();});
+    params.layout.sections=params.layout.runs[0].sections;
+  }
+  // Axis 3 — density jitter: drawer bank ±1 (clamp 2–8), shelves ±1 (clamp 3–8).
+  let done=false;
+  for(const r of params.layout.runs){ if(done)break;
+    for(const s of r.sections){ if(s.type==="drawers"||s.type==="shelves_drawers"){ s.drawer_count=Math.max(2,Math.min(8,drawerCountOf(s)+((v%2)?1:-1))); s.drawers=0; done=true; break; } }
+  }
+  done=false;
+  for(const r of params.layout.runs){ if(done)break;
+    for(const s of r.sections){ if(s.type==="shelves"||s.type==="shelves_drawers"){ s.shelves=Math.max(3,Math.min(8,(s.shelves||4)+((v%3===0)?-1:1))); done=true; break; } }
+  }
+  // Axis 3b — door-treatment rotation where legal (hinged pair <-> sliding, >=600 mm only).
+  done=false;
+  for(let ri=0;ri<params.layout.runs.length&&!done;ri++){
+    const ws=runWidthsFor(params,params.layout.runs[ri]);
+    for(let si=0;si<params.layout.runs[ri].sections.length;si++){
+      const s=params.layout.runs[ri].sections[si];
+      const dt=s.door_type||doorTypeFromDoors(s.doors||0);
+      if((dt==="hinged_pair"||dt==="sliding")&&(ws[si]||0)>=600){
+        const ndt=dt==="hinged_pair"?"sliding":"hinged_pair";
+        s.door_type=ndt; s.doors=DOORS_FROM_TYPE[ndt]; done=true; break;
+      }
+    }
+  }
+  params.design={id:p.id,name:p.name,variation:v,label:designLabel(p,v),min_width_mm:p.minW,min_height_mm:p.minH||null,min_side_mm:p.minSide||null,runs_required:(cur&&cur.runs_required)||p.runs.map(rr=>recipeRequiredMM(rr))};
+  commitDesignLayout(params);
+}
+function undoPreset(){
+  if(!__presetUndo)return;
+  const snap=__presetUndo.params;
+  __presetUndo=null;
+  loadParams(snap);
+}
+function presetFitWarnings(g){
+  const d=g.design; if(!d||!d.name)return [];
+  const out=[]; const t=g.materials.carcass_thickness||16;
+  (g.layout.runs||[]).forEach((run,ri)=>{
+    const req=(d.runs_required||[])[ri]||0;
+    let basis=null;
+    if(ri===0&&g.piece.overall_width)basis=g.piece.overall_width-2*t;
+    else if(ri>0&&run.length_mm)basis=Math.max(0,run.length_mm-(g.piece.overall_depth||0))-2*t;
+    if(basis!==null&&req){
+      const want=Math.max(req,ri===0&&d.min_width_mm?d.min_width_mm-2*t:0);
+      if(basis<want)out.push(["w",`Design '${d.name}': Run ${ri+1} inside width is ${Math.round(basis)} mm — this design wants at least ${Math.round(want)} mm here. Sections were squeezed proportionally and none was dropped; check the narrow bays.`]);
+    }
+    if(ri>0&&d.min_side_mm&&run.length_mm&&run.length_mm<d.min_side_mm)out.push(["w",`Design '${d.name}': Run ${ri+1} is ${run.length_mm} mm long — the design's side runs want at least ${d.min_side_mm} mm.`]);
+  });
+  if(d.min_height_mm&&g.piece.overall_height&&g.piece.overall_height<d.min_height_mm)out.push(["w",`Design '${d.name}' assumes at least ${d.min_height_mm} mm of height; at ${g.piece.overall_height} mm double-hang tiers and tall units will be tight.`]);
+  return out;
+}
+function presetThumb(p){
+  try{
+    const t=16, D=600;
+    const runs=p.runs.slice(0,SHAPE_RUNS[p.shape]||1).map((rr,ri)=>({
+      wall:(RUN_WALLS[p.shape]||[])[ri]||"main wall",
+      length_mm:ri===0?p.width_mm:(rr.len||1800),
+      divide_mode:"custom", is_corner_owner:ri===0,
+      sections:scaleRecipe(rr.sections,(ri===0?p.width_mm:Math.max(0,(rr.len||1800)-D))-2*t)
+    }));
+    const g2={piece:{overall_width:p.width_mm,overall_height:p.thumbH||2200,overall_depth:D,plinth_height:100,style:p.style,construction:"frameless"},
+      materials:{carcass_material:p.carcass,door_material:p.door,carcass_thickness:16,front_gap_mm:2},
+      layout:{shape:p.shape,runs:runs,sections:runs[0].sections}};
+    let svg=frontSVG(g2,false,0);
+    if(!svg)return "";
+    // frontSVG's material pattern ids (gp-F*/pe-F*) would collide across the
+    // page's many SVGs — re-key them per preset so each card paints its own skin.
+    return svg.split("gp-F").join("gp-Q"+p.id).split("pe-F").join("pe-Q"+p.id);
+  }catch(e){return "";}
+}
+function buildPresetUI(){
+  const host=$("presetGallery"); if(!host)return;
+  __galFilter=($("ptype")&&$("ptype").value==="kitchen")?"kitchen":"closet";
+  document.querySelectorAll("[data-galfilter]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.galfilter===__galFilter?"true":"false"));
+  const shapeName={straight:"Straight",l:"L",u:"U"};
+  PRESETS.forEach(p=>{
+    const card=document.createElement("div");
+    card.className="preset-card"; card.dataset.pid=p.id; card.dataset.project=p.project;
+    card.innerHTML=`<h4>${esc(p.name)}</h4><div class="thumb">${presetThumb(p)}</div><p class="why">${esc(p.tag)}</p><div class="meta">${p.project==="closet"?"Closet":"Kitchen"} · ${p.shapes.map(s=>shapeName[s]).join(" / ")} · ${p.recW[0]}–${p.recW[1]} mm wide · ${esc((STYLES[p.style]||{}).label||p.style)}</div><div class="badges"><span class="badge b-shape"></span><span class="badge warnb b-size" hidden></span></div>${p.id==="k5"?'<p class="why"><b>Galley note:</b> a true galley is two facing runs — this preset is the complete wet side. Model the facing run (stove + cupboards) as a second straight piece, with at least 1200 mm of aisle between runs.</p>':""}<button type="button" class="secondary">Use this design</button>`;
+    card.querySelector("button").addEventListener("click",()=>applyPresetById(p.id));
+    host.appendChild(card);
+  });
+  document.querySelectorAll("[data-galfilter]").forEach(b=>b.addEventListener("click",()=>setGalleryFilter(b.dataset.galfilter)));
+  const vb=$("varyBtn"); if(vb)vb.addEventListener("click",varyDesign);
+  const ub=$("presetUndoBtn"); if(ub)ub.addEventListener("click",undoPreset);
+  __galSig=null;
+}
+function setGalleryFilter(f){
+  __galFilter=f;
+  document.querySelectorAll("[data-galfilter]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.galfilter===f?"true":"false"));
+  __galSig=null;
+  try{syncPresetGallery(gather());}catch(e){}
+}
+function syncPresetGallery(g){
+  if(!$("presetGallery"))return;
+  const matched=matchPreset(g);
+  const sig=[__galFilter,g.layout.shape||"",g.piece.overall_width||0,(g.design&&g.design.label)||"",__presetUndo?1:0,matched?matched.id:""].join("|");
+  if(sig===__galSig)return; __galSig=sig;
+  const t=g.materials.carcass_thickness||16;
+  const shapeName={straight:"Straight",l:"L",u:"U"};
+  document.querySelectorAll("#presetGallery .preset-card").forEach(card=>{
+    const p=PRESET_BY_ID[card.dataset.pid]; if(!p)return;
+    card.style.display=p.project===__galFilter?"":"none";
+    const shapeOK=p.shapes.includes(g.layout.shape||"straight");
+    card.classList.toggle("off",!shapeOK);
+    const sb=card.querySelector(".b-shape");
+    if(sb){sb.textContent=shapeOK?"Fits the current shape":("Applies as "+shapeName[p.shape]); sb.classList.toggle("okb",shapeOK);}
+    const zb=card.querySelector(".b-size");
+    if(zb){
+      const W=g.piece.overall_width; let txt="";
+      if(W){const basis=W-2*t;
+        if(basis<0.6*p.minW)txt="Too small for this piece — applies squeezed, with a warning";
+        else if(W<p.minW)txt="Under its usual size — will squeeze + warn";}
+      zb.hidden=!txt; zb.textContent=txt;
+    }
+  });
+  const bar=$("presetBar"), txt=$("presetBarText"), vb=$("varyBtn"), ub=$("presetUndoBtn"), note=$("presetNote");
+  if(bar&&txt){
+    let show=false, msg="";
+    if(g.design&&g.design.label){show=true; msg="Design applied: "+g.design.label+". Vary it for a fresh take on the same recipe, or keep editing below — it's yours now.";}
+    else if(matched){show=true; msg="This layout matches the design '"+matched.name+"'. Vary can spin a variation of it.";}
+    else if(__presetUndo){show=true; msg="Your previous layout is still one tap away.";}
+    bar.hidden=!show; txt.textContent=msg;
+    if(vb)vb.style.display=(g.design||matched)?"":"none";
+    if(ub)ub.style.display=__presetUndo?"":"none";
+  }
+  if(note){
+    if(g.design&&g.design.id==="k5"){note.hidden=false; note.textContent="Galley note: a true galley is two facing runs. This design is the complete wet side — model the facing run (stove + cupboards) as a second straight piece, with at least 1200 mm of aisle between the runs.";}
+    else note.hidden=true;
+  }
+}
+
 /* ================= v6 interactive 3D (Three.js, CDN-degradable) =================
    If the Three.js CDN is unreachable, window.THREE is undefined: draw3D leaves a
    short note and returns — the 2D SVG previews are untouched and nothing throws. */
@@ -1438,7 +1770,8 @@ window.__makoCollectParams=function(){const g=refresh();return {params:g,orderMd
 window.__makoLoadParams=loadParams;
 document.querySelectorAll("#formCol input,#formCol select,#formCol textarea").forEach(el=>el.addEventListener("input",refresh));
 bayRow({type:"double_hang",doors:2});bayRow({type:"shelves_drawers",shelves:4,drawers:3,doors:0});bayRow({type:"single_hang",doors:2});
-buildMatUI();buildStyleUI();
+buildMatUI();buildStyleUI();buildPresetUI();
+$("ptype").addEventListener("change",()=>{setGalleryFilter($("ptype").value==="kitchen"?"kitchen":"closet");});
 runPanels().forEach((pn,i)=>wireRunPanel(pn,i));
 {const shSel=$("layoutShape"); if(shSel)shSel.addEventListener("change",()=>{ensureRunPanels(shSel.value);activeRun=0;refresh();});}
 {const o3=$("open3d"); if(o3)o3.addEventListener("change",()=>{window.__open3d=o3.checked;refresh();});}
