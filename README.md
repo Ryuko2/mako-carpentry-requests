@@ -70,3 +70,24 @@ token system throughout.
   **16 mm melamine** unless changed.
 - Missing numbers are flagged as questions. Mako **never invents a
   dimension**.
+
+## Changelog
+
+### v5.1 — 2026-11-13 (Lux — Eve HOLD fix: EVE-002 / EVE-003 / EVE-004)
+
+- **Round-trip preservation for select-bound fields.** A `<select>` silently drops a stored value that is not among its options, so loading a saved request whose door material or style sat outside the pickers' catalogues lost that value on the next save (Eve HOLD, EVE-002 S2 + EVE-003 S3). Stored values outside an option set are now parked in a visible "<value> — stored custom" option and ride through collect unchanged until Kevin deliberately picks something else. Applied to: door material picker, style picker, project type, wall, construction, the three thickness selects, and per-section type / doors / door-style selects. Params shape unchanged; no new dependencies.
+
+### v5 — 2026-11-12 (Lux — per-step live previews, rendered materials, styles)
+
+- **A live preview at the end of every build step**, all inline SVG, all driven by `gather()` on the existing refresh cycle; the sticky column's overall front elevation is unchanged:
+  - **Room** → top-down plan: room rect + dims, ceiling noted, chosen wall in amber, piece footprint on that wall (respects centred-on-wall), obstacles drawn at their position with labels.
+  - **Piece** → the front elevation + depth (its home step now).
+  - **Materials** → construction detail: door/carcass/back thickness bars to relative scale with edge-band indicators, plus the stock sheet with the piece front overlaid to the same scale.
+  - **Layout** → front elevation with real internals per section (hanging rods + clothes lines, shelf boards, drawer fronts, kitchen section types too), section widths from the same `bayWidths()` math.
+  - **Hardware** → door front with its handle(s), closet-rod end view at Ø scale, drawer-slide side strip at length scale.
+- **Materials picker (Materials step)** — curated Home Depot México sheet goods with colour swatches: melamine in 9 shades (Blanco, Blanco Polar, Gris, Negro, Roble, Nogal, Encino, Cerezo, Wengué), triplay pine face + oak/encino face, MDF natural, aglomerado natural, solid pine. Carcass and doors/fronts pick separately; the picks paint every render (flat colour for melamine, procedural SVG wood grain for wood/plywood, layered edge on plywood). The existing free-text name field still works — a custom name renders with a neutral fill. New optional param: `materials.door_material` (`carcass_material` unchanged; the order MD names both).
+- **Style picker (Piece step)** — 6 styles with mini door glyphs: Modern / Minimalist, Shaker / Classic, Rustic / Farmhouse, Industrial, Scandinavian, Traditional. One per-style delta table drives door profile, top treatment, base and handles across the renders; picking Shaker presets untouched section door styles to shaker (per-section overrides Kevin made are kept). New optional param: `piece.style`, plus a Style line in the order MD.
+- Both params additions are optional and back-compatible — old saved requests and the Mako pipeline read exactly what they read in v4. No new dependencies; still one file, offline except Firebase.
+
+### v4 — 2026-11-12 (Lux, QA'd by Eve — PASS WITH NOTES, EVE-001 fixed + regressed)
+The professional remake described under "Cloud features (Firebase)" above: app-bar + auth pill, full-width History band, send panel first in the right column, token-based design system.
