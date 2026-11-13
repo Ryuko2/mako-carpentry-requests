@@ -171,6 +171,16 @@
   .foot-facts li{color:var(--muted);font-size:var(--fs-14)}
   .base{max-width:1200px;margin:0 auto;padding:var(--sp-4);border-top:1px solid var(--border);display:flex;gap:var(--sp-2) var(--sp-4);flex-wrap:wrap;justify-content:space-between;color:var(--faint);font-size:var(--fs-12)}
 
+  /* ---------- v6: runs, door types, 3D ---------- */
+  .run-panel{border:1px solid var(--border-strong);border-radius:var(--r-md);padding:var(--sp-4);margin:var(--sp-3) 0;background:var(--surface-2)}
+  .run-panel .runhead{display:flex;flex-wrap:wrap;gap:var(--sp-2);align-items:center;justify-content:space-between}
+  .run-panel .runhead b{font-size:var(--fs-14)}
+  .runswitch{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin:var(--sp-2) 0}
+  .runswitch button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc);box-shadow:var(--ring)}
+  #pv3d canvas{width:100%;height:auto;display:block;background:var(--code);border:1px solid var(--border);border-radius:var(--r-md);touch-action:none;cursor:grab}
+  #pv3d canvas:active{cursor:grabbing}
+  .seg{display:flex;flex-wrap:wrap;gap:var(--sp-2);align-items:end}
+  .seg>div{flex:1;min-width:130px}
   @media(max-width:1024px){#previewWrap{position:static}}
   @media(max-width:700px){
     header{padding:var(--sp-2) var(--sp-3)}
@@ -271,7 +281,7 @@
   </select>
   <div class="glyphrow" id="styleGlyphs" role="group" aria-label="Furniture style quick pick"></div>
   <div class="row3">
-    <div><label>Overall width *</label><input type="number" step="any" id="W" placeholder="2400"></div>
+    <div><label>Overall width * (Run 1 length on the main wall)</label><input type="number" step="any" id="W" placeholder="2400"></div>
     <div><label>Overall height *</label><input type="number" step="any" id="H" placeholder="2400"></div>
     <div><label>Overall depth *</label><input type="number" step="any" id="D" placeholder="600"></div>
   </div>
@@ -317,21 +327,49 @@
 </section>
 
 <section>
-  <h2>Layout — sections left → right</h2>
-  <p class="hint">Each section is one vertical bay (closet) or cabinet run segment (kitchen). Leave a section's width blank and the free space is split equally. Rod heights, drawer math and shelf spacing default to Mako's standards unless you override them in Notes.</p>
-  <div id="bays"></div>
-  <div class="btnrow"><button type="button" class="secondary" id="addBay"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add section</button></div>
+  <h2>Layout — modular runs &amp; sections</h2>
+  <label>Layout shape — how the piece wraps the room</label>
+  <select id="layoutShape">
+    <option value="straight">Straight — one run on the main wall</option>
+    <option value="l">L — main run + one side run (corner)</option>
+    <option value="u">U — main run + both side runs (two corners)</option>
+  </select>
+  <p class="hint" id="cornerNote">Straight run: sections go left → right along the main wall.</p>
+  <div class="run-panel" data-runpanel="0">
+    <div class="runhead"><b>Run 1 — main wall</b><span class="small">length = Overall width in “The piece” above</span></div>
+    <div class="seg">
+      <div><label>How to divide this run</label><select class="r-divide"><option value="equal">Equal widths — split the run evenly</option><option value="custom">Custom — per-section widths below</option></select></div>
+      <div><label>Number of sections</label><input type="number" class="r-count" min="1" max="12" step="1"></div>
+      <div><button type="button" class="secondary r-apply">Set count</button></div>
+    </div>
+    <div id="bays"></div>
+    <div class="btnrow"><button type="button" class="secondary r-add">+ Add section to Run 1</button></div>
+  </div>
+  <div id="extraRuns"></div>
   <div class="pv">
     <h3>Live preview — sections with their insides</h3>
+    <div class="runswitch" id="runSwitcher" role="group" aria-label="Choose which run the elevation shows"></div>
     <div id="pvLayout"></div>
   </div>
 </section>
 
 <section>
+  <h2>Interactive 3D preview</h2>
+  <p class="hint">Drag to orbit · scroll or pinch to zoom · right-drag / two-finger drag to pan. Built live from the same numbers as the 2D drawings.</p>
+  <label class="check"><input type="checkbox" id="open3d"> Open doors &amp; drawers in 3D</label>
+  <div class="btnrow"><button type="button" class="secondary" id="reset3d">Reset 3D view</button></div>
+  <div id="pv3d"><p class="small">The 3D view loads with the form — if it cannot load, the 2D previews above keep working.</p></div>
+</section>
+
+<section>
   <h2>Hardware</h2>
   <div class="row">
-    <div><label>Hinge type</label><input id="hinge" value="35mm soft-close cup"></div>
+    <div><label>Hinge type (door mechanism)</label><select id="hinge"><option value="european_soft_close">European concealed — soft-close (35 mm cup)</option><option value="european_concealed">European concealed (35 mm cup)</option><option value="exposed_butt">Exposed butt hinges</option></select></div>
     <div><label>Handles per front</label><input type="number" id="handlesPer" value="1"></div>
+  </div>
+  <div class="row">
+    <div><label>Sliding-door system</label><select id="slidingSystem"><option value="top_hung_bypass">Top-hung bypass track</option><option value="bottom_rolling_bypass">Bottom-rolling bypass track</option></select></div>
+    <div><label>Drawer slide type (mechanism)</label><select id="slideType"><option value="undermount_soft_close">Undermount soft-close</option><option value="side_mount_ball_bearing">Side-mount ball-bearing</option><option value="push_to_open">Push-to-open</option><option value="wooden_runners">Wooden runners</option></select></div>
   </div>
   <div class="row">
     <div><label>Rod diameter (closets)</label><input type="number" step="any" id="rodD" value="25"></div>
@@ -429,28 +467,80 @@ const $=id=>document.getElementById(id);
 const REPO="Ryuko2/mako-carpentry-requests";
 const BAY_TYPES=[["double_hang","Double hang (2 rods)"],["single_hang","Single hang (1 rod, long clothes)"],["shelves_drawers","Shelf tower + drawers at bottom"],["shelves","Shelves only"],["drawers","Drawers only"],["cabinet_doors","Cabinet with doors (kitchen/base)"],["sink_base","Sink base (kitchen)"],["stove_space","Stove / hob space (kitchen)"],["fridge_space","Fridge space"],["pantry","Pantry / tall cabinet"],["open","Open / empty"]];
 let bayCount=0, obsCount=0;
+/* ================= v6: modular runs, door types, mechanisms ================= */
+const DOOR_TYPES=[["none","None — open section"],["hinged_single","Hinged — single door"],["hinged_pair","Hinged — pair of doors"],["sliding","Sliding (bypass)"],["bifold","Bifold (folding pair)"]];
+const DOOR_LABEL={none:"open (no door)",hinged_single:"hinged single",hinged_pair:"hinged pair",sliding:"sliding bypass",bifold:"bifold"};
+const DOORS_FROM_TYPE={none:0,hinged_single:1,hinged_pair:2,sliding:2,bifold:2};
+const HINGE_LABEL={european_concealed:"European concealed hinge (35 mm cup)",european_soft_close:"European concealed soft-close hinge (35 mm cup)",exposed_butt:"Exposed butt hinges"};
+const SLIDING_LABEL={top_hung_bypass:"Top-hung bypass sliding system",bottom_rolling_bypass:"Bottom-rolling bypass sliding system"};
+const SLIDE_LABEL={side_mount_ball_bearing:"Side-mount ball-bearing drawer slides",undermount_soft_close:"Undermount soft-close drawer slides",push_to_open:"Push-to-open drawer slides",wooden_runners:"Wooden drawer runners"};
+const SHAPE_RUNS={straight:1,l:2,u:3};
+const RUN_WALLS={straight:["main wall"],l:["main wall","left wall"],u:["main wall","left wall","right wall"]};
+let activeRun=0;
+function doorTypeFromDoors(n){return n===1?"hinged_single":n>=2?"hinged_pair":"none";}
+function drawerCountOf(b){const dc=parseInt(b&&b.drawer_count);if(dc>=1&&dc<=12)return dc;const d=parseInt(b&&b.drawers);return (d>=1&&d<=12)?d:3;}
+function runPanels(){return [...document.querySelectorAll("[data-runpanel]")];}
+function panelBays(panel){return panel?[...panel.querySelectorAll("[data-bay]")]:[];}
+function sectionsOfPanel(panel){
+  return panelBays(panel).map(b=>({
+    type:b.querySelector(".b-type").value,
+    width_mm:(()=>{const v=parseFloat(b.querySelector(".b-width").value);return isNaN(v)?null:Math.round(v*uf()*10)/10;})(),
+    shelves:parseInt(b.querySelector(".b-shelves").value)||0,
+    drawers:parseInt(b.querySelector(".b-drawers").value)||0,
+    doors:(()=>{const dt=b.querySelector(".b-door-type")?b.querySelector(".b-door-type").value:"none";return (dt in DOORS_FROM_TYPE)?DOORS_FROM_TYPE[dt]:(parseInt(b.querySelector(".b-doors")?.value)||0);})(),
+    door_style:b.querySelector(".b-doorstyle").value,
+    door_type:b.querySelector(".b-door-type")?b.querySelector(".b-door-type").value:doorTypeFromDoors(parseInt(b.querySelector(".b-doors")?.value)||0),
+    drawer_count:(()=>{const v=parseInt(b.querySelector(".b-drawer-count")?.value);return (Number.isFinite(v)&&v>=1)?v:drawerCountOf({drawers:parseInt(b.querySelector(".b-drawers").value)||0});})()
+  }));
+}
+function runLengthOf(g,idx){
+  if(idx===0)return g.piece.overall_width;
+  const r=(g.layout.runs||[])[idx];
+  return r?r.length_mm:null;
+}
+function runWidthsFor(g,run){
+  const rawL=run?run.length_mm:null;
+  const L=(run&&run.is_corner_owner===false&&rawL)?Math.max(0,rawL-(g.piece.overall_depth||0)):rawL;
+  const t=g.materials.carcass_thickness||16, secs=(run&&run.sections)||[];
+  if(!L||!secs.length)return [];
+  const inner=L-2*t, divs=Math.max(0,secs.length-1)*t, free=inner-divs;
+  if(run.divide_mode==="equal"){const each=Math.max(0,free/secs.length);return secs.map(()=>Math.round(each*10)/10);}
+  const specified=secs.reduce((sm,b)=>sm+(b.width_mm||0),0);
+  const blanks=secs.filter(b=>!b.width_mm).length;
+  const each=blanks?Math.max(0,(free-specified)/blanks):0;
+  return secs.map(b=>Math.round((b.width_mm||each)*10)/10);
+}
+function getRun(g,idx){
+  const runs=(g.layout&&g.layout.runs)||[];
+  if(runs[idx])return runs[idx];
+  return {wall:"main wall",length_mm:g.piece.overall_width,divide_mode:"custom",is_corner_owner:idx===0,sections:g.layout.sections||[]};
+}
 
-function bayRow(data){
+function bayRow(data,container){
   bayCount++;
   const d=data||{};
   const div=document.createElement("div"); div.className="bay"; div.dataset.bay="1";
-  div.innerHTML=`<div class="bayhead"><b>Section ${bayCount}</b><button type="button" class="danger">remove</button></div>
+  const dt=d.door_type||doorTypeFromDoors(d.doors||0);
+  const dc=(d.drawer_count>=2&&d.drawer_count<=8)?d.drawer_count:((d.drawers>=2&&d.drawers<=8)?d.drawers:3);
+  div.innerHTML=`<div class="bayhead"><b>Section</b><button type="button" class="danger">remove</button></div>
   <label>Type</label><select class="b-type">${BAY_TYPES.map(([v,t])=>`<option value="${v}"${d.type===v?" selected":""}>${t}</option>`).join("")}</select>
   <div class="row3">
-    <div><label>Width (blank = equal split)</label><input type="number" step="any" class="b-width" value="${d.width??""}" placeholder="auto"></div>
+    <div><label>Width (blank = auto / equal)</label><input type="number" step="any" class="b-width" value="${d.width??""}" placeholder="auto"></div>
     <div><label>Shelves (if any)</label><input type="number" class="b-shelves" value="${d.shelves??""}" placeholder="0"></div>
-    <div><label>Drawers (if any)</label><input type="number" class="b-drawers" value="${d.drawers??""}" placeholder="0"></div>
+    <div><label>Drawers — extra (non-bank sections)</label><input type="number" class="b-drawers" value="${d.drawers??""}" placeholder="0"></div>
   </div>
-  <div class="row">
-    <div><label>Doors over this section</label><select class="b-doors"><option value="0"${d.doors===0?" selected":""}>0 — open</option><option value="1"${d.doors===1?" selected":""}>1</option><option value="2"${d.doors===2?" selected":""}>2</option></select></div>
+  <div class="row3">
+    <div><label>Door type</label><select class="b-door-type">${DOOR_TYPES.map(([v,t])=>`<option value="${v}"${dt===v?" selected":""}>${t}</option>`).join("")}</select></div>
     <div><label>Door style</label><select class="b-doorstyle"><option${d.doorstyle==="slab"?" selected":""}>slab</option><option${d.doorstyle==="shaker"?" selected":""}>shaker</option></select></div>
+    <div><label>Drawer count (drawer banks, 2–8)</label><select class="b-drawer-count">${[2,3,4,5,6,7,8].map(n=>`<option value="${n}"${dc===n?" selected":""}>${n} drawers</option>`).join("")}</select></div>
   </div>`;
   div.querySelector(".danger").onclick=()=>{div.remove();refresh();};
   div.querySelectorAll("input,select").forEach(el=>el.addEventListener("input",refresh));
   preserveSelectValue(div.querySelector(".b-type"),d.type);
-  if(d.doors!==undefined&&d.doors!==null)preserveSelectValue(div.querySelector(".b-doors"),String(d.doors));
+  preserveSelectValue(div.querySelector(".b-door-type"),d.door_type);
+  if(d.drawer_count!==undefined&&d.drawer_count!==null)preserveSelectValue(div.querySelector(".b-drawer-count"),String(d.drawer_count));
   preserveSelectValue(div.querySelector(".b-doorstyle"),d.doorstyle);
-  $("bays").appendChild(div);
+  (container||$("bays")).appendChild(div);
 }
 function obsRow(data){
   obsCount++;
@@ -470,21 +560,30 @@ function obsRow(data){
   div.querySelectorAll("input").forEach(el=>el.addEventListener("input",refresh));
   $("obstacles").appendChild(div);
 }
-$("addBay").onclick=()=>{bayRow();refresh();};
 $("addObs").onclick=()=>{obsRow();refresh();};
 
 function uf(){return {mm:1,cm:10,in:25.4}[$("units").value];}
 function num(id){const v=parseFloat($(id).value);return isNaN(v)?null:v*uf();}
 function raw(id){return $(id).value.trim();}
 function gather(){
-  const bays=[...document.querySelectorAll("[data-bay]")].map(b=>({
-    type:b.querySelector(".b-type").value,
-    width_mm:(()=>{const v=parseFloat(b.querySelector(".b-width").value);return isNaN(v)?null:Math.round(v*uf()*10)/10;})(),
-    shelves:parseInt(b.querySelector(".b-shelves").value)||0,
-    drawers:parseInt(b.querySelector(".b-drawers").value)||0,
-    doors:parseInt(b.querySelector(".b-doors").value)||0,
-    door_style:b.querySelector(".b-doorstyle").value
-  }));
+  const panels=runPanels();
+  const shape=($("layoutShape")?$("layoutShape").value:"straight")||"straight";
+  const runCount=SHAPE_RUNS[shape]||1;
+  const runs=[];
+  for(let i=0;i<runCount;i++){
+    const panel=panels[i];
+    const secs=panel?sectionsOfPanel(panel):[];
+    const lenEl=panel?panel.querySelector(".r-length"):null;
+    const divEl=panel?panel.querySelector(".r-divide"):null;
+    runs.push({
+      wall:(RUN_WALLS[shape]||RUN_WALLS.straight)[i]||"main wall",
+      length_mm:i===0?num("W"):(lenEl?(()=>{const v=parseFloat(lenEl.value);return isNaN(v)?null:Math.round(v*uf()*10)/10;})():null),
+      divide_mode:divEl?divEl.value:"custom",
+      is_corner_owner:i===0,
+      sections:secs
+    });
+  }
+  const bays=runs.length?runs[0].sections:[];
   const obstacles=[...document.querySelectorAll("[data-obs]")].map(o=>({
     what:o.querySelector(".o-what").value.trim(),
     at_mm:(()=>{const v=parseFloat(o.querySelector(".o-at").value);return isNaN(v)?null:Math.round(v*uf()*10)/10;})(),
@@ -501,18 +600,21 @@ function gather(){
     piece:{overall_width:num("W"),overall_height:num("H"),overall_depth:num("D"),depth_includes_doors:$("depthInclDoors").checked,construction:$("construction").value,plinth_height:num("plinth")??0,style:($("pieceStyle")?$("pieceStyle").value:"modern")},
     materials:{carcass_material:raw("matName"),door_material:(()=>{const dp=$("doorMatPick");return (dp&&dp.value)?dp.value:raw("matName");})(),carcass_thickness:parseFloat($("tCarcass").value),back_thickness:parseFloat($("tBack").value),door_thickness:parseFloat($("tDoor").value),front_gap_mm:parseFloat($("gap").value)||0,band_all_exposed_edges:$("bandAll").checked},
     stock:{sheet_width:num("sheetW"),sheet_length:num("sheetL"),kerf:num("kerf")},
-    layout:{sections:bays},
-    hardware:{hinge_type:raw("hinge"),handles_per_front:parseInt($("handlesPer").value)||1,rod_diameter:num("rodD"),drawer_slide_length:num("slideL")},
+    layout:{shape:shape,corner_owner:"run_1",corner_note:shape==="straight"?"":("Corner bay belongs to Run 1 ("+(runs[0]?runs[0].wall:"main wall")+"); the next run butts into it — its clear length is its length minus the piece depth."),sections:bays,runs:runs},
+    hardware:{hinge_type:$("hinge")?$("hinge").value:raw("hinge"),hinge_label:(()=>{const v=$("hinge")?$("hinge").value:"";return HINGE_LABEL[v]||v;})(),sliding_system:$("slidingSystem")?$("slidingSystem").value:"top_hung_bypass",sliding_label:(()=>{const v=$("slidingSystem")?$("slidingSystem").value:"";return SLIDING_LABEL[v]||v;})(),drawer_slide_type:$("slideType")?$("slideType").value:"undermount_soft_close",drawer_slide_label:(()=>{const v=$("slideType")?$("slideType").value:"";return SLIDE_LABEL[v]||v;})(),handles_per_front:parseInt($("handlesPer").value)||1,rod_diameter:num("rodD"),drawer_slide_length:num("slideL")},
     deliverables:[...document.querySelectorAll(".deliv:checked")].map(c=>c.value),
     notes:raw("notes"),
     photo_links:raw("photos").split(/\n+/).map(s=>s.trim()).filter(Boolean)
   };
 }
 function bayWidths(g){
+  const runs=(g.layout&&g.layout.runs)||[];
+  if(runs.length)return runWidthsFor(g,runs[0]);
+  // legacy fallback (params object built outside gather)
   const W=g.piece.overall_width,t=g.materials.carcass_thickness;
   if(!W||!g.layout.sections.length) return [];
   const inner=W-2*t, divs=Math.max(0,g.layout.sections.length-1)*t, free=inner-divs;
-  const specified=g.layout.sections.reduce((s,b)=>s+(b.width_mm||0),0);
+  const specified=g.layout.sections.reduce((sm,b)=>sm+(b.width_mm||0),0);
   const blanks=g.layout.sections.filter(b=>!b.width_mm).length;
   const each=blanks?Math.max(0,(free-specified)/blanks):0;
   return g.layout.sections.map(b=>Math.round((b.width_mm||each)*10)/10);
@@ -529,6 +631,26 @@ function warnings(g){
   if(g.piece.overall_width&&specified>g.piece.overall_width-2*t)out.push(["e","Specified section widths exceed the inside width."]);
   ws.forEach((w,i)=>{const b=g.layout.sections[i]; if(b.doors&&w/b.doors>650)out.push(["w",`Section ${i+1}: doors would be ~${Math.round(w/b.doors)} mm wide each — over 650 mm doors sag; consider 2 doors or a divider.`]);});
   if(g.piece.overall_height&&g.piece.overall_height-(g.piece.plinth_height||0)>2350&&g.layout.sections.some(b=>b.doors))out.push(["w","Tall doors (over ~2300 mm of door height) tend to bow in 16 mm — Mako will flag straighteners."]);
+  // v6 warnings — per run, door types, corners (warn, never block)
+  ((g.layout&&g.layout.runs)||[]).forEach((run,ri)=>{
+    const rws=runWidthsFor(g,run), D=g.piece.overall_depth||0;
+    if(ri>0&&run.length_mm&&D&&run.length_mm<=D)out.push(["e",`Run ${ri+1}: length ${run.length_mm} mm is not more than the piece depth ${D} mm — the corner bay (owned by Run 1) would swallow the whole run.`]);
+    run.sections.forEach((b,si)=>{
+      const w=rws[si]||0, dt=b.door_type||doorTypeFromDoors(b.doors||0);
+      if(dt==="sliding"&&w&&w<600)out.push(["w",`Run ${ri+1} section ${si+1}: sliding doors on a ${Math.round(w)} mm section — under ~600 mm the bypass overlap leaves very little access.`]);
+      if(dt==="bifold"&&w&&w>1200)out.push(["w",`Run ${ri+1} section ${si+1}: bifold on a ${Math.round(w)} mm section — very wide for folding leaves; consider hinged pair or sliding.`]);
+      if((b.type==="drawers"||b.type==="shelves_drawers")&&drawerCountOf(b)>6&&g.piece.overall_height&&g.piece.overall_height<1800)out.push(["w",`Run ${ri+1} section ${si+1}: ${drawerCountOf(b)} drawers in ${g.piece.overall_height} mm of height makes shallow drawers.`]);
+    });
+    if(run.divide_mode!=="equal"){
+      const spec=run.sections.reduce((sm,b)=>sm+(b.width_mm||0),0), t2=g.materials.carcass_thickness||16;
+      // Side runs are validated against their CLEAR length (length − depth;
+      // the corner bay is Run 1's) — the same basis runWidthsFor builds on (EVE-010).
+      const basis=(ri>0&&D)?(run.length_mm||0)-D:(run.length_mm||0);
+      if(run.length_mm&&spec>basis-2*t2)out.push(["e",ri>0
+        ?`Run ${ri+1}: specified section widths (${spec} mm) exceed the run's inside width — ${Math.max(0,Math.round(basis-2*t2))} mm clear of the corner bay.`
+        :`Run ${ri+1}: specified section widths exceed the run's inside width.`]);
+    }
+  });
   if(!out.length)out.push(["ok","All key numbers present. Ready to send."]);
   return out;
 }
@@ -537,9 +659,45 @@ function dimLine(x1,y1,x2,y2,label,vertical){
   if(vertical) return `<line x1="${x1-4}" y1="${y1}" x2="${x1+4}" y2="${y1}" stroke="${c}"/><line x1="${x2-4}" y1="${y2}" x2="${x2+4}" y2="${y2}" stroke="${c}"/><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}"/><text x="${x1-6}" y="${(y1+y2)/2}" fill="${tc}" font-size="12" text-anchor="middle" transform="rotate(-90 ${x1-6} ${(y1+y2)/2})">${label}</text>`;
   return `<line x1="${x1}" y1="${y1-4}" x2="${x1}" y2="${y1+4}" stroke="${c}"/><line x1="${x2}" y1="${y2-4}" x2="${x2}" y2="${y2+4}" stroke="${c}"/><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}"/><text x="${(x1+x2)/2}" y="${y1-6}" fill="${tc}" font-size="12" text-anchor="middle">${label}</text>`;
 }
-function drawSVG(g){const html=frontSVG(g,false);$("svgBox").innerHTML=html||'<p class="small">Type the overall width and height and the dimensioned drawing appears here.</p>';}
-function frontSVG(g,internals){
-  const W=g.piece.overall_width,H=g.piece.overall_height,D=g.piece.overall_depth;
+function doorTypeSVG(b,g,st,doorM,sfx,cx,secTop,bw,secH,internals,s){
+  const dt=b.door_type||doorTypeFromDoors(b.doors||0);
+  if(dt==="none"||bw<=0||secH<=0)return "";
+  const gapPx=Math.max(1,(g.materials.front_gap_mm||2)*s/2);
+  const prof=effProfile(b,st);
+  const doorRect=(x,w)=>`<rect x="${x}" y="${secTop+gapPx}" width="${Math.max(0,w)}" height="${Math.max(0,secH-2*gapPx)}" fill="${fillFor(doorM,sfx+"d")}" stroke="#101319" stroke-width="1"/>`+doorProfile(prof,x,secTop+gapPx,Math.max(0,w),Math.max(0,secH-2*gapPx));
+  let o="";
+  if(dt==="hinged_single"){
+    o+=doorRect(cx+gapPx,bw-2*gapPx);
+    o+=`<line x1="${cx+3}" y1="${secTop+secH*.3}" x2="${cx+3}" y2="${secTop+secH*.42}" stroke="#eef0f4" stroke-width="3"/><line x1="${cx+3}" y1="${secTop+secH*.58}" x2="${cx+3}" y2="${secTop+secH*.7}" stroke="#eef0f4" stroke-width="3"/>`;
+    if(internals)o+=doorHandle(st,cx+bw/2,secTop+Math.min(30,secH*0.16));
+    if(internals)o+=`<path d="M ${cx+4} ${secTop+secH-4} A ${Math.max(10,bw-8)} ${Math.max(10,bw-8)} 0 0 1 ${cx+bw-4} ${secTop+secH-Math.max(10,bw-8)}" fill="none" stroke="#ffb454" stroke-width="1.4" stroke-dasharray="4 3"/>`;
+  } else if(dt==="hinged_pair"){
+    const dw=bw/2;
+    for(let dIdx=0;dIdx<2;dIdx++){const dx=cx+dw*dIdx;o+=doorRect(dx+gapPx,dw-2*gapPx);if(internals)o+=doorHandle(st,dx+dw/2,secTop+Math.min(30,secH*0.16));}
+    o+=`<line x1="${cx+3}" y1="${secTop+secH*.3}" x2="${cx+3}" y2="${secTop+secH*.42}" stroke="#eef0f4" stroke-width="3"/><line x1="${cx+bw-3}" y1="${secTop+secH*.3}" x2="${cx+bw-3}" y2="${secTop+secH*.42}" stroke="#eef0f4" stroke-width="3"/>`;
+    if(internals)o+=`<path d="M ${cx+4} ${secTop+secH-4} A ${Math.max(10,bw/2-6)} ${Math.max(10,bw/2-6)} 0 0 1 ${cx+bw/2} ${secTop+secH-Math.max(10,bw/2-6)}" fill="none" stroke="#ffb454" stroke-width="1.4" stroke-dasharray="4 3"/>`;
+  } else if(dt==="sliding"){
+    const pw=bw/2;
+    o+=doorRect(cx+gapPx,pw-2*gapPx);
+    o+=`<g opacity=".92">${doorRect(cx+pw+4,bw-pw-4-gapPx)}</g>`;
+    o+=`<rect x="${cx+pw-3}" y="${secTop+gapPx}" width="10" height="${Math.max(0,secH-2*gapPx)}" fill="rgba(0,0,0,.35)"/>`;
+    const ay=secTop+secH/2;
+    o+=`<path d="M ${cx+10} ${ay} h ${Math.max(8,bw-20)}" stroke="#ffb454" stroke-width="2" fill="none"/><path d="M ${cx+10} ${ay} l 6 -4 v 8 z" fill="#ffb454"/><path d="M ${cx+bw-10} ${ay} l -6 -4 v 8 z" fill="#ffb454"/>`;
+    o+=`<text x="${cx+bw/2}" y="${secTop+secH-6}" fill="#ffb454" font-size="9" text-anchor="middle">sliding</text>`;
+  } else if(dt==="bifold"){
+    const lw=bw/2;
+    for(let dIdx=0;dIdx<2;dIdx++){const dx=cx+lw*dIdx;o+=doorRect(dx+gapPx,lw-2*gapPx);}
+    o+=`<line x1="${cx+bw/2}" y1="${secTop+4}" x2="${cx+bw/2}" y2="${secTop+secH-4}" stroke="#ffb454" stroke-width="2"/>`;
+    o+=`<path d="M ${cx+bw/2-9} ${secTop+secH/2-12} l 9 12 l -9 12 M ${cx+bw/2+9} ${secTop+secH/2-12} l -9 12 l 9 12" stroke="#ffb454" stroke-width="1.6" fill="none"/>`;
+    if(internals)o+=doorHandle(st,cx+bw/2,secTop+Math.min(30,secH*0.16));
+    o+=`<text x="${cx+bw/2}" y="${secTop+secH-6}" fill="#ffb454" font-size="9" text-anchor="middle">bifold</text>`;
+  }
+  return o;
+}
+function drawSVG(g){const html=frontSVG(g,false,activeRun);$("svgBox").innerHTML=html||'<p class="small">Type the overall width and height and the dimensioned drawing appears here.</p>';}
+function frontSVG(g,internals,runIdx){
+  const run=getRun(g,runIdx===undefined?activeRun:runIdx);
+  const W=run.length_mm,H=g.piece.overall_height,D=g.piece.overall_depth;
   if(!W||!H||W<=0||H<=0)return "";
   const t=g.materials.carcass_thickness||16, plinth=g.piece.plinth_height||0;
   const st=STYLES[g.piece.style]||STYLES.modern;
@@ -550,22 +708,18 @@ function frontSVG(g,internals){
   const maxW=620,maxH=380, s=Math.min(maxW/W,maxH/H);
   const wpx=W*s,hpx=H*s, x0=70,y0=30+topPx;
   const secTop=y0, secBot=y0+hpx-baseH*s, secH=Math.max(0,secBot-secTop);
-  const ws=bayWidths(g);
-  let sec="",cx=x0+t*s;
-  g.layout.sections.forEach((b,i)=>{
+  const ws=runWidthsFor(g,run);
+  const secs=run.sections||[];
+  const ri=(runIdx===undefined?activeRun:runIdx);
+  const cornerPx=ri>0?(D||0)*s:0;
+  let sec="",cx=x0+t*s+cornerPx;
+  if(ri>0&&D)sec+=`<rect x="${x0+t*s}" y="${secTop}" width="${cornerPx}" height="${secH}" fill="rgba(255,180,84,.13)" stroke="#ffb454" stroke-dasharray="4 3"/><text x="${x0+t*s+cornerPx/2}" y="${secTop+secH/2}" fill="#ffb454" font-size="10" text-anchor="middle" transform="rotate(-90 ${x0+t*s+cornerPx/2} ${secTop+secH/2})">corner bay — Run 1</text>`;
+  secs.forEach((b,i)=>{
     const bw=(ws[i]||0)*s;
     if(bw>0){
       sec+=`<rect x="${cx}" y="${secTop}" width="${bw}" height="${secH}" fill="rgba(0,0,0,.16)" stroke="#57c785" stroke-width="1"/>`;
       if(internals)sec+=drawInternals(b,cx,secTop,bw,secH);
-      if(b.doors){
-        const gapPx=Math.max(1,(g.materials.front_gap_mm||2)*s/2), dw=bw/b.doors;
-        for(let dIdx=0;dIdx<b.doors;dIdx++){
-          const dx=cx+dw*dIdx, doorW=Math.max(0,dw-2*gapPx), doorH=Math.max(0,secH-2*gapPx);
-          sec+=`<rect x="${dx+gapPx}" y="${secTop+gapPx}" width="${doorW}" height="${doorH}" fill="${fillFor(doorM,sfx+"d")}" stroke="#101319" stroke-width="1"/>`;
-          sec+=doorProfile(effProfile(b,st),dx+gapPx,secTop+gapPx,doorW,doorH);
-          if(internals)sec+=doorHandle(st,dx+dw/2,secTop+Math.min(30,secH*0.16));
-        }
-      }
+      sec+=doorTypeSVG(b,g,st,doorM,sfx,cx,secTop,bw,secH,internals,s);
       sec+=`<text x="${cx+bw/2}" y="${secTop+13}" fill="#c6cdd9" font-size="10" text-anchor="middle" style="paint-order:stroke" stroke="#22252d" stroke-width="3">${b.type.replace(/_/g," ")}</text>`;
       sec+=dimLine(cx,y0+hpx+34,cx+bw,y0+hpx+34,`${ws[i]} mm`);
     }
@@ -608,10 +762,20 @@ function orderMD(g){
   g.room.obstacles.forEach(o=>L.push(`- Obstacle: ${o.what} at ${o.at_mm} mm from left, ${o.width_mm} mm wide${o.height_mm?`, ${o.height_mm} mm high`:""}${o.note?` — ${o.note}`:""}`));
   L.push("", "## Piece", `- Overall: **${g.piece.overall_width} W × ${g.piece.overall_height} H × ${g.piece.overall_depth} D mm**${g.piece.depth_includes_doors?" (depth includes doors)":""}`, `- Construction: ${g.piece.construction}; plinth ${g.piece.plinth_height} mm`, `- Style: ${(typeof STYLES!=="undefined"&&STYLES[g.piece.style])?STYLES[g.piece.style].label:(g.piece.style||"modern")}`);
   L.push("", "## Materials", `- Carcass: ${g.materials.carcass_material}, ${g.materials.carcass_thickness} mm; back ${g.materials.back_thickness} mm; doors ${g.materials.door_thickness} mm — fronts: ${g.materials.door_material||g.materials.carcass_material}; front gap ${g.materials.front_gap_mm} mm`, `- Sheets ${g.stock.sheet_width} × ${g.stock.sheet_length} mm, kerf ${g.stock.kerf} mm; band all exposed edges: ${g.materials.band_all_exposed_edges?"YES":"no"}`);
-  const ws=bayWidths(g);
-  L.push("", "## Layout (left → right)");
-  g.layout.sections.forEach((b,i)=>L.push(`- Section ${i+1}: ${b.type} — clear width ${ws[i]} mm${b.shelves?`, ${b.shelves} shelves`:""}${b.drawers?`, ${b.drawers} drawers`:""}${b.doors?`, ${b.doors} ${b.door_style} door(s)`:", open"}`));
-  L.push("", "## Hardware", `- Hinges: ${g.hardware.hinge_type}; handles per front: ${g.hardware.handles_per_front}; rod Ø${g.hardware.rod_diameter} mm; slides ${g.hardware.drawer_slide_length} mm`);
+  const shape=(g.layout&&g.layout.shape)||"straight";
+  L.push("", "## Layout — shape: "+shape.toUpperCase());
+  if(shape!=="straight")L.push(`- Corner: the corner bay belongs to Run 1 (main wall); each side run butts into it — a side run's clear length is its length minus the piece depth (${g.piece.overall_depth} mm). Corner counted once, in Run 1.`);
+  const runs=(g.layout&&g.layout.runs&&g.layout.runs.length)?g.layout.runs:[{wall:"main wall",length_mm:g.piece.overall_width,divide_mode:"custom",sections:g.layout.sections||[]}];
+  runs.forEach((run,ri)=>{
+    const rws=runWidthsFor(g,run);
+    L.push(`### Run ${ri+1} — ${run.wall} (length ${run.length_mm} mm${ri>0?`, clear of corner ${Math.max(0,(run.length_mm||0)-(g.piece.overall_depth||0))} mm`:""}, divide: ${run.divide_mode==="equal"?"equal widths":"custom widths"})`);
+    (run.sections||[]).forEach((b,si)=>{
+      const dt=b.door_type||doorTypeFromDoors(b.doors||0);
+      const isBank=(b.type==="drawers"||b.type==="shelves_drawers");
+      L.push(`- Section ${ri+1}.${si+1}: ${b.type} — clear width ${rws[si]} mm${b.shelves?`, ${b.shelves} shelves`:""}${isBank?`, ${drawerCountOf(b)} drawers`:(b.drawers?`, ${b.drawers} drawers`:"")}, door: ${DOOR_LABEL[dt]||dt}${dt!=="none"?` (${b.door_style})`:""}`);
+    });
+  });
+  L.push("", "## Hardware — mechanisms (herrería)", `- Hinges: ${g.hardware.hinge_label||g.hardware.hinge_type}; handles per front: ${g.hardware.handles_per_front}; rod Ø${g.hardware.rod_diameter} mm`, `- Sliding system (where sliding doors are used): ${g.hardware.sliding_label||g.hardware.sliding_system}`, `- Drawer slides: ${g.hardware.drawer_slide_label||g.hardware.drawer_slide_type}, ${g.hardware.drawer_slide_length} mm`);
   L.push("", "## Deliverables", ...g.deliverables.map(d=>`- ${d}`));
   if(g.notes)L.push("", "## Notes", g.notes);
   if(g.photo_links.length)L.push("", "## Photos", ...g.photo_links.map(p=>`- ${p}`));
@@ -706,8 +870,8 @@ function drawInternals(b,x,y,w,h){
     case "double_hang": return hang(.16,.30)+hang(.52,.30);
     case "single_hang": return hang(.12,.62);
     case "shelves": return shelves(b.shelves||4,.02,.94);
-    case "drawers": return drawers(b.drawers||3,.94);
-    case "shelves_drawers": return drawers(b.drawers||3,.34)+shelves(b.shelves||4,.02,.58);
+    case "drawers": return drawers(drawerCountOf(b),.94);
+    case "shelves_drawers": return drawers(drawerCountOf(b),.34)+shelves(b.shelves||4,.02,.58);
     case "cabinet_doors": return shelves(1,.1,.8);
     case "pantry": return shelves(3,.02,.9);
     case "stove_space": {let o=`<line x1="${x+4}" y1="${y+12}" x2="${x+w-4}" y2="${y+12}" stroke="${board}" stroke-width="2"/>`;[[.3,6],[.68,4.6],[.48,3.4]].forEach(([fx,r])=>{o+=`<circle cx="${x+w*fx}" cy="${y+12}" r="${r}" fill="none" stroke="${line}"/>`;});return o;}
@@ -725,7 +889,23 @@ function drawRoomSVG(g){
   const wpx=rw*s, hpx=rd*s, wall=g.room.wall;
   const carc=matStyle(g.materials.carcass_material);
   let fp="";
-  if(W&&D){
+  const shape=(g.layout&&g.layout.shape)||"straight";
+  if(W&&D&&shape!=="straight"&&shape!=="freestanding"){
+    const runs=g.layout.runs||[];
+    const Dp=D*s;
+    // main run along the bottom (main) wall, starting at the left corner
+    fp+=`<rect x="${x0}" y="${y0+hpx-Dp}" width="${W*s}" height="${Dp}" fill="${fillFor(carc,"R")}" stroke="#eef0f4" stroke-width="1.5"/><text x="${x0+W*s/2}" y="${y0+hpx-Dp/2+4}" fill="#eef0f4" font-size="11" text-anchor="middle" style="paint-order:stroke" stroke="#22252d" stroke-width="3">Run 1 · ${W} × ${D}</text>`;
+    const sideRun=(run,side)=>{
+      if(!run||!run.length_mm)return "";
+      const L=run.length_mm*s;
+      const rx=side==="left"?x0:x0+W*s-Dp;
+      return `<rect x="${rx}" y="${y0+hpx-L}" width="${Dp}" height="${L}" fill="${fillFor(carc,"R")}" stroke="#eef0f4" stroke-width="1.5"/><text x="${rx+Dp/2}" y="${y0+hpx-L/2+4}" fill="#eef0f4" font-size="11" text-anchor="middle" transform="rotate(-90 ${rx+Dp/2} ${y0+hpx-L/2+4})" style="paint-order:stroke" stroke="#22252d" stroke-width="3">${side==="left"?"Run 2":"Run 3"} · ${run.length_mm} × ${D}</text>`;
+    };
+    if(shape==="l")fp+=sideRun(runs[1],"left");
+    if(shape==="u"){fp+=sideRun(runs[1],"left");fp+=sideRun(runs[2],"right");}
+    fp+=`<text x="${x0+18}" y="${y0+hpx-Dp-8}" fill="#ffb454" font-size="10">corner → Run 1 owns the corner bay</text>`;
+  }
+  else if(W&&D){
     let fx,fy,fw,fh;
     if(wall==="room length wall (left)"){fw=D*s;fh=W*s;fx=x0;fy=g.room.centered_on_wall?y0+(hpx-fh)/2:y0;}
     else if(wall==="room length wall (right)"){fw=D*s;fh=W*s;fx=x0+wpx-fw;fy=g.room.centered_on_wall?y0+(hpx-fh)/2:y0;}
@@ -808,8 +988,8 @@ function drawHardwareSVG(g){
   const slide=sl?`<rect x="452" y="84" width="${slideW}" height="52" fill="${fillFor(carc,"Hc")}" stroke="#101319"/><rect x="460" y="100" width="${Math.max(0,slideW-16)}" height="5" fill="#9aa5b5"/><rect x="460" y="114" width="${Math.max(0,slideW-16)}" height="5" fill="#79849a"/><text x="${452+slideW/2}" y="160" fill="#eef0f4" font-size="12" text-anchor="middle">Drawer slide ${sl} mm</text><text x="${452+slideW/2}" y="176" fill="#9aa5b5" font-size="11" text-anchor="middle">(drawer side, length to scale)</text>`:`<text x="545" y="118" fill="#9aa5b5" font-size="12" text-anchor="middle">Slide — not set</text>`;
   box.innerHTML=`<svg viewBox="0 0 700 312" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hardware details: door front with handles, closet rod diameter, drawer slide length"><defs>${matDefs(doorM,"Hd")}${matDefs(carc,"Hc")}</defs>${door}${rod}${slide}</svg>`;
 }
-function drawPieceSVG(g){const box=$("pvPiece");if(!box)return;const h=frontSVG(g,false);box.innerHTML=h||'<p class="small">Type the overall width and height and this step shows the piece front + depth, in the materials and style you picked.</p>';}
-function drawLayoutSVG(g){const box=$("pvLayout");if(!box)return;const h=frontSVG(g,true);box.innerHTML=h||'<p class="small">Type the overall width and height and this step draws every section with its rods, shelves and drawers inside.</p>';}
+function drawPieceSVG(g){const box=$("pvPiece");if(!box)return;const h=frontSVG(g,false,0);box.innerHTML=h||'<p class="small">Type the overall width and height and this step shows the piece front + depth, in the materials and style you picked.</p>';}
+function drawLayoutSVG(g){const box=$("pvLayout");if(!box)return;const h=frontSVG(g,true,activeRun);box.innerHTML=h||'<p class="small">Type the overall width and height and this step draws every section with its rods, shelves and drawers inside.</p>';}
 let matPickPrev=null;
 function syncMatUI(g){
   const cs=matStyle(g.materials.carcass_material||"");
@@ -898,11 +1078,137 @@ function buildStyleUI(){
   sel.addEventListener("change",()=>{applyStylePresets();refresh();});
 }
 document.addEventListener("change",e=>{const t=e.target;if(t&&t.classList&&t.classList.contains("b-doorstyle"))t.dataset.touched="1";});
+/* ---------- v6 runs UI ---------- */
+function runPanelHTML(idx,wallName){
+  return `<div class="runhead"><b>Run ${idx+1} — ${wallName}</b><span class="small">butts into Run 1's corner bay</span></div>
+    <div class="seg">
+      <div><label>Run length (along its wall, incl. corner)</label><input type="number" step="any" class="r-length" placeholder="2400"></div>
+      <div><label>How to divide this run</label><select class="r-divide"><option value="equal">Equal widths — split the run evenly</option><option value="custom">Custom — per-section widths below</option></select></div>
+      <div><label>Number of sections</label><input type="number" class="r-count" min="1" max="12" step="1"></div>
+    </div>
+    <div class="seg"><div><button type="button" class="secondary r-apply">Set count</button></div></div>
+    <div class="run-bays"></div>
+    <div class="btnrow"><button type="button" class="secondary r-add">+ Add section to Run ${idx+1}</button></div>`;
+}
+function wireRunPanel(panel,idx){
+  if(!panel||panel.dataset.wired)return; panel.dataset.wired="1";
+  const baysBox=idx===0?$("bays"):panel.querySelector(".run-bays");
+  const addBtn=panel.querySelector(".r-add");
+  if(addBtn)addBtn.addEventListener("click",()=>{bayRow({},baysBox);refresh();});
+  const applyBtn=panel.querySelector(".r-apply");
+  if(applyBtn)applyBtn.addEventListener("click",()=>{
+    const want=Math.max(1,Math.min(12,parseInt(panel.querySelector(".r-count").value)||panelBays(panel).length||1));
+    let cur=panelBays(panel).length;
+    while(cur<want){bayRow({},baysBox);cur++;}
+    while(cur>want){const rows=panelBays(panel);rows[rows.length-1].remove();cur--;}
+    refresh();
+  });
+  const divSel=panel.querySelector(".r-divide");
+  if(divSel)divSel.addEventListener("change",()=>refresh());
+  const lenEl=panel.querySelector(".r-length");
+  if(lenEl)lenEl.addEventListener("input",()=>refresh());
+  const cntEl=panel.querySelector(".r-count");
+  if(cntEl)cntEl.addEventListener("input",()=>{/* count applies on Set count */});
+}
+function syncRunCounts(g){
+  runPanels().forEach((panel,i)=>{
+    const c=panel.querySelector(".r-count");
+    if(c&&document.activeElement!==c)c.value=panelBays(panel).length;
+    const run=(g.layout.runs||[])[i];
+    const divSel=panel.querySelector(".r-divide");
+    if(divSel&&run&&document.activeElement!==divSel&&divSel.value!==run.divide_mode){/* keep DOM as source */}
+  });
+}
+/* Session stash of side runs a shape switch removes (EVE-008): switching
+   L → straight → L must restore the side run Kevin entered, never a factory
+   default. loadParams refreshes the stash from the loaded request, so the
+   stash always belongs to the request on screen. */
+let __runStash={};
+function stashExtraRunsFrom(g0){
+  try{((g0&&g0.layout&&g0.layout.runs)||[]).forEach((r,i)=>{if(i>=1)__runStash[i]=r;});}catch(e){}
+}
+function snapshotPanelRuns(){
+  const out=[];
+  runPanels().forEach((pn,i)=>{
+    if(i===0)return;
+    const lenEl=pn.querySelector(".r-length"), divSel=pn.querySelector(".r-divide");
+    const v=lenEl?parseFloat(lenEl.value):NaN;
+    out[i]={wall:"",length_mm:isNaN(v)?null:Math.round(v*uf()*10)/10,divide_mode:divSel?divSel.value:"custom",is_corner_owner:false,sections:sectionsOfPanel(pn)};
+  });
+  return out;
+}
+function fillRunPanel(panel,sr){
+  if(!panel||!sr)return;
+  const lenEl=panel.querySelector(".r-length"); if(lenEl&&sr.length_mm)lenEl.value=sr.length_mm;
+  const divSel=panel.querySelector(".r-divide"); if(divSel&&sr.divide_mode){divSel.value=sr.divide_mode; preserveSelectValue(divSel,sr.divide_mode);}
+  const box=panel.querySelector(".run-bays"); if(!box)return;
+  box.innerHTML="";
+  (sr.sections||[]).forEach(sec=>bayRow({type:sec.type,width:(sec.width_mm===null||sec.width_mm===undefined)?"":sec.width_mm,shelves:sec.shelves?sec.shelves:"",drawers:sec.drawers?sec.drawers:"",doors:sec.doors||0,doorstyle:sec.door_style,door_type:sec.door_type,drawer_count:sec.drawer_count},box));
+}
+function ensureRunPanels(shape,storedRuns){
+  const host=$("extraRuns"); if(!host)return;
+  const want=(SHAPE_RUNS[shape]||1)-1;
+  const cur=host.querySelectorAll("[data-runpanel]").length;
+  if(cur===want){
+    runPanels().forEach((pn,i)=>wireRunPanel(pn,i));
+    // Same panel count ≠ same data: a load must reapply the stored side-run
+    // sections even when the shape did not change (EVE-007).
+    if(storedRuns)runPanels().forEach((pn,i)=>{if(i>=1&&storedRuns[i])fillRunPanel(pn,storedRuns[i]);});
+    return;
+  }
+  // snapshot current extra-run data before rebuilding — and stash it, so a
+  // later switch back restores it instead of a factory default (EVE-008).
+  // The snapshot reads the live DOM panels directly: gather() alone under-reads
+  // side runs at switch time, because the shape select has already flipped.
+  let snap=storedRuns||null;
+  if(!snap){
+    const domSnap=snapshotPanelRuns();
+    stashExtraRunsFrom({layout:{runs:domSnap}});
+    try{const g0=gather();snap=g0.layout.runs||[];}catch(e){snap=[];}
+    domSnap.forEach((r,i)=>{if(r&&(r.length_mm||(r.sections&&r.sections.length)))snap[i]=r;});
+  }
+  host.innerHTML="";
+  for(let i=1;i<=want;i++){
+    const panel=document.createElement("div");
+    panel.className="run-panel"; panel.dataset.runpanel=String(i);
+    panel.innerHTML=runPanelHTML(i,(RUN_WALLS[shape]||[])[i]||"side wall");
+    host.appendChild(panel);
+    wireRunPanel(panel,i);
+    let sr=snap&&snap[i];
+    if(!(sr&&(sr.length_mm||(sr.sections&&sr.sections.length))))sr=__runStash[i]||sr; // an empty snapshot object must not shadow the stash (EVE-008)
+    const srHas=sr&&(sr.length_mm||(sr.sections&&sr.sections.length));
+    if(srHas){
+      fillRunPanel(panel,sr);
+    } else {
+      const lenEl2=panel.querySelector(".r-length"); const wNow=num("W"); if(lenEl2&&wNow)lenEl2.value=wNow; // sensible starting length = main run's; Kevin edits it
+      bayRow({type:"double_hang",doors:2},panel.querySelector(".run-bays"));
+    }
+  }
+  runPanels().forEach((pn,i)=>wireRunPanel(pn,i));
+}
+function syncRunSwitcher(g){
+  const host=$("runSwitcher"); if(!host)return;
+  const n=(g.layout.runs||[]).length||1;
+  if(activeRun>=n)activeRun=0;
+  if(host.children.length!==n){
+    host.innerHTML="";
+    for(let i=0;i<n;i++){
+      const b=document.createElement("button"); b.type="button"; b.className="secondary mini"; b.textContent="Run "+(i+1); b.dataset.run=String(i);
+      b.addEventListener("click",()=>{activeRun=i;refresh();});
+      host.appendChild(b);
+    }
+  }
+  [...host.children].forEach((b,i)=>b.setAttribute("aria-pressed",i===activeRun?"true":"false"));
+  const note=$("cornerNote");
+  if(note){const sh=g.layout.shape||"straight";note.textContent=sh==="straight"?"Straight run: sections go left → right along the main wall.":("Corner rule: the corner bay belongs to Run 1 (main wall) and is counted once — each side run butts into it, so a side run's clear length is its length minus the piece depth.");}
+}
 function refresh(){
   const g=gather();
   drawSVG(g);
   [[drawRoomSVG,"pvRoom"],[drawPieceSVG,"pvPiece"],[drawMaterialsSVG,"pvMaterials"],[drawLayoutSVG,"pvLayout"],[drawHardwareSVG,"pvHardware"]].forEach(([fn,id])=>{try{fn(g);}catch(e){const b=$(id);if(b)b.innerHTML='<p class="small">This preview could not draw — the rest of the form is unaffected.</p>';}});
   try{syncMatUI(g);syncStyleUI(g);}catch(e){}
+  try{syncRunSwitcher(g);syncRunCounts(g);}catch(e){}
+  try{draw3D(g);}catch(e){const b3=$("pv3d");if(b3&&!window.__threeFailed)b3.innerHTML='<p class="small">3D preview could not draw — the 2D previews are unaffected.</p>';}
   $("warnings").innerHTML=warnings(g).map(([k,m])=>`<div class="${k}">${k==="e"?"⛔":k==="w"?"⚠️":"✅"} ${m}</div>`).join("");
   $("jsonOut").textContent=JSON.stringify(g,null,2);
   $("mdOut").textContent=orderMD(g);
@@ -921,6 +1227,7 @@ $("loadExample").onclick=()=>{
   const set=(id,v)=>{$(id).value=v;};
   set("ptype","closet");set("jobname","example-closet-001");set("client","Example — process demo");set("units","mm");
   set("roomW",3800);set("roomD",4200);set("roomH",2550);set("W",2400);set("H",2400);set("D",600);set("plinth",100);
+  {const shSel=$("layoutShape"); if(shSel)shSel.value="straight"; __runStash={}; ensureRunPanels("straight",null); activeRun=0;}
   $("bays").innerHTML="";bayCount=0;
   bayRow({type:"double_hang",doors:2,doorstyle:"slab"});
   bayRow({type:"shelves_drawers",shelves:4,drawers:3,doors:0});
@@ -946,17 +1253,184 @@ function loadParams(p){
     if(!dv||dv===m.carcass_material)dm.value="";else preserveSelectValue(dm,dv);}}
   const st=p.stock||{};
   set("sheetW",st.sheet_width);set("sheetL",st.sheet_length);set("kerf",st.kerf);
+  const lay=p.layout||{};
+  const layShape=lay.shape||"straight";
+  {const shSel=$("layoutShape"); if(shSel){shSel.value=layShape; preserveSelectValue(shSel,layShape);}}
+  const runsData=(lay.runs&&lay.runs.length)?lay.runs:[{wall:"main wall",length_mm:(p.piece||{}).overall_width,divide_mode:"custom",sections:lay.sections||[]}];
+  // If the legacy mirror (layout.sections) disagrees with runs[0], the mirror wins for Run 1:
+  // gather always writes them consistently, so a disagreement means a hand-edited or older object.
+  if(lay.sections&&runsData[0]&&JSON.stringify(runsData[0].sections||[])!==JSON.stringify(lay.sections))runsData[0]=Object.assign({},runsData[0],{sections:lay.sections});
+  __runStash={}; stashExtraRunsFrom({layout:{runs:runsData}}); // the shape-switch stash now belongs to THIS request (EVE-008)
+  ensureRunPanels(layShape,runsData);
   $("bays").innerHTML="";bayCount=0;
-  ((p.layout&&p.layout.sections)||[]).forEach(s=>bayRow({type:s.type,width:(s.width_mm===null||s.width_mm===undefined)?"":s.width_mm,shelves:s.shelves?s.shelves:"",drawers:s.drawers?s.drawers:"",doors:s.doors||0,doorstyle:s.door_style}));
+  ((runsData[0]&&runsData[0].sections)||lay.sections||[]).forEach(s2=>bayRow({type:s2.type,width:(s2.width_mm===null||s2.width_mm===undefined)?"":s2.width_mm,shelves:s2.shelves?s2.shelves:"",drawers:s2.drawers?s2.drawers:"",doors:s2.doors||0,doorstyle:s2.door_style,door_type:s2.door_type,drawer_count:s2.drawer_count}));
+  runPanels().forEach((panel,i)=>{
+    const rd=runsData[i]; if(!rd)return;
+    const divSel=panel.querySelector(".r-divide"); if(divSel&&rd.divide_mode){divSel.value=rd.divide_mode; preserveSelectValue(divSel,rd.divide_mode);}
+    const lenEl=panel.querySelector(".r-length"); if(lenEl&&rd.length_mm!==null&&rd.length_mm!==undefined)lenEl.value=rd.length_mm;
+  });
+  activeRun=0;
   document.querySelectorAll(".b-doorstyle").forEach(sel=>{sel.dataset.touched="1";}); // loaded values are Kevin's — style presets must not stomp them
   const hw=p.hardware||{};
-  set("hinge",hw.hinge_type||"");set("handlesPer",hw.handles_per_front);set("rodD",hw.rod_diameter);set("slideL",hw.drawer_slide_length);
+  set("hinge",hw.hinge_type||"european_soft_close");preserveSelectValue($("hinge"),hw.hinge_type);
+  set("slidingSystem",hw.sliding_system||"top_hung_bypass");preserveSelectValue($("slidingSystem"),hw.sliding_system);
+  set("slideType",hw.drawer_slide_type||"undermount_soft_close");preserveSelectValue($("slideType"),hw.drawer_slide_type);
+  set("handlesPer",hw.handles_per_front);set("rodD",hw.rod_diameter);set("slideL",hw.drawer_slide_length);
   const delivs=new Set(p.deliverables||[]);
   document.querySelectorAll(".deliv").forEach(c=>{c.checked=delivs.has(c.value);});
   set("notes",p.notes||"");
   set("photos",(p.photo_links||[]).join("\n"));
   refresh();
   window.scrollTo({top:0,behavior:"smooth"});
+}
+/* ================= v6 interactive 3D (Three.js, CDN-degradable) =================
+   If the Three.js CDN is unreachable, window.THREE is undefined: draw3D leaves a
+   short note and returns — the 2D SVG previews are untouched and nothing throws. */
+let __t3=null, __t3Hash="";
+function t3Mat(color,rough){return new THREE.MeshStandardMaterial({color:color,roughness:rough===undefined?.85:rough,metalness:.05});}
+function t3Box(w,h,d,mat,x,y,z,parent){const m=new THREE.Mesh(new THREE.BoxGeometry(Math.max(0.001,w),Math.max(0.001,h),Math.max(0.001,d)),mat);m.position.set(x,y,z);(parent||__t3.scene).add(m);return m;}
+function buildRun3D(g,run,ri,open){
+  const T=THREE, grp=new T.Group();
+  const H=g.piece.overall_height||0, D=g.piece.overall_depth||0, t=g.materials.carcass_thickness||16;
+  const plinth=Math.min(g.piece.plinth_height||0,H*.3);
+  const Ltot=run.length_mm||0; if(!H||!D||!Ltot)return grp;
+  const startU=ri>0?D:0;               // side runs start clear of Run 1's corner bay
+  const L=Ltot-startU; if(L<=0)return grp;
+  const carc=t3Mat(new T.Color(matStyle(g.materials.carcass_material).base).getHex());
+  const doorM=t3Mat(new T.Color(matStyle(g.materials.door_material||g.materials.carcass_material).base).getHex());
+  const inner=t3Mat(0x2a3040,.95);
+  const S=0.001; // mm -> scene units (metres-ish)
+  // carcass shell over [startU, startU+L]
+  const cu=L*S, cz=D*S, cy=H*S;
+  t3Box(t*S,cy,cz,carc,startU*S+t*S/2,cy/2,cz/2,grp);                       // left side
+  t3Box(t*S,cy,cz,carc,(startU+L)*S-t*S/2,cy/2,cz/2,grp);                 // right side
+  t3Box(cu,t*S,cz,carc,(startU+L/2)*S,cy-t*S/2,cz/2,grp);                 // top
+  t3Box(cu,t*S,cz,carc,(startU+L/2)*S,plinth*S+t*S/2,cz/2,grp);           // bottom above plinth
+  const bt=g.materials.back_thickness||6;
+  t3Box(cu,cy,bt*S,inner,(startU+L/2)*S,cy/2,(bt/2)*S,grp);                // back panel — the real back thickness, at the back (z 0..bt)
+  if(plinth>0)t3Box(cu,plinth*S,cz-40*S,t3Mat(0x22252d),(startU+L/2)*S,plinth*S/2,cz/2-20*S,grp); // plinth
+  const topY=H-plinth, botY=plinth;
+  const ws=runWidthsFor(g,run);
+  let u=startU+t;
+  (run.sections||[]).forEach((b,si)=>{
+    const w=ws[si]||0; if(w<=0){return;}
+    const ux=u, uw=w; u+=w+t;
+    const dt=b.door_type||doorTypeFromDoors(b.doors||0);
+    const secH=(topY-botY);
+    // internals
+    const shelf=(fy)=>t3Box(uw*S,14*S,(D-30)*S,carc,(ux+uw/2)*S,(botY+secH*fy)*S,(D/2)*S,grp);
+    const rod=(fy)=>{const r=new T.Mesh(new T.CylinderGeometry(12*S,12*S,uw*S,10),t3Mat(0xd7dde8,.35));r.rotation.z=Math.PI/2;r.position.set((ux+uw/2)*S,(botY+secH*fy)*S,(D/2)*S);grp.add(r);};
+    if(b.type==="double_hang"){rod(.82);rod(.45);}
+    else if(b.type==="single_hang"){rod(.86);}
+    else if(b.type==="shelves"){const n=b.shelves||4;for(let i=1;i<=n;i++)shelf(i/(n+1));}
+    else if(b.type==="pantry"){for(let i=1;i<=3;i++)shelf(i/4);}
+    else if(b.type==="cabinet_doors"){shelf(.5);}
+    const isBank=(b.type==="drawers"||b.type==="shelves_drawers");
+    if(isBank){
+      const n=drawerCountOf(b), zoneF=b.type==="drawers"?.94:.34;
+      const zh=secH*zoneF, dh=zh/n;
+      for(let i=0;i<n;i++){
+        const fy=botY+dh*i;
+        const front=t3Box((uw-6)*S,(dh-5)*S,16*S,doorM,(ux+uw/2)*S,(fy+dh/2)*S,D*S+8*S,grp);
+        if(open){const box=t3Box((uw-24)*S,(dh-24)*S,(D*.55)*S,inner,(ux+uw/2)*S,(fy+dh/2)*S,((D*1.5)-(D*.55)/2)*S,grp);front.position.z=(D+ (D*.5))*S;}
+        const hnd=t3Box(Math.min(160,uw*.4)*S,10*S,10*S,t3Mat(0xcfd6e4,.4),(ux+uw/2)*S,(fy+dh/2)*S,D*S+22*S,grp);
+      }
+      if(b.type==="shelves_drawers"){const n2=b.shelves||4;for(let i=1;i<=n2;i++){const fy2=botY+zh+ (secH-zh)*(i/(n2+1));t3Box(uw*S,14*S,(D-30)*S,carc,(ux+uw/2)*S,fy2*S,(D/2)*S,grp);}}
+    }
+    // doors at the front (z = D plane), local frame: x=u, z=depth
+    const doorH=secH-6, doorY=botY+secH/2, gap=3;
+    const mkDoor=(wMm)=>{const dm=new T.Mesh(new T.BoxGeometry(Math.max(1,wMm-gap)*S,doorH*S,16*S),doorM);return dm;};
+    if(dt==="hinged_single"){
+      const pivot=new T.Group(); pivot.position.set(ux*S,doorY*S,D*S); grp.add(pivot);
+      const dm=mkDoor(uw); dm.position.set(uw*S/2,0,8*S); pivot.add(dm);
+      if(open)pivot.rotation.y=-1.85;
+    } else if(dt==="hinged_pair"){
+      [-1,1].forEach(side=>{
+        const pivot=new T.Group(); const edgeX=side<0?ux:ux+uw; pivot.position.set(edgeX*S,doorY*S,D*S); grp.add(pivot);
+        const dm=mkDoor(uw/2); dm.position.set(-side*(uw/2)*S/2,0,8*S); pivot.add(dm);
+        if(open)pivot.rotation.y=side*1.85;
+      });
+    } else if(dt==="sliding"){
+      const p1=mkDoor(uw/2+30); p1.position.set((ux+uw/4)*S,doorY*S,(D+2)*S); grp.add(p1);
+      const p2=mkDoor(uw/2+30); p2.position.set((ux+uw*.75)*S,doorY*S,(D+22)*S); grp.add(p2);
+      if(open)p1.position.x=(ux+uw*.28)*S;
+    } else if(dt==="bifold"){
+      [-1,1].forEach(side=>{
+        const pivot=new T.Group(); const edgeX=side<0?ux:ux+uw; pivot.position.set(edgeX*S,doorY*S,D*S); grp.add(pivot);
+        const leaf=mkDoor(uw/2); leaf.position.set(-side*(uw/2)*S/2,0,8*S); pivot.add(leaf);
+        if(open)pivot.rotation.y=side*2.2;
+      });
+    }
+    // divider to next section
+    if(si<(run.sections.length-1))t3Box(t*S,secH*S,cz,carc,(ux+uw+t/2)*S,(botY+secH/2)*S,cz/2,grp);
+  });
+  return grp;
+}
+function draw3D(g){
+  const box=$("pv3d"); if(!box)return;
+  if(!window.THREE){
+    // The library script sits AFTER this script in the page, so on first paint
+    // THREE is legitimately still on its way: show a loading note, and claim
+    // "could not load" only once the load is known to have failed (EVE-009).
+    if(window.__threeState==="failed"){window.__threeFailed=true;box.innerHTML='<p class="small">3D preview unavailable — the Three.js library could not load (offline / CDN blocked). All 2D previews keep working.</p>';}
+    else{window.__threeFailed=false;if(!box.querySelector("canvas"))box.innerHTML='<p class="small">3D preview loading…</p>';}
+    return;
+  }
+  window.__threeState="ready";
+  window.__threeFailed=false;
+  const open=!!window.__open3d;
+  const hash=JSON.stringify([g.layout,g.piece,g.materials,g.hardware,open]);
+  const needReset=window.__reset3d; window.__reset3d=false;
+  if(__t3&&hash===__t3Hash&&!needReset)return;
+  __t3Hash=hash;
+  const W3=(g.layout.runs&&g.layout.runs[0]?g.layout.runs[0].length_mm:g.piece.overall_width)||2400;
+  const H3=g.piece.overall_height||2400, D3=g.piece.overall_depth||600;
+  if(!__t3){
+    const renderer=new THREE.WebGLRenderer({antialias:true});
+    renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+    renderer.setSize(660,430,false); // CSS owns the display size (responsive); the drawing buffer stays 660×430
+    box.innerHTML=""; box.appendChild(renderer.domElement);
+    const scene=new THREE.Scene(); scene.background=new THREE.Color(0x0d1119);
+    scene.add(new THREE.HemisphereLight(0xeef0f4,0x22252d,.95));
+    const dl=new THREE.DirectionalLight(0xffffff,.85); dl.position.set(3,5,4); scene.add(dl);
+    const camera=new THREE.PerspectiveCamera(42,660/430,.1,100);
+    __t3={renderer,scene,camera,sph:{th:.7,ph:1.05,r:5.2},tgt:new THREE.Vector3(1.2,1.1,0),drag:null};
+    const cv=renderer.domElement, st=__t3;
+    const ptrs=new Map();
+    cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});st.drag={x:e.clientX,y:e.clientY,pan:e.shiftKey||e.button===2||ptrs.size>1,pinch:ptrs.size>1?Math.hypot(...(()=>{const a=[...ptrs.values()];return [a[0].x-a[1].x,a[0].y-a[1].y];})()):0};});
+    cv.addEventListener("pointermove",e=>{if(!st.drag||!ptrs.has(e.pointerId))return;const prev=ptrs.get(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      if(st.drag.pinch&&ptrs.size>1){const a=[...ptrs.values()];const d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);if(st.drag.pinch)st.sph.r=Math.max(1.6,Math.min(14,st.sph.r*st.drag.pinch/Math.max(20,d)));st.drag.pinch=d;return;}
+      const dx=e.clientX-st.drag.x, dy=e.clientY-st.drag.y; st.drag.x=e.clientX; st.drag.y=e.clientY;
+      if(st.drag.pan){const k=st.sph.r*.0016;const fwd=new THREE.Vector3();st.camera.getWorldDirection(fwd);const right=new THREE.Vector3().crossVectors(fwd,st.camera.up).normalize();const up2=new THREE.Vector3().crossVectors(right,fwd);st.tgt.addScaledVector(right,-dx*k).addScaledVector(up2,dy*k);}
+      else{st.sph.th-=dx*.008; st.sph.ph=Math.max(.15,Math.min(1.5,st.sph.ph-dy*.008));}});
+    const endP=e=>{ptrs.delete(e.pointerId);if(!ptrs.size)st.drag=null;};
+    cv.addEventListener("pointerup",endP); cv.addEventListener("pointercancel",endP);
+    cv.addEventListener("wheel",e=>{e.preventDefault();st.sph.r=Math.max(1.6,Math.min(14,st.sph.r*(e.deltaY>0?1.12:0.9)));},{passive:false});
+    cv.addEventListener("contextmenu",e=>e.preventDefault());
+    const tick=()=>{if(!__t3)return;const c=__t3.camera,s2=__t3.sph,t2=__t3.tgt;c.position.set(t2.x+s2.r*Math.sin(s2.ph)*Math.sin(s2.th),t2.y+s2.r*Math.cos(s2.ph),t2.z+s2.r*Math.sin(s2.ph)*Math.cos(s2.th));c.lookAt(t2);__t3.renderer.render(__t3.scene,c);requestAnimationFrame(tick);};
+    requestAnimationFrame(tick);
+  }
+  // rebuild piece group
+  [...__t3.scene.children].filter(o=>o.userData&&o.userData.piece).forEach(o=>__t3.scene.remove(o));
+  const pieceGrp=new THREE.Group(); pieceGrp.userData.piece=true; __t3.scene.add(pieceGrp);
+  const rw=(g.room&&g.room.width)||W3*1.5, rd=(g.room&&g.room.depth)||4200;
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(rw*0.001,rd*0.001),t3Mat(0x141926,1)); floor.rotation.x=-Math.PI/2; floor.position.set(rw*0.0005,0,rd*0.0005- (D3*0.001)/2 + rd*0.0005*0); floor.position.z=(rd*0.001)/2 - D3*0.001 + (D3*0.001)/2; floor.userData.piece=true; pieceGrp.add(floor);
+  const runs=g.layout.runs||[];
+  const g0=buildRun3D(g,getRun(g,0),0,open); pieceGrp.add(g0);
+  if(runs[1]){ // left wall: length must map to +z (corner at z=0) AND depth to +x with the front facing the room.
+    // That mapping is a mirror of Run 1's frame — no pure Y-rotation can do both — so the run is depth-flipped
+    // inside a wrapper (scale.z=-1; three.js flips frontFace for negative-determinant matrices, so culling and
+    // lighting stay correct), then rotated into place. Result: back at x≈0, doors at x≈D facing the room (EVE-006).
+    const g1=buildRun3D(g,runs[1],1,open);
+    const flip1=new THREE.Group(); flip1.scale.z=-1; flip1.position.z=D3*0.001; flip1.add(g1);
+    const wrap1=new THREE.Group(); wrap1.rotation.y=-Math.PI/2; wrap1.position.set(D3*0.001,0,0); wrap1.add(flip1);
+    pieceGrp.add(wrap1);
+  }
+  if(runs[2]){ // right wall: a pure rotation does it — length maps to +z, depth maps to W−x, fronts face −x (the room) (EVE-006).
+    const g2=buildRun3D(g,runs[2],2,open); g2.rotation.y=-Math.PI/2; g2.position.set(W3*0.001,0,0); pieceGrp.add(g2);
+  }
+  if(needReset||__t3.tgt.lengthSq()===0){__t3.sph={th:.7,ph:1.05,r:Math.max(W3,H3)*0.001*2.1};__t3.tgt.set(W3*0.0005,H3*0.00045,0);}
+  if(!__t3.__init){__t3.__init=true;__t3.sph.r=Math.max(W3,H3)*0.001*2.1;__t3.tgt.set(W3*0.0005,H3*0.00045,0);}
 }
 // Bridges for the Firebase cloud module below — single source of truth stays
 // gather()/orderMD()/loadParams() above; the module never rebuilds params itself.
@@ -965,8 +1439,28 @@ window.__makoLoadParams=loadParams;
 document.querySelectorAll("#formCol input,#formCol select,#formCol textarea").forEach(el=>el.addEventListener("input",refresh));
 bayRow({type:"double_hang",doors:2});bayRow({type:"shelves_drawers",shelves:4,drawers:3,doors:0});bayRow({type:"single_hang",doors:2});
 buildMatUI();buildStyleUI();
+runPanels().forEach((pn,i)=>wireRunPanel(pn,i));
+{const shSel=$("layoutShape"); if(shSel)shSel.addEventListener("change",()=>{ensureRunPanels(shSel.value);activeRun=0;refresh();});}
+{const o3=$("open3d"); if(o3)o3.addEventListener("change",()=>{window.__open3d=o3.checked;refresh();});}
+{const r3=$("reset3d"); if(r3)r3.addEventListener("click",()=>{window.__reset3d=true;refresh();});}
 refresh();
+/* EVE-009: settle the 3D library state. The three.js script executes AFTER
+   this script, so THREE arriving late is normal, not a failure: poll briefly
+   for it and rebuild the moment it lands; declare failure only on the script's
+   own error event, or when window load has passed and it is still absent. */
+window.__threeState=window.THREE?"ready":"pending";
+(function(){
+  const settle=()=>{
+    if(window.THREE){if(window.__threeState!=="ready"){window.__threeState="ready";try{refresh();}catch(e){}}}
+    else if(window.__threeState==="pending"){window.__threeState="failed";try{refresh();}catch(e){}}
+  };
+  const poll=setInterval(()=>{if(window.THREE){clearInterval(poll);settle();}},200);
+  setTimeout(()=>clearInterval(poll),20000);
+  window.addEventListener("error",e=>{const t=e&&e.target;if(t&&t.tagName==="SCRIPT"&&/three/i.test(t.src||"")&&window.__threeState==="pending"){window.__threeState="failed";try{refresh();}catch(err){}}},true);
+  window.addEventListener("load",()=>{if(window.THREE)settle();else setTimeout(settle,500);});
+})();
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
 <script type="module">
 // ===== Mako cloud sync (Firebase) =====
 // Ryuko replaces the placeholder below with the real Firebase web config.
