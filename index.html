@@ -46,6 +46,14 @@
   #historySection{scroll-margin-top:88px}
   main{max-width:1200px;margin:0 auto;padding:var(--sp-4) var(--sp-4) var(--sp-8);display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4)}
   @media(max-width:1024px){main{grid-template-columns:1fr}}
+  /* v8: the studio spans the full main width in its own row. The preview column
+     keeps row 1 (steps 01–04): a grid item cannot span around the studio row,
+     so during studio work the persistent summary bar carries Save/Send +
+     warning count (the PAX summary-bar pattern), and the drawing/warnings
+     column is one scroll up. */
+  #studioSection{grid-column:1/-1;grid-row:2}
+  #previewCol{grid-column:2;grid-row:1}
+  @media(max-width:1024px){#studioSection{grid-column:auto;grid-row:auto}#previewCol{grid-column:auto;grid-row:auto}}
   .lead{color:var(--muted);font-size:var(--fs-16);max-width:65ch;margin:0 0 var(--sp-4)}
   .lead b{color:var(--text)}
 
@@ -53,11 +61,11 @@
   section{background:linear-gradient(180deg,var(--surface-2),var(--surface));border:1px solid var(--border);border-radius:var(--r-lg);padding:var(--sp-5);margin-bottom:var(--sp-4)}
   section h2{font-size:var(--fs-20);font-weight:600;letter-spacing:-.01em;margin:0;color:var(--text);display:flex;align-items:center;gap:var(--sp-3)}
   section h2 .ic{color:var(--acc)}
-  #formCol{counter-reset:step}
-  #formCol section{counter-increment:step}
-  #formCol section>h2::before{content:counter(step,decimal-leading-zero);flex:none;width:32px;height:32px;display:grid;place-items:center;border-radius:var(--r-sm);background:var(--surface-3);border:1px solid var(--border);color:var(--acc);font-size:var(--fs-13);font-weight:700;font-variant-numeric:tabular-nums}
+  main{counter-reset:step}
+  #formCol section,#formColB section,#studioSection{counter-increment:step}
+  #formCol section>h2::before,#formColB section>h2::before,#studioSection>h2::before{content:counter(step,decimal-leading-zero);flex:none;width:32px;height:32px;display:grid;place-items:center;border-radius:var(--r-sm);background:var(--surface-3);border:1px solid var(--border);color:var(--acc);font-size:var(--fs-13);font-weight:700;font-variant-numeric:tabular-nums}
   section .hint{color:var(--muted);font-size:var(--fs-13);margin:var(--sp-1) 0 var(--sp-4)}
-  #formCol h3{font-size:var(--fs-14);font-weight:600;color:var(--text);margin:var(--sp-4) 0 var(--sp-2)}
+  #formCol h3,#formColB h3{font-size:var(--fs-14);font-weight:600;color:var(--text);margin:var(--sp-4) 0 var(--sp-2)}
 
   /* ---------- forms (template 05) ---------- */
   label{display:block;font-size:var(--fs-14);font-weight:600;color:var(--text);margin:var(--sp-4) 0 var(--sp-2)}
@@ -186,6 +194,7 @@
   .preset-card>button{margin-top:auto}
   .gal-filters{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin:var(--sp-2) 0}
   .gal-filters button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc);box-shadow:var(--ring)}
+  .preset-bar[hidden]{display:none}
   .preset-bar{display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-3);align-items:center;justify-content:space-between;border:1px solid rgba(87,199,133,.35);background:rgba(87,199,133,.06);border-radius:var(--r-md);padding:var(--sp-3);margin:var(--sp-3) 0}
   .preset-bar .small{color:var(--text)}
   .preset-bar .btnrow{margin:0}
@@ -197,7 +206,7 @@
   .run-panel .runhead b{font-size:var(--fs-14)}
   .runswitch{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin:var(--sp-2) 0}
   .runswitch button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc);box-shadow:var(--ring)}
-  #pv3d canvas{width:100%;height:auto;display:block;background:var(--code);border:1px solid var(--border);border-radius:var(--r-md);touch-action:none;cursor:grab}
+  #pv3d canvas{width:100%;height:auto;display:block;background:#f5f5f3;border:1px solid var(--border);border-radius:var(--r-md);touch-action:none;cursor:grab}
   #pv3d canvas:active{cursor:grabbing}
   .seg{display:flex;flex-wrap:wrap;gap:var(--sp-2);align-items:end}
   .seg>div{flex:1;min-width:130px}
@@ -216,6 +225,69 @@
     .foot{grid-template-columns:1fr}
     #sendBlock .btnrow button{flex:1 1 auto}
   }
+
+  /* ===== v8 — three-zone design studio (PAX three-zone: gallery rail / 3D stage / inspector rail) ===== */
+  .studio{display:grid;grid-template-columns:248px minmax(0,1fr) 302px;gap:var(--sp-4);align-items:start}
+  .studio-rail h3{font-size:var(--fs-13);letter-spacing:.04em;text-transform:uppercase;color:var(--txt2);margin:0 0 var(--sp-2)}
+  .studio-rail .gal{grid-template-columns:1fr}
+  .studio-rail .preset-card .thumb svg{max-height:120px}
+  .studio-rail .preset-card.previewing{border-color:var(--acc);box-shadow:var(--ring)}
+  .studio-stage{min-width:0}
+  .studio-stage #pv3d{display:flex;align-items:center;justify-content:center;min-height:120px}
+  .studio-stage #pv3d canvas{width:100%;height:auto;display:block;border-radius:var(--r-md);cursor:grab;touch-action:none}
+  .studio-pv{margin-top:var(--sp-4)}
+  .studioview{display:flex;gap:var(--sp-2);flex-wrap:wrap;align-items:center;margin-bottom:var(--sp-2)}
+  .segbtns{display:flex;gap:var(--sp-1);flex-wrap:wrap}
+  .segbtns button[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:#1a1206;font-weight:700}
+  .pv-banner[hidden]{display:none}
+  .pv-banner{display:flex;gap:var(--sp-3);align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--acc-soft);border:1px solid var(--acc);border-radius:var(--r-md);padding:var(--sp-2) var(--sp-3);margin-bottom:var(--sp-3)}
+  .pv-banner .small{color:var(--txt);font-weight:600}
+  /* Persistent summary bar — primary actions pinned at the top of the studio (Kevin's law) */
+  #summaryBar{position:sticky;top:74px;z-index:40;display:flex;gap:var(--sp-2) var(--sp-4);align-items:center;flex-wrap:wrap;background:var(--s2);border:1px solid var(--bd2);border-radius:var(--r-lg);padding:var(--sp-2) var(--sp-3);margin-bottom:var(--sp-4);box-shadow:var(--sh)}
+  #summaryBar .sb-main{font-weight:700;color:var(--txt)}
+  #summaryBar .sb-item{font-size:var(--fs-13);color:var(--txt2)}
+  #summaryBar .sb-warn{color:var(--warn);font-weight:600}
+  #summaryBar .sb-actions{margin-left:auto;display:flex;gap:var(--sp-2);flex-wrap:wrap}
+  .inspector{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r-lg);padding:var(--sp-3);margin-bottom:var(--sp-4)}
+  .inspector h3{font-size:var(--fs-13);letter-spacing:.04em;text-transform:uppercase;color:var(--txt2);margin:0 0 var(--sp-2)}
+  .inspector .insp-title{font-weight:700;color:var(--acc);margin:0 0 var(--sp-2)}
+  .inspector select,.inspector input{margin-bottom:var(--sp-2)}
+  .bay.selbay{border-color:var(--acc);box-shadow:var(--ring)}
+  #pvLayout [data-sec],#svgBox [data-sec]{cursor:pointer}
+  .studio-rail{position:sticky;top:148px;max-height:calc(100vh - 164px);overflow-y:auto;padding-right:2px;scrollbar-width:thin}
+  /* ===== v8.1 — ESP-LABS presentation layer (Exemplar 2 study): framed light stage,
+     5-button pill toolbar, projected numbered hotspots + leader lines, components
+     strip wired two-way to the selection state, layer views ===== */
+  .stage-wrap{position:relative;background:#f5f5f3;border:1px solid #e3e1db;border-radius:var(--r-md);overflow:hidden}
+  .stage-wrap #pv3d{background:transparent}
+  .stage-wrap #pv3d canvas{border:none;border-radius:0}
+  .stage-wrap.no3d .esp-toolbar,.stage-wrap.no3d .esp-hint,.stage-wrap.no3d #hsSvg,.stage-wrap.no3d #hsLayer,.stage-wrap.no3d #stageEmptyNote{display:none}
+  .stage-empty-note{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(430px,86%);background:#fff7e6;border:1px solid #d97706;border-left:4px solid #d97706;border-radius:var(--r-md);padding:12px 14px;color:#26251f;font-size:13px;line-height:1.45;z-index:6;box-shadow:0 4px 14px rgba(20,20,20,.16)}
+  #hsSvg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:4}
+  #hsLayer{position:absolute;inset:0;pointer-events:none;z-index:5}
+  .hs-badge{position:absolute;width:26px;height:26px;min-height:0;border-radius:50%;background:#0d9488;color:#fff;border:2px solid #fff;box-shadow:0 1px 5px rgba(20,20,20,.3);font:700 12px ui-monospace,SFMono-Regular,Menlo,monospace;display:grid;place-items:center;cursor:pointer;transform:translate(-50%,-50%);padding:0;pointer-events:auto}
+  .hs-badge:hover{background:#0b7c70}
+  .hs-badge.sel{background:#d97706;animation:hsPulse 1.6s ease-in-out infinite}
+  @keyframes hsPulse{0%,100%{box-shadow:0 0 0 0 rgba(217,119,6,.5)}50%{box-shadow:0 0 0 7px rgba(217,119,6,0)}}
+  @media(prefers-reduced-motion:reduce){.hs-badge.sel{animation:none}}
+  .esp-hint{position:absolute;top:8px;right:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:#8a877f;z-index:5;pointer-events:none}
+  .esp-toolbar{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);display:flex;gap:2px;background:#fff;border:1px solid #e3e1db;border-radius:999px;box-shadow:0 4px 14px rgba(20,20,20,.16);padding:4px;z-index:6}
+  .esp-toolbar button{width:40px;height:40px;min-height:0;border:none;border-radius:50%;background:transparent;color:#26251f;font-size:19px;line-height:1;display:grid;place-items:center;cursor:pointer;padding:0}
+  .esp-toolbar button:hover{background:#f0efec}
+  .esp-toolbar button:active{background:#e6e4de}
+  .comp-strip{display:flex;gap:var(--sp-2);overflow-x:auto;padding:var(--sp-1) 2px var(--sp-2);scrollbar-width:thin}
+  .comp-card{flex:0 0 auto;min-width:138px;max-width:180px;background:var(--s2);border:1px solid var(--bd);border-radius:var(--r-md);padding:8px 10px;cursor:pointer;text-align:left;color:var(--txt)}
+  .comp-card:hover{border-color:var(--bd2)}
+  .comp-card.sel{border-color:#0d9488;box-shadow:0 0 0 2px rgba(13,148,136,.45)}
+  .comp-card .cc-num{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#0d9488;color:#fff;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace;margin-right:6px;vertical-align:2px}
+  .comp-card.sel .cc-num{background:#d97706}
+  .comp-card .cc-t{font-weight:600;font-size:var(--fs-13)}
+  .comp-card .cc-s{display:block;font-size:12px;color:var(--txt2);margin-top:3px}
+  @media(max-width:700px){.hs-badge{width:24px;height:24px;font-size:11px}.esp-toolbar button{width:36px;height:36px;font-size:17px}.esp-hint{display:none}}
+  @media(max-width:1180px){.studio{grid-template-columns:220px minmax(0,1fr) 272px}}
+  @media(max-width:1024px){.studio-rail{position:static;max-height:none;overflow:visible}}
+  @media(max-width:1024px){.studio{grid-template-columns:1fr 1fr}.studio-stage{grid-column:1/-1;order:-1}}
+  @media(max-width:700px){.studio{grid-template-columns:1fr}.studio-stage{grid-column:auto;order:-1}#summaryBar{top:60px}}
   @media (prefers-reduced-motion: reduce){
     *,*::before,*::after{animation:none!important;transition:none!important}
     html{scroll-behavior:auto}
@@ -247,7 +319,7 @@
   </section>
 </div>
 <main>
-<div id="formCol">
+<div id="formCol" class="fcol">
 <p class="lead">Fill this in and <b>Mako</b> — the carpentry CAD specialist — has everything she needs: the order sheet, <b>params.json</b>, a live dimensioned drawing, and a one-click send to Ryuko. Nothing is invented: a field you leave blank becomes a flagged question, never a guess.</p>
 
 <section>
@@ -346,56 +418,135 @@
   </div>
 </section>
 
-<section>
-  <h2>Layout — modular runs &amp; sections</h2>
-  <h3>Start from a design — proven layouts, one tap</h3>
-  <p class="hint">Real catalogue layouts (IKEA PAX/METOD, California Closets, ClosetMaid, Mexican a-medida shops). Picking one fills the runs, sections, doors and drawers below and pairs its style + materials — scaled to the overall size typed in “The piece”. Your room, overall size and hardware stay untouched, and Undo brings your own layout back.</p>
-  <div class="gal-filters" role="group" aria-label="Design gallery filter">
-    <button type="button" class="secondary mini" data-galfilter="closet" aria-pressed="true">Closet designs</button>
-    <button type="button" class="secondary mini" data-galfilter="kitchen" aria-pressed="false">Kitchen designs</button>
-  </div>
-  <div id="presetGallery" class="gal"></div>
-  <div id="presetBar" class="preset-bar" hidden>
-    <span id="presetBarText" class="small"></span>
-    <span class="btnrow">
-      <button type="button" class="secondary mini" id="varyBtn">Vary this design</button>
-      <button type="button" class="secondary mini" id="presetUndoBtn">Undo — restore my layout</button>
+
+</div>
+<section id="studioSection">
+  <h2>Design studio — designs, 3D &amp; sections</h2>
+  <div id="summaryBar" aria-label="Request summary">
+    <span class="sb-main" id="sbDesign">No design applied</span>
+    <span class="sb-item" id="sbShape">Straight</span>
+    <span class="sb-item" id="sbSections"></span>
+    <span class="sb-item sb-warn" id="sbWarn" hidden></span>
+    <span class="sb-actions">
+      <button type="button" class="primary mini" id="sbSave">Save to cloud</button>
+      <button type="button" class="secondary mini" id="sbSend">Send as Issue</button>
     </span>
   </div>
-  <p class="small" id="presetNote" hidden></p>
-  <label>Layout shape — how the piece wraps the room</label>
-  <select id="layoutShape">
-    <option value="straight">Straight — one run on the main wall</option>
-    <option value="l">L — main run + one side run (corner)</option>
-    <option value="u">U — main run + both side runs (two corners)</option>
-  </select>
-  <p class="hint" id="cornerNote">Straight run: sections go left → right along the main wall.</p>
-  <div class="run-panel" data-runpanel="0">
-    <div class="runhead"><b>Run 1 — main wall</b><span class="small">length = Overall width in “The piece” above</span></div>
-    <div class="seg">
-      <div><label>How to divide this run</label><select class="r-divide"><option value="equal">Equal widths — split the run evenly</option><option value="custom">Custom — per-section widths below</option></select></div>
-      <div><label>Number of sections</label><input type="number" class="r-count" min="1" max="12" step="1"></div>
-      <div><button type="button" class="secondary r-apply">Set count</button></div>
+  <div class="studio">
+    <div class="studio-rail studio-rail-l">
+      <h3>Start from a design — proven layouts, one tap</h3>
+      <p class="hint">Real catalogue layouts (IKEA PAX/METOD, California Closets, ClosetMaid, Mexican a-medida shops). <b>Preview</b> shows a design in the 3D stage without touching your layout; <b>Use this design</b> fills the runs, sections, doors and drawers, scaled to the overall size typed in “The piece”. Your room, overall size and hardware stay untouched, and Undo brings your own layout back.</p>
+      <div class="gal-filters" role="group" aria-label="Design gallery filter">
+        <button type="button" class="secondary mini" data-galfilter="closet" aria-pressed="true">Closet designs</button>
+        <button type="button" class="secondary mini" data-galfilter="kitchen" aria-pressed="false">Kitchen designs</button>
+      </div>
+      <div id="presetGallery" class="gal"></div>
+      <div id="presetBar" class="preset-bar" hidden>
+        <span id="presetBarText" class="small"></span>
+        <span class="btnrow">
+          <button type="button" class="secondary mini" id="varyBtn">Vary this design</button>
+          <button type="button" class="secondary mini" id="presetUndoBtn">Undo — restore my layout</button>
+        </span>
+      </div>
+      <p class="small" id="presetNote" hidden></p>
     </div>
-    <div id="bays"></div>
-    <div class="btnrow"><button type="button" class="secondary r-add">+ Add section to Run 1</button></div>
-  </div>
-  <div id="extraRuns"></div>
-  <div class="pv">
-    <h3>Live preview — sections with their insides</h3>
-    <div class="runswitch" id="runSwitcher" role="group" aria-label="Choose which run the elevation shows"></div>
-    <div id="pvLayout"></div>
+    <div class="studio-stage">
+      <div id="pvBanner" class="pv-banner" hidden>
+        <span id="pvBannerText" class="small"></span>
+        <span class="btnrow">
+          <button type="button" class="primary mini" id="pvUse">Use this design</button>
+          <button type="button" class="secondary mini" id="pvBack">Back to my layout</button>
+        </span>
+      </div>
+      <div class="studioview">
+        <div class="segbtns" id="viewModes" role="group" aria-label="3D fronts view mode">
+          <button type="button" class="secondary mini" data-vmode="shown" aria-pressed="true">Fronts shown</button>
+          <button type="button" class="secondary mini" data-vmode="open" aria-pressed="false">Doors open</button>
+          <button type="button" class="secondary mini" data-vmode="hidden" aria-pressed="false">Fronts hidden — interiors</button>
+        </div>
+        <span class="small">Layer view:</span>
+        <div class="segbtns" id="layerModes" role="group" aria-label="3D layer view">
+          <button type="button" class="secondary mini" data-layer="assembled" aria-pressed="true">Assembled</button>
+          <button type="button" class="secondary mini" data-layer="frame" aria-pressed="false">Frame</button>
+          <button type="button" class="secondary mini" data-layer="fronts" aria-pressed="false">Doors &amp; drawers</button>
+          <button type="button" class="secondary mini" data-layer="hardware" aria-pressed="false">Hardware</button>
+        </div>
+        <button type="button" class="secondary mini" id="reset3d">Reset 3D view</button>
+      </div>
+      <div class="stage-wrap no3d" id="stageWrap">
+        <div id="pv3d"><p class="small">The 3D view loads with the form — if it cannot load, the 2D previews and the whole studio keep working.</p></div>
+        <svg id="hsSvg" aria-hidden="true"></svg>
+        <div id="hsLayer"></div>
+        <div class="esp-hint" aria-hidden="true">drag to turn · pinch to zoom</div>
+        <div id="stageEmptyNote" class="stage-empty-note" hidden role="status"></div>
+        <div class="esp-toolbar" role="group" aria-label="3D view controls">
+          <button type="button" id="tbTurnL" title="Turn left" aria-label="Turn left">↺</button>
+          <button type="button" id="tbTurnR" title="Turn right" aria-label="Turn right">↻</button>
+          <button type="button" id="tbZoomOut" title="Zoom out" aria-label="Zoom out">−</button>
+          <button type="button" id="tbZoomIn" title="Zoom in" aria-label="Zoom in">+</button>
+          <button type="button" id="tbReset" title="Back to the start view" aria-label="Back to the start view">⌖</button>
+        </div>
+      </div>
+      <p class="hint">Drag to orbit · scroll or pinch to zoom · right-drag / two-finger drag to pan. <b>Click a section</b> in the 3D (or in the elevation below) to edit just that section in the inspector; Esc or a click on empty space clears the selection.</p>
+      <h3>Components on stage</h3>
+      <p class="hint">Every section of the design on stage, numbered to match the badges on the model. Tap a card — or its badge on the model — to select that section.</p>
+      <div id="compStrip" class="comp-strip"></div>
+      <div class="pv studio-pv">
+        <h3>Front elevation — sections with their insides</h3>
+        <div class="runswitch" id="runSwitcher" role="group" aria-label="Choose which run the elevation shows"></div>
+        <div id="pvLayout"></div>
+      </div>
+    </div>
+    <div class="studio-rail studio-rail-r">
+      <div id="inspector" class="inspector">
+        <h3>Section inspector</h3>
+        <p class="small" id="inspEmpty">Nothing selected. Click a section in the 3D view or the elevation and its controls land here — only the options that fit that section are offered.</p>
+        <div id="inspBody" hidden>
+          <p class="insp-title" id="inspTitle"></p>
+          <label>Section type</label>
+          <select id="inspType"></select>
+          <div class="row">
+            <div><label>Width (mm)</label><input type="number" step="any" id="inspWidth" placeholder="auto"></div>
+            <div><label>Shelves</label><input type="number" step="1" min="0" max="12" id="inspShelves"></div>
+          </div>
+          <div id="inspBankRow">
+            <label>Drawer count (bank, 2–8)</label>
+            <select id="inspDrawers"></select>
+          </div>
+          <div id="inspExtraRow">
+            <label>Drawers in this section (non-bank)</label>
+            <input type="number" step="1" min="0" max="12" id="inspDrawersX">
+          </div>
+          <div class="row">
+            <div><label>Door type</label><select id="inspDoorType"></select></div>
+            <div><label>Door style</label><select id="inspDoorStyle"><option value="slab">slab</option><option value="shaker">shaker</option></select></div>
+          </div>
+          <p class="small" id="inspNote"></p>
+          <div class="btnrow"><button type="button" class="secondary mini" id="inspClear">Done — clear selection</button></div>
+        </div>
+      </div>
+      <label>Layout shape — how the piece wraps the room</label>
+      <select id="layoutShape">
+        <option value="straight">Straight — one run on the main wall</option>
+        <option value="l">L — main run + one side run (corner)</option>
+        <option value="u">U — main run + both side runs (two corners)</option>
+      </select>
+      <p class="hint" id="cornerNote">Straight run: sections go left → right along the main wall.</p>
+      <div class="run-panel" data-runpanel="0">
+        <div class="runhead"><b>Run 1 — main wall</b><span class="small">length = Overall width in “The piece” above</span></div>
+        <div class="seg">
+          <div><label>How to divide this run</label><select class="r-divide"><option value="equal">Equal widths — split the run evenly</option><option value="custom">Custom — per-section widths below</option></select></div>
+          <div><label>Number of sections</label><input type="number" class="r-count" min="1" max="12" step="1"></div>
+          <div><button type="button" class="secondary r-apply">Set count</button></div>
+        </div>
+        <div id="bays"></div>
+        <div class="btnrow"><button type="button" class="secondary r-add">+ Add section to Run 1</button></div>
+      </div>
+      <div id="extraRuns"></div>
+    </div>
   </div>
 </section>
-
-<section>
-  <h2>Interactive 3D preview</h2>
-  <p class="hint">Drag to orbit · scroll or pinch to zoom · right-drag / two-finger drag to pan. Built live from the same numbers as the 2D drawings.</p>
-  <label class="check"><input type="checkbox" id="open3d"> Open doors &amp; drawers in 3D</label>
-  <div class="btnrow"><button type="button" class="secondary" id="reset3d">Reset 3D view</button></div>
-  <div id="pv3d"><p class="small">The 3D view loads with the form — if it cannot load, the 2D previews above keep working.</p></div>
-</section>
-
+<div id="formColB" class="fcol">
 <section>
   <h2>Hardware</h2>
   <div class="row">
@@ -731,8 +882,8 @@ function doorTypeSVG(b,g,st,doorM,sfx,cx,secTop,bw,secH,internals,s){
   }
   return o;
 }
-function drawSVG(g){const html=frontSVG(g,false,activeRun);$("svgBox").innerHTML=html||'<p class="small">Type the overall width and height and the dimensioned drawing appears here.</p>';}
-function frontSVG(g,internals,runIdx){
+function drawSVG(g){const html=frontSVG(g,false,activeRun,selHl(activeRun));wireElevClicks($("svgBox"));$("svgBox").innerHTML=html||'<p class="small">Type the overall width and height and the dimensioned drawing appears here.</p>';}
+function frontSVG(g,internals,runIdx,hlIdx){
   const run=getRun(g,runIdx===undefined?activeRun:runIdx);
   const W=run.length_mm,H=g.piece.overall_height,D=g.piece.overall_depth;
   if(!W||!H||W<=0||H<=0)return "";
@@ -754,10 +905,11 @@ function frontSVG(g,internals,runIdx){
   secs.forEach((b,i)=>{
     const bw=(ws[i]||0)*s;
     if(bw>0){
-      sec+=`<rect x="${cx}" y="${secTop}" width="${bw}" height="${secH}" fill="rgba(0,0,0,.16)" stroke="#57c785" stroke-width="1"/>`;
+      sec+=`<rect data-sec="${i}" x="${cx}" y="${secTop}" width="${bw}" height="${secH}" fill="rgba(0,0,0,.16)" stroke="#57c785" stroke-width="1"/>`;
       if(internals)sec+=drawInternals(b,cx,secTop,bw,secH);
       sec+=doorTypeSVG(b,g,st,doorM,sfx,cx,secTop,bw,secH,internals,s);
       sec+=`<text x="${cx+bw/2}" y="${secTop+13}" fill="#c6cdd9" font-size="10" text-anchor="middle" style="paint-order:stroke" stroke="#22252d" stroke-width="3">${b.type.replace(/_/g," ")}</text>`;
+      if(hlIdx===i)sec+=`<rect x="${cx}" y="${secTop}" width="${bw}" height="${secH}" fill="rgba(255,180,84,.10)" stroke="#ffb454" stroke-width="3" pointer-events="none"/>`;
       sec+=dimLine(cx,y0+hpx+34,cx+bw,y0+hpx+34,`${ws[i]} mm`);
     }
     cx+=bw+t*s;
@@ -796,6 +948,7 @@ function orderMD(g){
   L.push(`# ORDER — ${g.job} (${g.project_type})`);
   if(g.client)L.push(`Client: ${g.client}`);
   if(g.design&&g.design.label)L.push(`Design: ${g.design.label}`);
+  if(g.design&&g.design.note)L.push(`Design note: ${g.design.note}`);
   L.push("", "## Room", `- ${g.room.width} × ${g.room.depth} mm, ceiling ${g.room.ceiling} mm`, `- Piece on: ${g.room.wall}${g.room.centered_on_wall?", centred":""}`);
   g.room.obstacles.forEach(o=>L.push(`- Obstacle: ${o.what} at ${o.at_mm} mm from left, ${o.width_mm} mm wide${o.height_mm?`, ${o.height_mm} mm high`:""}${o.note?` — ${o.note}`:""}`));
   L.push("", "## Piece", `- Overall: **${g.piece.overall_width} W × ${g.piece.overall_height} H × ${g.piece.overall_depth} D mm**${g.piece.depth_includes_doors?" (depth includes doors)":""}`, `- Construction: ${g.piece.construction}; plinth ${g.piece.plinth_height} mm`, `- Style: ${(typeof STYLES!=="undefined"&&STYLES[g.piece.style])?STYLES[g.piece.style].label:(g.piece.style||"modern")}`);
@@ -1026,8 +1179,8 @@ function drawHardwareSVG(g){
   const slide=sl?`<rect x="452" y="84" width="${slideW}" height="52" fill="${fillFor(carc,"Hc")}" stroke="#101319"/><rect x="460" y="100" width="${Math.max(0,slideW-16)}" height="5" fill="#9aa5b5"/><rect x="460" y="114" width="${Math.max(0,slideW-16)}" height="5" fill="#79849a"/><text x="${452+slideW/2}" y="160" fill="#eef0f4" font-size="12" text-anchor="middle">Drawer slide ${sl} mm</text><text x="${452+slideW/2}" y="176" fill="#9aa5b5" font-size="11" text-anchor="middle">(drawer side, length to scale)</text>`:`<text x="545" y="118" fill="#9aa5b5" font-size="12" text-anchor="middle">Slide — not set</text>`;
   box.innerHTML=`<svg viewBox="0 0 700 312" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hardware details: door front with handles, closet rod diameter, drawer slide length"><defs>${matDefs(doorM,"Hd")}${matDefs(carc,"Hc")}</defs>${door}${rod}${slide}</svg>`;
 }
-function drawPieceSVG(g){const box=$("pvPiece");if(!box)return;const h=frontSVG(g,false,0);box.innerHTML=h||'<p class="small">Type the overall width and height and this step shows the piece front + depth, in the materials and style you picked.</p>';}
-function drawLayoutSVG(g){const box=$("pvLayout");if(!box)return;const h=frontSVG(g,true,activeRun);box.innerHTML=h||'<p class="small">Type the overall width and height and this step draws every section with its rods, shelves and drawers inside.</p>';}
+function drawPieceSVG(g){const box=$("pvPiece");if(!box)return;const h=frontSVG(g,false,0,selHl(0));box.innerHTML=h||'<p class="small">Type the overall width and height and this step shows the piece front + depth, in the materials and style you picked.</p>';}
+function drawLayoutSVG(g){const box=$("pvLayout");if(!box)return;const h=frontSVG(g,true,activeRun,selHl(activeRun));wireElevClicks(box);box.innerHTML=h||'<p class="small">Type the overall width and height and this step draws every section with its rods, shelves and drawers inside.</p>';}
 let matPickPrev=null;
 function syncMatUI(g){
   const cs=matStyle(g.materials.carcass_material||"");
@@ -1248,7 +1401,13 @@ function refresh(){
   try{syncPresetGallery(g);}catch(e){}
   try{syncRunSwitcher(g);syncRunCounts(g);}catch(e){}
   try{draw3D(g);}catch(e){const b3=$("pv3d");if(b3&&!window.__threeFailed)b3.innerHTML='<p class="small">3D preview could not draw — the 2D previews are unaffected.</p>';}
-  $("warnings").innerHTML=warnings(g).map(([k,m])=>`<div class="${k}">${k==="e"?"⛔":k==="w"?"⚠️":"✅"} ${m}</div>`).join("");
+  const __ws=warnings(g);
+  $("warnings").innerHTML=__ws.map(([k,m])=>`<div class="${k}">${k==="e"?"⛔":k==="w"?"⚠️":"✅"} ${m}</div>`).join("");
+  try{syncSummaryBar(g,__ws);}catch(e){}
+  try{syncPreviewUI();}catch(e){}
+  try{syncInspector(g);}catch(e){}
+  try{syncComponents(g);}catch(e){}
+  try{syncStageChrome();}catch(e){}
   $("jsonOut").textContent=JSON.stringify(g,null,2);
   $("mdOut").textContent=orderMD(g);
   try{localStorage.setItem("mako-form-draft",JSON.stringify({v:[...document.querySelectorAll("input,select,textarea")].map(e=>e.type==="checkbox"?e.checked:e.value),bays:g.layout.sections,obs:g.room.obstacles}));}catch(e){}
@@ -1266,7 +1425,7 @@ $("loadExample").onclick=()=>{
   const set=(id,v)=>{$(id).value=v;};
   set("ptype","closet");set("jobname","example-closet-001");set("client","Example — process demo");set("units","mm");
   set("roomW",3800);set("roomD",4200);set("roomH",2550);set("W",2400);set("H",2400);set("D",600);set("plinth",100);
-  __design=null; __presetUndo=null;
+  __design=null; __presetUndo=null; __preview=null; __sel=null; __pvHl=null;
   {const shSel=$("layoutShape"); if(shSel)shSel.value="straight"; __runStash={}; ensureRunPanels("straight",null); activeRun=0;}
   $("bays").innerHTML="";bayCount=0;
   bayRow({type:"double_hang",doors:2,doorstyle:"slab"});
@@ -1294,6 +1453,7 @@ function loadParams(p){
   const st=p.stock||{};
   set("sheetW",st.sheet_width);set("sheetL",st.sheet_length);set("kerf",st.kerf);
   __design=(p.design&&p.design.name)?p.design:null;
+  __preview=null; __sel=null; __pvHl=null; // v8: 3D preview + section selection are session-only — a load ends both
   __presetUndo=null; // the Undo snapshot is scoped to THIS request — a load starts a fresh undo lifecycle (EVE-011; the example loader clears it the same way). undoPreset() nulls it before calling loadParams, so within-request Undo is unaffected.
   const lay=p.layout||{};
   const layShape=lay.shape||"straight";
@@ -1355,9 +1515,26 @@ const PRESETS=[
  {id:"k2",name:"Pantry Bookend",tag:"A full-height pantry bookends the run; then fridge, sink, prep and stove follow the same flow.",project:"kitchen",shape:"straight",shapes:["straight"],style:"shaker",carcass:"Melamine — Blanco",door:"Melamine — Blanco Polar",minW:3200,recW:[3200,4800],minH:null,width_mm:3600,thumbH:2200,runs:[{sections:[S("pantry",16,{dt:"hinged_single",ds:"shaker"}),S("fridge_space",20),S("sink_base",24),S("cabinet_doors",20,{dt:"hinged_pair",ds:"shaker"}),S("stove_space",20)]}]},
  {id:"k3",name:"L Classic",tag:"Sink centred on the window wall, fridge closing that leg; prep runs into the stove, pantry at the end.",project:"kitchen",shape:"l",shapes:["l"],style:"shaker",carcass:"Melamine — Blanco",door:"Melamine — Encino",minW:2400,recW:[2400,3600],minH:null,minSide:2000,width_mm:3000,thumbH:2200,runs:[{sections:[S("fridge_space",25),S("sink_base",40),S("cabinet_doors",35,{dt:"hinged_pair",ds:"shaker"})]},{len:2600,sections:[S("cabinet_doors",45,{dt:"hinged_pair",ds:"shaker"}),S("stove_space",30),S("pantry",25,{dt:"hinged_single",ds:"shaker"})]}]},
  {id:"k4",name:"Cook's Triangle L",tag:"Hob and sink on the same wall — IKEA's safety rule — with the fridge at its end; leg two is storage.",project:"kitchen",shape:"l",shapes:["l"],style:"modern",carcass:"Melamine — Blanco",door:"Melamine — Roble",minW:2800,recW:[2800,4200],minH:null,minSide:1800,width_mm:3400,thumbH:2200,runs:[{sections:[S("fridge_space",22),S("sink_base",28),S("cabinet_doors",20,{dt:"hinged_pair"}),S("stove_space",30)]},{len:2400,sections:[S("cabinet_doors",60,{dt:"hinged_pair"}),S("pantry",40,{dt:"hinged_single"})]}]},
- {id:"k5",name:"Galley Wet Side",tag:"One complete side of a galley: fridge, sink, dish + prep cupboards. The stove faces it — see the note.",project:"kitchen",shape:"straight",shapes:["straight"],style:"modern",carcass:"Melamine — Blanco",door:"Melamine — Blanco",minW:2400,recW:[2400,3600],minH:null,width_mm:3000,thumbH:2200,runs:[{sections:[S("fridge_space",25),S("sink_base",35),S("cabinet_doors",40,{dt:"hinged_pair"})]}]},
+ {id:"k5",name:"Galley Wet Side",note:"A true galley is two facing runs. This design is the complete wet side — model the facing run (stove + cupboards) as a second straight piece, with at least 1200 mm of aisle between the runs.",tag:"One complete side of a galley: fridge, sink, dish + prep cupboards. The stove faces it — see the note.",project:"kitchen",shape:"straight",shapes:["straight"],style:"modern",carcass:"Melamine — Blanco",door:"Melamine — Blanco",minW:2400,recW:[2400,3600],minH:null,width_mm:3000,thumbH:2200,runs:[{sections:[S("fridge_space",25),S("sink_base",35),S("cabinet_doors",40,{dt:"hinged_pair"})]}]},
  {id:"k6",name:"U Family Kitchen",tag:"Sink centred on the base wall, stove leg to the left, fridge + tall pantry bank closing the right.",project:"kitchen",shape:"u",shapes:["u"],style:"modern",carcass:"Melamine — Blanco",door:"Melamine — Roble",minW:2600,recW:[2600,4000],minH:null,minSide:2000,width_mm:3200,thumbH:2200,runs:[{sections:[S("cabinet_doors",30,{dt:"hinged_pair"}),S("sink_base",40),S("cabinet_doors",30,{dt:"hinged_pair"})]},{len:2600,sections:[S("stove_space",35),S("cabinet_doors",65,{dt:"hinged_pair"})]},{len:2600,sections:[S("fridge_space",30),S("cabinet_doors",30,{dt:"hinged_pair"}),S("pantry",40,{dt:"hinged_single"})]}]},
  {id:"k7",name:"U Chef",tag:"The whole working wall in sequence, one long prep leg, and a tall bank you can see across the room.",project:"kitchen",shape:"u",shapes:["u"],style:"traditional",carcass:"Melamine — Blanco",door:"Melamine — Encino",minW:3000,recW:[3000,4800],minH:null,minSide:2200,width_mm:3800,thumbH:2200,runs:[{sections:[S("fridge_space",20),S("sink_base",30),S("cabinet_doors",20,{dt:"hinged_pair",ds:"shaker"}),S("stove_space",30)]},{len:2800,sections:[S("cabinet_doors",60,{dt:"hinged_pair",ds:"shaker"}),S("pantry",40,{dt:"hinged_single",ds:"shaker"})]},{len:2800,sections:[S("pantry",50,{dt:"hinged_single",ds:"shaker"}),S("cabinet_doors",50,{dt:"hinged_pair",ds:"shaker"})]}]}
+,
+ /* ---- Round 2 (2026-11-13 research): trends, MX realities, multi-piece designs.
+    multi:"second" = the design is its OWN piece (island / coffee station / tall
+    bank): it applies to the current piece like any design — shape, dims and
+    advisories travel in its note, and Undo restores the previous layout. ---- */
+ {id:"c13",name:"La Isla Cajonera",multi:"second",note:"Island piece: apply it to its own piece at dresser height (≈900–1100 mm), standing in the middle of a big walk-in — it needs ≈900 mm of circulation on every side, and the layout warnings below assume wardrobe height, so read them with that in mind.",tag:"A drawer island for the middle of the walk-in: banks on both flanks, a mixed tower between. The 2024–26 walk-in centrepiece.",project:"closet",shape:"straight",shapes:["straight"],style:"modern",carcass:"Melamine — Nogal",door:"Melamine — Nogal",minW:1500,recW:[1500,2200],minH:null,width_mm:1800,thumbH:1000,runs:[{sections:[S("drawers",40,{dc:6}),S("shelves_drawers",30,{sh:3,dc:3}),S("drawers",30,{dc:4})]}]},
+ {id:"c14",name:"Torre Esquinera",tag:"An L whose corner is a full-height shelf tower — folded knits live at the corner, hanging wraps both walls.",project:"closet",shape:"l",shapes:["l"],style:"modern",carcass:"Melamine — Blanco Polar",door:"Melamine — Blanco Polar",minW:2200,recW:[2200,3400],minH:2000,minSide:1500,width_mm:2800,thumbH:2100,runs:[{sections:[S("double_hang",36),S("single_hang",28),S("shelves",36,{sh:6})]},{len:1800,sections:[S("double_hang",55),S("shelves",45,{sh:5})]}]},
+ {id:"c15",name:"Crece Conmigo",tag:"The kids' reach-in that grows up: low double-hang now (sliding doors, no swing into the room), a deep shelf bay, a small drawer bank.",project:"closet",shape:"straight",shapes:["straight"],style:"scandinavian",carcass:"Melamine — Blanco",door:"Melamine — Blanco",minW:1500,recW:[1500,2400],minH:1900,width_mm:1900,thumbH:2000,runs:[{sections:[S("double_hang",40,{dt:"sliding"}),S("shelves",32,{sh:5}),S("drawers",28,{dc:3})]}]},
+ {id:"c16",name:"Lavandería Completa",tag:"Utility and laundry storage: a linen drawer bank, a broom-and-coats tall hang, deep closed shelves for chemicals and machines.",project:"closet",shape:"straight",shapes:["straight"],style:"modern",carcass:"Melamine — Blanco",door:"Melamine — Blanco",minW:1800,recW:[1800,3000],minH:2000,width_mm:2400,thumbH:2100,runs:[{sections:[S("drawers",35,{dc:4}),S("single_hang",30),S("shelves",35,{sh:5,dt:"hinged_pair"})]}]},
+ {id:"c17",name:"Recámara Compacta MX",note:"Shallow-depth pattern for tight Mexican bedrooms: design the carcass at 400–500 mm deep, not the usual 600 — hanging runs snug below 500 mm, and that trade is the point of this design.",tag:"The tight-bedroom reach-in, patterned for a 400–500 mm shallow carcass: shelf tower, sliding-door hang bay, two drawers, bicolor fronts.",project:"closet",shape:"straight",shapes:["straight"],style:"modern",carcass:"Melamine — Gris",door:"Melamine — Nogal",minW:1400,recW:[1400,2000],minH:2000,width_mm:1700,thumbH:2100,runs:[{sections:[S("shelves",25,{sh:5}),S("double_hang",45,{dt:"sliding"}),S("drawers",30,{dc:2})]}]},
+ {id:"c18",name:"Mudroom de Entrada",tag:"Entry storage that earns its keep: shoe shelves, a tall coat hang, and a drawer bank for keys, leashes and gloves.",project:"closet",shape:"straight",shapes:["straight"],style:"rustic",carcass:"Melamine — Encino",door:"Melamine — Encino",minW:1500,recW:[1500,2600],minH:2000,width_mm:2000,thumbH:2100,runs:[{sections:[S("shelves",30,{sh:4}),S("single_hang",40),S("drawers",30,{dc:3})]}]},
+ {id:"c19",name:"Esquinero Compacto",tag:"The smallest honest walk-in corner (5×5 ft and up): double-hang plus a tower on the main wall, shelves and long hang around the corner.",project:"closet",shape:"l",shapes:["l"],style:"scandinavian",carcass:"Melamine — Blanco",door:"Melamine — Blanco",minW:1500,recW:[1500,2400],minH:2000,minSide:1200,width_mm:1900,thumbH:2100,runs:[{sections:[S("double_hang",55),S("shelves_drawers",45,{sh:4,dc:3})]},{len:1500,sections:[S("shelves",50,{sh:5}),S("single_hang",50)]}]},
+ {id:"c20",name:"Península de Cajones U",tag:"A U with a working twist: hanging on three walls, and the third wall is a drawer peninsula — banks you dress at, not just store in.",project:"closet",shape:"u",shapes:["u"],style:"modern",carcass:"Melamine — Nogal",door:"Melamine — Nogal",minW:2400,recW:[2400,3600],minH:2100,minSide:1800,width_mm:3000,thumbH:2200,runs:[{sections:[S("double_hang",34),S("shelves",32,{sh:5}),S("double_hang",34)]},{len:2000,sections:[S("single_hang",60),S("shelves",40,{sh:6})]},{len:2000,sections:[S("drawers",60,{dc:6}),S("shelves_drawers",40,{sh:3,dc:2})]}]},
+ {id:"k8",name:"Cocina Península",note:"The return is a peninsula, not a wall run: the 300–380 mm seating overhang on the room side is a countertop decision — keep the carcass depth at 600 mm — and keep at least 900 mm between the peninsula end and any facing wall or tall unit.",tag:"An L that ends in a peninsula: full work wall, then a doorless return that seats the room side and preps from both.",project:"kitchen",shape:"l",shapes:["l"],style:"modern",carcass:"Melamine — Blanco",door:"Melamine — Gris",minW:3000,recW:[3000,4200],minH:null,minSide:1200,width_mm:3600,thumbH:2200,runs:[{sections:[S("fridge_space",20),S("sink_base",28),S("cabinet_doors",22,{dt:"hinged_pair"}),S("stove_space",30)]},{len:1800,sections:[S("cabinet_doors",100)]}]},
+ {id:"k9",name:"Torre de Horno",note:"OVEN TOWER, not larder: the 'pantry' section in this design is an appliance tower — oven niche ≈590 mm + microwave niche ≈450 mm inside the 600 mm tall unit, storage below, ventilation at the back and plinth. Do not cut it as a larder.",tag:"The tall-appliance wall: a straight run anchored by an oven + microwave tower, landed by a prep cabinet.",project:"kitchen",shape:"straight",shapes:["straight"],style:"modern",carcass:"Melamine — Blanco",door:"Melamine — Gris",minW:3200,recW:[3200,4800],minH:null,width_mm:4000,thumbH:2200,runs:[{sections:[S("fridge_space",20),S("sink_base",24),S("cabinet_doors",18,{dt:"hinged_pair"}),S("pantry",20,{dt:"hinged_single"}),S("stove_space",18)]}]},
+ {id:"k10",name:"Estación de Café",multi:"second",note:"Coffee station: apply it as its own secondary piece. Keep the brew counter open with at least 450 mm clear above it (no wall cabinet over the machine), and set the piece depth at least 50 mm deeper than the machine that will live on it.",tag:"A dedicated brew bar: one closed tower for beans and kit, one long open counter for the machine, grinder and cups.",project:"kitchen",shape:"straight",shapes:["straight"],style:"rustic",carcass:"Melamine — Blanco",door:"Melamine — Encino",minW:1200,recW:[1200,2400],minH:null,width_mm:1800,thumbH:2200,runs:[{sections:[S("pantry",30,{dt:"hinged_single",ds:"shaker"}),S("cabinet_doors",70)]}]},
+ {id:"k11",name:"Bloque Alto",multi:"second",note:"Tall bank: stop the towers short of the ceiling — towers at 1970–2120 mm under a ≈2400 mm ceiling; the gap is intentional. Apply it as its own piece.",tag:"A freestanding tall bank: fridge slot, two full-height larders and a wide shaker cupboard — the pantry wall as one piece.",project:"kitchen",shape:"straight",shapes:["straight"],style:"shaker",carcass:"Melamine — Blanco",door:"Melamine — Blanco Polar",minW:2800,recW:[2800,3800],minH:null,width_mm:3300,thumbH:2200,runs:[{sections:[S("fridge_space",22),S("pantry",22,{dt:"hinged_single",ds:"shaker"}),S("pantry",22,{dt:"hinged_single",ds:"shaker"}),S("cabinet_doors",34,{dt:"hinged_pair",ds:"shaker"})]}]}
 ];
 const PRESET_BY_ID={}; PRESETS.forEach(p=>{PRESET_BY_ID[p.id]=p;});
 const PRESET_SKINS={
@@ -1434,11 +1611,13 @@ function commitDesignLayout(params){
   });
   document.querySelectorAll(".b-doorstyle").forEach(sel=>{sel.dataset.touched="1";}); // the preset's per-section styles are deliberate — style presets must not stomp them
   __design=params.design||null;
+  __sel=null; __pvHl=null; // EVE-018: a wholesale layout replacement (preset Apply, Vary) retires the selection — its run/idx pointed into the OLD layout, so the inspector/badges/cards must re-render against the new design with NO selection, exactly as loads do (loadParams line ~1454)
   activeRun=0;
   refresh();
 }
 function applyPresetById(id){
   const p=PRESET_BY_ID[id]; if(!p)return;
+  __preview=null; __pvHl=null; __sel=null; // EVE-018: applying ends preview mode AND any selection — the applied design IS the layout now, and a selection index into the OLD design is a ghost (loads clear it the same way; commitDesignLayout enforces it for every caller)
   const g0=gather();
   __presetUndo={params:JSON.parse(JSON.stringify(g0))};
   const t=g0.materials.carcass_thickness||16;
@@ -1461,7 +1640,7 @@ function applyPresetById(id){
     });
   }
   params.layout.shape=shape; params.layout.runs=runs; params.layout.sections=runs[0].sections; params.layout.corner_owner="run_1";
-  params.design={id:p.id,name:p.name,variation:0,label:p.name,min_width_mm:p.minW,min_height_mm:p.minH||null,min_side_mm:p.minSide||null,runs_required:p.runs.slice(0,nRuns).map(rr=>recipeRequiredMM(rr))};
+  params.design={id:p.id,name:p.name,variation:0,label:p.name,min_width_mm:p.minW,min_height_mm:p.minH||null,min_side_mm:p.minSide||null,runs_required:p.runs.slice(0,nRuns).map(rr=>recipeRequiredMM(rr)),note:p.note||null};
   commitDesignLayout(params);
 }
 function matchPreset(g){
@@ -1561,8 +1740,10 @@ function buildPresetUI(){
   PRESETS.forEach(p=>{
     const card=document.createElement("div");
     card.className="preset-card"; card.dataset.pid=p.id; card.dataset.project=p.project;
-    card.innerHTML=`<h4>${esc(p.name)}</h4><div class="thumb">${presetThumb(p)}</div><p class="why">${esc(p.tag)}</p><div class="meta">${p.project==="closet"?"Closet":"Kitchen"} · ${p.shapes.map(s=>shapeName[s]).join(" / ")} · ${p.recW[0]}–${p.recW[1]} mm wide · ${esc((STYLES[p.style]||{}).label||p.style)}</div><div class="badges"><span class="badge b-shape"></span><span class="badge warnb b-size" hidden></span></div>${p.id==="k5"?'<p class="why"><b>Galley note:</b> a true galley is two facing runs — this preset is the complete wet side. Model the facing run (stove + cupboards) as a second straight piece, with at least 1200 mm of aisle between runs.</p>':""}<button type="button" class="secondary">Use this design</button>`;
-    card.querySelector("button").addEventListener("click",()=>applyPresetById(p.id));
+    card.innerHTML=`<h4>${esc(p.name)}</h4><div class="thumb">${presetThumb(p)}</div><p class="why">${esc(p.tag)}</p><div class="meta">${p.project==="closet"?"Closet":"Kitchen"} · ${p.shapes.map(s=>shapeName[s]).join(" / ")} · ${p.recW[0]}–${p.recW[1]} mm wide · ${esc((STYLES[p.style]||{}).label||p.style)}</div><div class="badges"><span class="badge b-shape"></span>${p.multi?'<span class="badge warnb">Second piece</span>':""}<span class="badge warnb b-size" hidden></span></div>${p.note?`<p class="why"><b>Note:</b> ${esc(p.note)}</p>`:""}<div class="btnrow"><button type="button" class="secondary usebtn">Use this design</button><button type="button" class="secondary pvbtn">Preview in 3D</button></div>`;
+    card.querySelector(".usebtn").addEventListener("click",()=>applyPresetById(p.id));
+    card.querySelector(".pvbtn").addEventListener("click",()=>togglePreview(p.id));
+    card.querySelector(".thumb").addEventListener("click",()=>togglePreview(p.id));
     host.appendChild(card);
   });
   document.querySelectorAll("[data-galfilter]").forEach(b=>b.addEventListener("click",()=>setGalleryFilter(b.dataset.galfilter)));
@@ -1571,6 +1752,7 @@ function buildPresetUI(){
   __galSig=null;
 }
 function setGalleryFilter(f){
+  __preview=null;
   __galFilter=f;
   document.querySelectorAll("[data-galfilter]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.galfilter===f?"true":"false"));
   __galSig=null;
@@ -1579,7 +1761,7 @@ function setGalleryFilter(f){
 function syncPresetGallery(g){
   if(!$("presetGallery"))return;
   const matched=matchPreset(g);
-  const sig=[__galFilter,g.layout.shape||"",g.piece.overall_width||0,(g.design&&g.design.label)||"",__presetUndo?1:0,matched?matched.id:""].join("|");
+  const sig=[__galFilter,g.layout.shape||"",g.piece.overall_width||0,(g.design&&g.design.label)||"",__presetUndo?1:0,matched?matched.id:"",__preview?__preview.id:""].join("|");
   if(sig===__galSig)return; __galSig=sig;
   const t=g.materials.carcass_thickness||16;
   const shapeName={straight:"Straight",l:"L",u:"U"};
@@ -1610,9 +1792,10 @@ function syncPresetGallery(g){
     if(ub)ub.style.display=__presetUndo?"":"none";
   }
   if(note){
-    if(g.design&&g.design.id==="k5"){note.hidden=false; note.textContent="Galley note: a true galley is two facing runs. This design is the complete wet side — model the facing run (stove + cupboards) as a second straight piece, with at least 1200 mm of aisle between the runs.";}
+    if(g.design&&g.design.note){note.hidden=false; note.textContent="Design note: "+g.design.note;}
     else note.hidden=true;
   }
+  document.querySelectorAll("#presetGallery .preset-card").forEach(c=>c.classList.toggle("previewing",!!__preview&&c.dataset.pid===__preview.id));
 }
 
 /* ================= v6 interactive 3D (Three.js, CDN-degradable) =================
@@ -1620,8 +1803,9 @@ function syncPresetGallery(g){
    short note and returns — the 2D SVG previews are untouched and nothing throws. */
 let __t3=null, __t3Hash="";
 function t3Mat(color,rough){return new THREE.MeshStandardMaterial({color:color,roughness:rough===undefined?.85:rough,metalness:.05});}
-function t3Box(w,h,d,mat,x,y,z,parent){const m=new THREE.Mesh(new THREE.BoxGeometry(Math.max(0.001,w),Math.max(0.001,h),Math.max(0.001,d)),mat);m.position.set(x,y,z);(parent||__t3.scene).add(m);return m;}
-function buildRun3D(g,run,ri,open){
+let __ltag="frame"; // v8.1: layer tag stamped on every mesh t3Box creates (frame / fronts / handle)
+function t3Box(w,h,d,mat,x,y,z,parent){const m=new THREE.Mesh(new THREE.BoxGeometry(Math.max(0.001,w),Math.max(0.001,h),Math.max(0.001,d)),mat);m.position.set(x,y,z);m.userData.layer=__ltag;(parent||__t3.scene).add(m);return m;}
+function buildRun3D(g,run,ri,open,hideFronts,sel){
   const T=THREE, grp=new T.Group();
   const H=g.piece.overall_height||0, D=g.piece.overall_depth||0, t=g.materials.carcass_thickness||16;
   const plinth=Math.min(g.piece.plinth_height||0,H*.3);
@@ -1645,13 +1829,18 @@ function buildRun3D(g,run,ri,open){
   const ws=runWidthsFor(g,run);
   let u=startU+t;
   (run.sections||[]).forEach((b,si)=>{
+    __ltag="frame";
     const w=ws[si]||0; if(w<=0){return;}
     const ux=u, uw=w; u+=w+t;
+    // v8: every mesh of this section lives in one tagged group — the raycast
+    // picker and the selection cage both key off userData.sec.
+    const secGrp=new T.Group(); secGrp.userData.sec={run:ri,idx:si}; grp.add(secGrp);
+    if(sel&&sel.run===ri&&sel.idx===si){const cageH=(topY-botY);const cage=new T.Mesh(new T.BoxGeometry((uw+10)*S,cageH*S,(D+30)*S),new T.MeshBasicMaterial({color:0xd97706,wireframe:true,transparent:true,opacity:.8}));cage.position.set((ux+uw/2)*S,(botY+cageH/2)*S,(D/2)*S);secGrp.add(cage);__lastCage=cage;}
     const dt=b.door_type||doorTypeFromDoors(b.doors||0);
-    const secH=(topY-botY);
+    const secH=(topY-botY); const secH0=secH;
     // internals
-    const shelf=(fy)=>t3Box(uw*S,14*S,(D-30)*S,carc,(ux+uw/2)*S,(botY+secH*fy)*S,(D/2)*S,grp);
-    const rod=(fy)=>{const r=new T.Mesh(new T.CylinderGeometry(12*S,12*S,uw*S,10),t3Mat(0xd7dde8,.35));r.rotation.z=Math.PI/2;r.position.set((ux+uw/2)*S,(botY+secH*fy)*S,(D/2)*S);grp.add(r);};
+    const shelf=(fy)=>t3Box(uw*S,14*S,(D-30)*S,carc,(ux+uw/2)*S,(botY+secH*fy)*S,(D/2)*S,secGrp);
+    const rod=(fy)=>{const r=new T.Mesh(new T.CylinderGeometry(12*S,12*S,uw*S,10),t3Mat(0xd7dde8,.35));r.rotation.z=Math.PI/2;r.position.set((ux+uw/2)*S,(botY+secH*fy)*S,(D/2)*S);r.userData.layer="rod";secGrp.add(r);};
     if(b.type==="double_hang"){rod(.82);rod(.45);}
     else if(b.type==="single_hang"){rod(.86);}
     else if(b.type==="shelves"){const n=b.shelves||4;for(let i=1;i<=n;i++)shelf(i/(n+1));}
@@ -1663,38 +1852,45 @@ function buildRun3D(g,run,ri,open){
       const zh=secH*zoneF, dh=zh/n;
       for(let i=0;i<n;i++){
         const fy=botY+dh*i;
-        const front=t3Box((uw-6)*S,(dh-5)*S,16*S,doorM,(ux+uw/2)*S,(fy+dh/2)*S,D*S+8*S,grp);
-        if(open){const box=t3Box((uw-24)*S,(dh-24)*S,(D*.55)*S,inner,(ux+uw/2)*S,(fy+dh/2)*S,((D*1.5)-(D*.55)/2)*S,grp);front.position.z=(D+ (D*.5))*S;}
-        const hnd=t3Box(Math.min(160,uw*.4)*S,10*S,10*S,t3Mat(0xcfd6e4,.4),(ux+uw/2)*S,(fy+dh/2)*S,D*S+22*S,grp);
+        let front=null; __ltag="fronts";
+        if(!hideFronts){front=t3Box((uw-6)*S,(dh-5)*S,16*S,doorM,(ux+uw/2)*S,(fy+dh/2)*S,D*S+8*S,secGrp);}
+        if(open){const box=t3Box((uw-24)*S,(dh-24)*S,(D*.55)*S,inner,(ux+uw/2)*S,(fy+dh/2)*S,((D*1.5)-(D*.55)/2)*S,secGrp);if(front)front.position.z=(D+ (D*.5))*S;}
+        __ltag="handle";
+        if(!hideFronts)t3Box(Math.min(160,uw*.4)*S,10*S,10*S,t3Mat(0xcfd6e4,.4),(ux+uw/2)*S,(fy+dh/2)*S,D*S+22*S,secGrp);
       }
-      if(b.type==="shelves_drawers"){const n2=b.shelves||4;for(let i=1;i<=n2;i++){const fy2=botY+zh+ (secH-zh)*(i/(n2+1));t3Box(uw*S,14*S,(D-30)*S,carc,(ux+uw/2)*S,fy2*S,(D/2)*S,grp);}}
+      if(b.type==="shelves_drawers"){__ltag="frame";const n2=b.shelves||4;for(let i=1;i<=n2;i++){const fy2=botY+zh+ (secH-zh)*(i/(n2+1));t3Box(uw*S,14*S,(D-30)*S,carc,(ux+uw/2)*S,fy2*S,(D/2)*S,secGrp);}}
     }
     // doors at the front (z = D plane), local frame: x=u, z=depth
     const doorH=secH-6, doorY=botY+secH/2, gap=3;
-    const mkDoor=(wMm)=>{const dm=new T.Mesh(new T.BoxGeometry(Math.max(1,wMm-gap)*S,doorH*S,16*S),doorM);return dm;};
-    if(dt==="hinged_single"){
-      const pivot=new T.Group(); pivot.position.set(ux*S,doorY*S,D*S); grp.add(pivot);
+    const mkDoor=(wMm)=>{const dm=new T.Mesh(new T.BoxGeometry(Math.max(1,wMm-gap)*S,doorH*S,16*S),doorM);dm.userData.layer="fronts";return dm;};
+    if(!hideFronts&&dt==="hinged_single"){
+      const pivot=new T.Group(); pivot.position.set(ux*S,doorY*S,D*S); secGrp.add(pivot);
       const dm=mkDoor(uw); dm.position.set(uw*S/2,0,8*S); pivot.add(dm);
       if(open)pivot.rotation.y=-1.85;
-    } else if(dt==="hinged_pair"){
+    } else if(!hideFronts&&dt==="hinged_pair"){
       [-1,1].forEach(side=>{
-        const pivot=new T.Group(); const edgeX=side<0?ux:ux+uw; pivot.position.set(edgeX*S,doorY*S,D*S); grp.add(pivot);
+        const pivot=new T.Group(); const edgeX=side<0?ux:ux+uw; pivot.position.set(edgeX*S,doorY*S,D*S); secGrp.add(pivot);
         const dm=mkDoor(uw/2); dm.position.set(-side*(uw/2)*S/2,0,8*S); pivot.add(dm);
         if(open)pivot.rotation.y=side*1.85;
       });
-    } else if(dt==="sliding"){
-      const p1=mkDoor(uw/2+30); p1.position.set((ux+uw/4)*S,doorY*S,(D+2)*S); grp.add(p1);
-      const p2=mkDoor(uw/2+30); p2.position.set((ux+uw*.75)*S,doorY*S,(D+22)*S); grp.add(p2);
+    } else if(!hideFronts&&dt==="sliding"){
+      const p1=mkDoor(uw/2+30); p1.position.set((ux+uw/4)*S,doorY*S,(D+2)*S); secGrp.add(p1);
+      const p2=mkDoor(uw/2+30); p2.position.set((ux+uw*.75)*S,doorY*S,(D+22)*S); secGrp.add(p2);
       if(open)p1.position.x=(ux+uw*.28)*S;
-    } else if(dt==="bifold"){
+    } else if(!hideFronts&&dt==="bifold"){
       [-1,1].forEach(side=>{
-        const pivot=new T.Group(); const edgeX=side<0?ux:ux+uw; pivot.position.set(edgeX*S,doorY*S,D*S); grp.add(pivot);
+        const pivot=new T.Group(); const edgeX=side<0?ux:ux+uw; pivot.position.set(edgeX*S,doorY*S,D*S); secGrp.add(pivot);
         const leaf=mkDoor(uw/2); leaf.position.set(-side*(uw/2)*S/2,0,8*S); pivot.add(leaf);
         if(open)pivot.rotation.y=side*2.2;
       });
     }
     // divider to next section
-    if(si<(run.sections.length-1))t3Box(t*S,secH*S,cz,carc,(ux+uw+t/2)*S,(botY+secH/2)*S,cz/2,grp);
+    __ltag="frame";
+    if(si<(run.sections.length-1))t3Box(t*S,secH*S,cz,carc,(ux+uw+t/2)*S,(botY+secH/2)*S,cz/2,secGrp);
+    // v8.1: hotspot anchor — top-front centre of this section; the ESP overlay
+    // projects it to screen space every frame for the badge + leader line.
+    const an=new T.Object3D(); an.position.set((ux+uw/2)*S,(topY+2)*S,(D+16)*S); secGrp.add(an);
+    __anchors.push({run:ri,idx:si,obj:an});
   });
   return grp;
 }
@@ -1710,71 +1906,457 @@ function draw3D(g){
   }
   window.__threeState="ready";
   window.__threeFailed=false;
-  const open=!!window.__open3d;
-  const hash=JSON.stringify([g.layout,g.piece,g.materials,g.hardware,open]);
+  // v8: in preview mode the stage renders the PREVIEW params, never gather()'s —
+  // previewing is read-only on the user's state by construction.
+  const srcG=__preview?previewParams(__preview):g;
+  const mode=window.__viewMode||"shown";
+  const open=(mode==="open"), hideFronts=(mode==="hidden")&&(window.__layerMode||"assembled")!=="fronts"; // EVE-019: the "Doors & drawers" layer view isolates the fronts, so it overrides the interiors front-hiding for its own parts — otherwise fronts-layer × fronts-hidden builds no front/handle meshes at all and the stage is a silent void
+  const selKey=__preview?__pvHl:__sel;
+  const hash=JSON.stringify([srcG.layout,srcG.piece,srcG.materials,srcG.hardware,mode,selKey,__preview?__preview.id:"",window.__layerMode||"assembled"]);
   const needReset=window.__reset3d; window.__reset3d=false;
   if(__t3&&hash===__t3Hash&&!needReset)return;
   __t3Hash=hash;
-  const W3=(g.layout.runs&&g.layout.runs[0]?g.layout.runs[0].length_mm:g.piece.overall_width)||2400;
-  const H3=g.piece.overall_height||2400, D3=g.piece.overall_depth||600;
+  const W3=(srcG.layout.runs&&srcG.layout.runs[0]?srcG.layout.runs[0].length_mm:srcG.piece.overall_width)||2400;
+  const H3=srcG.piece.overall_height||2400, D3=srcG.piece.overall_depth||600;
   if(!__t3){
     const renderer=new THREE.WebGLRenderer({antialias:true});
     renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
     renderer.setSize(660,430,false); // CSS owns the display size (responsive); the drawing buffer stays 660×430
     box.innerHTML=""; box.appendChild(renderer.domElement);
-    const scene=new THREE.Scene(); scene.background=new THREE.Color(0x0d1119);
-    scene.add(new THREE.HemisphereLight(0xeef0f4,0x22252d,.95));
+    const scene=new THREE.Scene(); scene.background=new THREE.Color(0xf5f5f3); // ESP light stage
+    scene.add(new THREE.HemisphereLight(0xeef0f4,0xcfc8ba,.95));
     const dl=new THREE.DirectionalLight(0xffffff,.85); dl.position.set(3,5,4); scene.add(dl);
     const camera=new THREE.PerspectiveCamera(42,660/430,.1,100);
-    __t3={renderer,scene,camera,sph:{th:.7,ph:1.05,r:5.2},tgt:new THREE.Vector3(1.2,1.1,0),drag:null};
+    __t3={renderer,scene,camera,sph:{th:.7,ph:1.15,r:5.2},tgt:new THREE.Vector3(1.2,1.1,0),drag:null,tween:null,selCage:null,defView:null,shadowTex:null};
     const cv=renderer.domElement, st=__t3;
     const ptrs=new Map();
-    cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});st.drag={x:e.clientX,y:e.clientY,pan:e.shiftKey||e.button===2||ptrs.size>1,pinch:ptrs.size>1?Math.hypot(...(()=>{const a=[...ptrs.values()];return [a[0].x-a[1].x,a[0].y-a[1].y];})()):0};});
+    cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});st.tween=null;if(ptrs.size===1&&e.button===0)st.clickCand={x:e.clientX,y:e.clientY,id:e.pointerId};st.drag={x:e.clientX,y:e.clientY,pan:e.shiftKey||e.button===2||ptrs.size>1,pinch:ptrs.size>1?Math.hypot(...(()=>{const a=[...ptrs.values()];return [a[0].x-a[1].x,a[0].y-a[1].y];})()):0};});
     cv.addEventListener("pointermove",e=>{if(!st.drag||!ptrs.has(e.pointerId))return;const prev=ptrs.get(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
       if(st.drag.pinch&&ptrs.size>1){const a=[...ptrs.values()];const d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);if(st.drag.pinch)st.sph.r=Math.max(1.6,Math.min(14,st.sph.r*st.drag.pinch/Math.max(20,d)));st.drag.pinch=d;return;}
       const dx=e.clientX-st.drag.x, dy=e.clientY-st.drag.y; st.drag.x=e.clientX; st.drag.y=e.clientY;
       if(st.drag.pan){const k=st.sph.r*.0016;const fwd=new THREE.Vector3();st.camera.getWorldDirection(fwd);const right=new THREE.Vector3().crossVectors(fwd,st.camera.up).normalize();const up2=new THREE.Vector3().crossVectors(right,fwd);st.tgt.addScaledVector(right,-dx*k).addScaledVector(up2,dy*k);}
       else{st.sph.th-=dx*.008; st.sph.ph=Math.max(.15,Math.min(1.5,st.sph.ph-dy*.008));}});
-    const endP=e=>{ptrs.delete(e.pointerId);if(!ptrs.size)st.drag=null;};
+    const endP=e=>{const cand=st.clickCand&&st.clickCand.id===e.pointerId?st.clickCand:null;st.clickCand=null;ptrs.delete(e.pointerId);if(!ptrs.size)st.drag=null;
+      if(cand&&Math.hypot(e.clientX-cand.x,e.clientY-cand.y)<6){try{pickSectionAt(e.clientX,e.clientY);}catch(err){}}};
     cv.addEventListener("pointerup",endP); cv.addEventListener("pointercancel",endP);
     cv.addEventListener("wheel",e=>{e.preventDefault();st.sph.r=Math.max(1.6,Math.min(14,st.sph.r*(e.deltaY>0?1.12:0.9)));},{passive:false});
     cv.addEventListener("contextmenu",e=>e.preventDefault());
-    const tick=()=>{if(!__t3)return;const c=__t3.camera,s2=__t3.sph,t2=__t3.tgt;c.position.set(t2.x+s2.r*Math.sin(s2.ph)*Math.sin(s2.th),t2.y+s2.r*Math.cos(s2.ph),t2.z+s2.r*Math.sin(s2.ph)*Math.cos(s2.th));c.lookAt(t2);__t3.renderer.render(__t3.scene,c);requestAnimationFrame(tick);};
+    const tick=()=>{if(!__t3)return;const st2=__t3;
+      if(st2.tween){const tw=st2.tween,k=Math.min(1,(performance.now()-tw.t0)/tw.dur),e=1-Math.pow(1-k,3),F=tw.from,T2=tw.to;
+        st2.sph.th=F.th+(T2.th-F.th)*e; st2.sph.ph=F.ph+(T2.ph-F.ph)*e; st2.sph.r=F.r+(T2.r-F.r)*e;
+        st2.tgt.set(F.tx+(T2.tx-F.tx)*e,F.ty+(T2.ty-F.ty)*e,F.tz+(T2.tz-F.tz)*e);
+        if(k>=1)st2.tween=null;}
+      if(st2.selCage)st2.selCage.material.opacity=.5+.35*Math.sin(performance.now()*.004); // the one pulsing detail (ESP's LED rule)
+      const c=st2.camera,s2=st2.sph,t2=st2.tgt;c.position.set(t2.x+s2.r*Math.sin(s2.ph)*Math.sin(s2.th),t2.y+s2.r*Math.cos(s2.ph),t2.z+s2.r*Math.sin(s2.ph)*Math.cos(s2.th));c.lookAt(t2);st2.renderer.render(st2.scene,c);
+      try{projectHotspots();}catch(err){}
+      requestAnimationFrame(tick);};
     requestAnimationFrame(tick);
   }
   // rebuild piece group
   [...__t3.scene.children].filter(o=>o.userData&&o.userData.piece).forEach(o=>__t3.scene.remove(o));
   const pieceGrp=new THREE.Group(); pieceGrp.userData.piece=true; __t3.scene.add(pieceGrp);
-  const rw=(g.room&&g.room.width)||W3*1.5, rd=(g.room&&g.room.depth)||4200;
-  const floor=new THREE.Mesh(new THREE.PlaneGeometry(rw*0.001,rd*0.001),t3Mat(0x141926,1)); floor.rotation.x=-Math.PI/2; floor.position.set(rw*0.0005,0,rd*0.0005- (D3*0.001)/2 + rd*0.0005*0); floor.position.z=(rd*0.001)/2 - D3*0.001 + (D3*0.001)/2; floor.userData.piece=true; pieceGrp.add(floor);
-  const runs=g.layout.runs||[];
-  const g0=buildRun3D(g,getRun(g,0),0,open); pieceGrp.add(g0);
+  const rw=(srcG.room&&srcG.room.width)||W3*1.5, rd=(srcG.room&&srcG.room.depth)||4200;
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(rw*0.001,rd*0.001),t3Mat(0xe9e7e1,1)); floor.rotation.x=-Math.PI/2; floor.position.set(rw*0.0005,0,(rd*0.001)/2 - (D3*0.001)/2); floor.userData.piece=true; pieceGrp.add(floor);
+  // ESP contact shadow: one soft radial-gradient blob under the piece — no shadow maps, no cost.
+  if(!__t3.shadowTex){const cnv=document.createElement("canvas");cnv.width=cnv.height=256;const cx2=cnv.getContext("2d");const gr=cx2.createRadialGradient(128,128,10,128,128,126);gr.addColorStop(0,"rgba(25,22,18,0.40)");gr.addColorStop(0.6,"rgba(25,22,18,0.16)");gr.addColorStop(1,"rgba(25,22,18,0)");cx2.fillStyle=gr;cx2.fillRect(0,0,256,256);__t3.shadowTex=new THREE.CanvasTexture(cnv);}
+  const shBlob=new THREE.Mesh(new THREE.PlaneGeometry(Math.max(W3*1.12,600)*0.001,Math.max(D3*2.4,700)*0.001),new THREE.MeshBasicMaterial({map:__t3.shadowTex,transparent:true,depthWrite:false}));
+  shBlob.rotation.x=-Math.PI/2; shBlob.position.set(W3*0.0005,0.0025,D3*0.0005); shBlob.userData.piece=true; pieceGrp.add(shBlob);
+  __anchors=[]; __lastCage=null;
+  const runs=srcG.layout.runs||[];
+  const g0=buildRun3D(srcG,getRun(srcG,0),0,open,hideFronts,selKey); pieceGrp.add(g0);
   if(runs[1]){ // left wall: length must map to +z (corner at z=0) AND depth to +x with the front facing the room.
     // That mapping is a mirror of Run 1's frame — no pure Y-rotation can do both — so the run is depth-flipped
     // inside a wrapper (scale.z=-1; three.js flips frontFace for negative-determinant matrices, so culling and
     // lighting stay correct), then rotated into place. Result: back at x≈0, doors at x≈D facing the room (EVE-006).
-    const g1=buildRun3D(g,runs[1],1,open);
+    const g1=buildRun3D(srcG,runs[1],1,open,hideFronts,selKey);
     const flip1=new THREE.Group(); flip1.scale.z=-1; flip1.position.z=D3*0.001; flip1.add(g1);
     const wrap1=new THREE.Group(); wrap1.rotation.y=-Math.PI/2; wrap1.position.set(D3*0.001,0,0); wrap1.add(flip1);
     pieceGrp.add(wrap1);
   }
   if(runs[2]){ // right wall: a pure rotation does it — length maps to +z, depth maps to W−x, fronts face −x (the room) (EVE-006).
-    const g2=buildRun3D(g,runs[2],2,open); g2.rotation.y=-Math.PI/2; g2.position.set(W3*0.001,0,0); pieceGrp.add(g2);
+    const g2=buildRun3D(srcG,runs[2],2,open,hideFronts,selKey); g2.rotation.y=-Math.PI/2; g2.position.set(W3*0.001,0,0); pieceGrp.add(g2);
   }
-  if(needReset||__t3.tgt.lengthSq()===0){__t3.sph={th:.7,ph:1.05,r:Math.max(W3,H3)*0.001*2.1};__t3.tgt.set(W3*0.0005,H3*0.00045,0);}
+  __t3.selCage=__lastCage;
+  __t3.defView={th:.7,ph:1.15,r:Math.max(W3,H3)*0.001*2.1,tx:W3*0.0005,ty:H3*0.00045,tz:0};
+  try{applyLayerVisibility();}catch(e){}
+  try{buildHotspots(srcG);}catch(e){}
+  if(needReset||__t3.tgt.lengthSq()===0){__t3.sph={th:.7,ph:1.15,r:Math.max(W3,H3)*0.001*2.1};__t3.tgt.set(W3*0.0005,H3*0.00045,0);}
   if(!__t3.__init){__t3.__init=true;__t3.sph.r=Math.max(W3,H3)*0.001*2.1;__t3.tgt.set(W3*0.0005,H3*0.00045,0);}
 }
+/* ================= v8: 3D-first design studio =================
+   Three-zone studio after the IKEA PAX Planner study (see
+   ui-reverse-engineering.md): gallery rail left, 3D stage centre, inspector
+   right; click-to-inspect editing; legal-options-only controls; interiors
+   mode (fronts shown / doors open / fronts hidden); a persistent summary bar
+   with the primary actions pinned at the top.
+   SESSION-ONLY STATE: __preview (design being previewed), __sel (selected
+   section) and window.__viewMode NEVER enter gather()/collectParams output —
+   previewParams() builds a throwaway params object for the stage, and the
+   inspector writes through the existing .b-* bay fields, so params, previews,
+   warnings and the order MD stay in agreement by construction. */
+let __sel=null, __preview=null, __pvDims="";
+let __pvHl=null;            // v8.1: preview-mode highlight (visual only — never __sel, never params)
+let __anchors=[], __lastCage=null; // v8.1: hotspot anchors + selection cage from the latest 3D build
+window.__viewMode="shown";
+window.__layerMode="assembled";
+
+function selHl(runIdx){return (__sel&&__sel.run===runIdx)?__sel.idx:-1;}
+function selectSection(run,idx){__sel={run:run,idx:idx}; window.__compScroll=true; if(activeRun!==run)activeRun=run; refresh();}
+function clearSelection(){if(__sel){__sel=null; refresh();}}
+function wireElevClicks(box){
+  // Delegated, attached once to the persistent container: the rects are redrawn
+  // on every refresh, and a section's centre is usually covered by its own
+  // internals/door drawing — the click target is whatever sits on top, so the
+  // handler resolves the section from the event target's ancestry.
+  if(!box||box.__secWired)return;
+  box.__secWired=true;
+  box.addEventListener("click",e=>{
+    if(__preview)return;
+    const r=e.target&&e.target.closest?e.target.closest("[data-sec]"):null;
+    if(r&&box.contains(r))selectSection(activeRun,parseInt(r.dataset.sec,10));
+  });
+}
+
+/* ---- design preview in 3D (read-only on user state) ---- */
+function previewParams(p){
+  const g0=gather();
+  const curW=g0.piece.overall_width||0;
+  const fits=curW>=p.minW&&curW<=p.recW[1];
+  const W=fits?curW:p.width_mm;
+  const H=g0.piece.overall_height||p.thumbH||2200;
+  const D=g0.piece.overall_depth||600;
+  const t=g0.materials.carcass_thickness||16;
+  const curShape=g0.layout.shape||"straight";
+  const shape=p.shapes.includes(curShape)?curShape:p.shape;
+  const nRuns=SHAPE_RUNS[shape]||1;
+  const adj=JSON.parse(JSON.stringify(g0)); adj.piece.overall_width=W;
+  const runs=[];
+  for(let ri=0;ri<nRuns;ri++){
+    const rr=p.runs[Math.min(ri,p.runs.length-1)];
+    const len=ri===0?W:(((g0.layout.runs||[])[ri]||{}).length_mm||rr.len||1800);
+    runs.push({wall:(RUN_WALLS[shape]||RUN_WALLS.straight)[ri]||"main wall",length_mm:len,divide_mode:"custom",is_corner_owner:ri===0,sections:scaleRecipe(rr.sections,runBasisMM(adj,ri,rr,t,p.width_mm))});
+  }
+  __pvDims=W+" × "+H+" mm";
+  return {project_type:p.project,job:g0.job,room:g0.room,
+    piece:{overall_width:W,overall_height:H,overall_depth:D,plinth_height:g0.piece.plinth_height||0,style:p.style,construction:g0.piece.construction,depth_includes_doors:g0.piece.depth_includes_doors},
+    materials:{carcass_material:p.carcass,door_material:p.door,carcass_thickness:t,back_thickness:g0.materials.back_thickness||6,front_gap_mm:2},
+    layout:{shape:shape,runs:runs,sections:runs[0].sections},hardware:g0.hardware,design:null};
+}
+function togglePreview(id){
+  const p=PRESET_BY_ID[id]; if(!p)return;
+  __preview=(__preview&&__preview.id===id)?null:p;
+  __pvHl=null;
+  refresh();
+  if(__preview){const pv=$("pv3d"); if(pv)pv.scrollIntoView({behavior:"smooth",block:"nearest"});}
+}
+function exitPreview(){if(__preview){__preview=null; __pvHl=null; refresh();}}
+function syncPreviewUI(){
+  const bn=$("pvBanner"); if(!bn)return;
+  if(__preview){
+    bn.hidden=false;
+    $("pvBannerText").textContent="Previewing: "+__preview.name+" — shown at "+__pvDims+". Your layout underneath is untouched.";
+  } else bn.hidden=true;
+}
+
+/* ---- 3D picking: a tap/click (not an orbit drag) selects the section hit ---- */
+function pickSectionAt(cx,cy){
+  if(__preview||!__t3||!window.THREE)return;
+  const cv=__t3.renderer.domElement, r=cv.getBoundingClientRect();
+  if(!r.width||!r.height)return;
+  const nd=new THREE.Vector2(((cx-r.left)/r.width)*2-1,-((cy-r.top)/r.height)*2+1);
+  const rc=new THREE.Raycaster(); rc.setFromCamera(nd,__t3.camera);
+  const piece=__t3.scene.children.find(o=>o.userData&&o.userData.piece);
+  if(!piece)return;
+  const hits=rc.intersectObjects(piece.children,true);
+  for(const h of hits){
+    let o=h.object;
+    while(o){ if(o.userData&&o.userData.sec){selectSection(o.userData.sec.run,o.userData.sec.idx); return;} o=o.parent; }
+  }
+  clearSelection(); // clicked the shell, the floor or empty space
+}
+
+/* ================= v8.1: ESP-LABS presentation layer =================
+   Framed light stage (CSS), a 5-button pill toolbar with tweened turn/zoom/
+   reset, numbered hotspots projected from 3D anchors with leader lines, a
+   components strip wired two-way to the ONE selection state, and layer views
+   (Assembled / Frame / Doors & drawers / Hardware) beside the interiors
+   modes. All of it is presentation-only: __pvHl, window.__layerMode and the
+   camera tween live in the same session-only bucket as __sel/__preview and
+   never reach gather() output. */
+let __hs=[];
+function hsPick(run,idx){
+  if(__preview){__pvHl={run:run,idx:idx}; refresh(); return;}
+  selectSection(run,idx);
+}
+function buildHotspots(srcG){
+  const layer=$("hsLayer"), svg=$("hsSvg"); if(!layer||!svg)return;
+  layer.innerHTML=""; svg.innerHTML=""; __hs=[];
+  const NS="http://www.w3.org/2000/svg";
+  const byKey={}; __anchors.forEach(a=>{byKey[a.run+":"+a.idx]=a;});
+  let num=0;
+  (srcG.layout.runs||[]).forEach((run,ri)=>{
+    (run.sections||[]).forEach((b,si)=>{
+      num++;
+      const a=byKey[ri+":"+si]; if(!a)return;
+      const badge=document.createElement("button");
+      badge.type="button"; badge.className="hs-badge"; badge.textContent=num;
+      badge.title="Select section "+num;
+      badge.setAttribute("aria-label","Select section "+num);
+      badge.addEventListener("click",()=>hsPick(ri,si));
+      layer.appendChild(badge);
+      const line=document.createElementNS(NS,"line");
+      line.setAttribute("stroke","#0d9488"); line.setAttribute("stroke-width","1.5"); line.setAttribute("stroke-dasharray","4 3");
+      svg.appendChild(line);
+      const dot=document.createElementNS(NS,"circle");
+      dot.setAttribute("r","3.5"); dot.setAttribute("fill","#0d9488"); dot.setAttribute("stroke","#fff"); dot.setAttribute("stroke-width","1.5");
+      svg.appendChild(dot);
+      __hs.push({run:ri,idx:si,num:num,badge:badge,line:line,dot:dot,anchor:a.obj});
+    });
+  });
+  syncHsSelection();
+}
+function hsIsSel(h){
+  const s=__preview?__pvHl:__sel;
+  return !!(s&&s.run===h.run&&s.idx===h.idx);
+}
+function syncHsSelection(){
+  __hs.forEach(h=>{
+    const sel=hsIsSel(h);
+    h.badge.classList.toggle("sel",sel);
+    h.line.setAttribute("stroke",sel?"#d97706":"#0d9488");
+    h.line.setAttribute("stroke-width",sel?"2.5":"1.5");
+    h.line.setAttribute("stroke-dasharray",sel?"none":"4 3");
+    h.dot.setAttribute("fill",sel?"#d97706":"#0d9488");
+  });
+}
+const __pv3={v:null}; // scratch holder — the Vector3 is allocated lazily (THREE may be absent)
+function projectHotspots(){
+  if(!__t3||!window.THREE||!__hs.length)return;
+  const wrap=$("stageWrap"), cv=__t3.renderer.domElement;
+  if(!wrap||!cv)return;
+  if(!__pv3.v)__pv3.v=new THREE.Vector3();
+  const wr=wrap.getBoundingClientRect(), cr=cv.getBoundingClientRect();
+  if(!wr.width||!cr.width)return;
+  const ox=cr.left-wr.left, oy=cr.top-wr.top, v=__pv3.v;
+  __hs.forEach(h=>{
+    h.anchor.getWorldPosition(v); v.project(__t3.camera);
+    const x=ox+(v.x*0.5+0.5)*cr.width, y=oy+(-v.y*0.5+0.5)*cr.height;
+    const hide=v.z>1||x<-30||x>wr.width+30||y<-30||y>wr.height+30;
+    h.badge.style.display=hide?"none":"grid";
+    h.line.style.display=hide?"none":"";
+    h.dot.style.display=hide?"none":"";
+    if(hide)return;
+    const bx=Math.max(15,Math.min(wr.width-15,x+(x<wr.width/2?-38:38)));
+    const by=Math.max(15,Math.min(wr.height-15,y-16));
+    h.badge.style.left=bx+"px"; h.badge.style.top=by+"px";
+    h.line.setAttribute("x1",x); h.line.setAttribute("y1",y);
+    h.line.setAttribute("x2",bx); h.line.setAttribute("y2",by);
+    h.dot.setAttribute("cx",x); h.dot.setAttribute("cy",y);
+  });
+}
+/* ---- layer views: show/hide named mesh groups over the built scene ---- */
+const LAYER_VIS={assembled:null,frame:{frame:1},fronts:{fronts:1,handle:1},hardware:{rod:1,handle:1}};
+function applyLayerVisibility(){
+  if(!__t3)return;
+  const vis=LAYER_VIS[window.__layerMode||"assembled"];
+  const piece=__t3.scene.children.find(o=>o.userData&&o.userData.piece);
+  if(!piece)return;
+  piece.traverse(o=>{if(o.userData&&o.userData.layer)o.visible=!vis||!!vis[o.userData.layer];});
+  syncStageEmptyNote();
+}
+/* EVE-019 safety net: a layer × interiors combination that filters out EVERY
+   built part must never present as a silent blank stage — an explicit on-stage
+   note names the combination and how to bring the piece back. Fires only when
+   parts exist but zero are visible, so a genuinely empty layout / dead 3D
+   (which carry their own messages) never trigger it. Session-only chrome. */
+const LAYER_LABEL={assembled:"Assembled",frame:"Frame",fronts:"Doors & drawers",hardware:"Hardware"};
+const VMODE_LABEL={shown:"Fronts shown",open:"Doors open",hidden:"Fronts hidden — interiors"};
+function syncStageEmptyNote(){
+  const note=$("stageEmptyNote"); if(!note)return;
+  if(!__t3){note.hidden=true; return;}
+  const piece=__t3.scene.children.find(o=>o.userData&&o.userData.piece);
+  if(!piece){note.hidden=true; return;}
+  let total=0, visN=0;
+  piece.traverse(o=>{if(o.userData&&o.userData.layer){total++; if(o.visible)visN++;}});
+  if(total>0&&visN===0){
+    const lm=window.__layerMode||"assembled", vm=window.__viewMode||"shown";
+    note.textContent="Nothing to show in this combination — Layer view: "+(LAYER_LABEL[lm]||lm)+" · Interiors: "+(VMODE_LABEL[vm]||vm)+". Together, these two controls filter out every part of the piece. Switch the Layer view to Assembled, or set Interiors to “Fronts shown”, to bring the piece back.";
+    note.hidden=false;
+  } else note.hidden=true;
+}
+function setLayerMode(m){
+  window.__layerMode=m;
+  document.querySelectorAll("#layerModes [data-layer]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.layer===m?"true":"false"));
+  applyLayerVisibility();
+  refresh(); // hash carries the layer mode, so any rebuild re-applies it in draw3D
+}
+/* ---- ESP toolbar: tweened turn / zoom / reset over the existing orbit state ---- */
+function t3TweenTo(patch,dur){
+  if(!__t3)return;
+  const st=__t3;
+  st.tween={t0:performance.now(),dur:dur||320,
+    from:{th:st.sph.th,ph:st.sph.ph,r:st.sph.r,tx:st.tgt.x,ty:st.tgt.y,tz:st.tgt.z},
+    to:Object.assign({th:st.sph.th,ph:st.sph.ph,r:st.sph.r,tx:st.tgt.x,ty:st.tgt.y,tz:st.tgt.z},patch)};
+}
+/* ---- components strip: one card per section on stage, two-way with selection ---- */
+function compSpec(b){
+  const parts=[];
+  if(b.type==="drawers"||b.type==="shelves_drawers")parts.push(drawerCountOf(b)+" drawers");
+  if(b.shelves)parts.push(b.shelves+" shelves");
+  const dt=b.door_type||doorTypeFromDoors(b.doors||0);
+  if(dt&&dt!=="none")parts.push(dt.replace(/_/g," "));
+  return parts.join(" · ");
+}
+function syncComponents(g){
+  const strip=$("compStrip"); if(!strip)return;
+  const srcG=__preview?previewParams(__preview):g;
+  const runs=srcG.layout.runs||[];
+  let num=0, any=false;
+  const frag=document.createDocumentFragment();
+  runs.forEach((run,ri)=>{
+    const ws=runWidthsFor(srcG,run);
+    (run.sections||[]).forEach((b,si)=>{
+      any=true; num++;
+      const selNow=__preview?(__pvHl&&__pvHl.run===ri&&__pvHl.idx===si):(__sel&&__sel.run===ri&&__sel.idx===si);
+      const card=document.createElement("button");
+      card.type="button"; card.className="comp-card"+(selNow?" sel":"");
+      if(selNow)card.dataset.sel="1";
+      const n=document.createElement("span"); n.className="cc-num"; n.textContent=num;
+      const t=document.createElement("span"); t.className="cc-t";
+      t.textContent=(((BAY_TYPES.find(x=>x[0]===b.type)||[])[1])||b.type).split("(")[0].trim();
+      const s=document.createElement("span"); s.className="cc-s";
+      const spec=compSpec(b);
+      s.textContent=(runs.length>1?("Run "+(ri+1)+" · "):"")+"≈"+Math.round(ws[si]||0)+" mm"+(spec?(" · "+spec):"");
+      card.appendChild(n); card.appendChild(t); card.appendChild(s);
+      card.addEventListener("click",()=>hsPick(ri,si));
+      frag.appendChild(card);
+    });
+  });
+  strip.innerHTML=""; strip.appendChild(frag);
+  if(!any){const p=document.createElement("p"); p.className="small"; p.textContent="No sections yet — add sections in the inspector column and they appear here."; strip.appendChild(p);}
+  if(window.__compScroll){window.__compScroll=false; const sc=strip.querySelector("[data-sel]"); if(sc)sc.scrollIntoView({block:"nearest",inline:"nearest"});}
+}
+function syncStageChrome(){
+  const w=$("stageWrap"); if(!w)return;
+  const has=!!(__t3&&__t3.renderer&&__t3.renderer.domElement&&$("pv3d").contains(__t3.renderer.domElement));
+  w.classList.toggle("no3d",!has);
+}
+
+/* ---- view modes: fronts shown / doors open / fronts hidden (interiors) ---- */
+function setViewMode(m){
+  window.__viewMode=m;
+  document.querySelectorAll("#viewModes [data-vmode]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.vmode===m?"true":"false"));
+  refresh();
+}
+
+/* ---- persistent summary bar (primary actions pinned at the top) ---- */
+function syncSummaryBar(g,ws){
+  const d=$("sbDesign"); if(!d)return;
+  d.textContent=(g.design&&g.design.label)?("Design: "+g.design.label):"No design applied — pick one at left, or build your own below";
+  const shapeName={straight:"Straight",l:"L-shape",u:"U-shape"};
+  $("sbShape").textContent="Shape: "+(shapeName[g.layout.shape]||g.layout.shape||"Straight");
+  const total=(g.layout.runs||[]).reduce((a,r)=>a+((r.sections||[]).length),0);
+  $("sbSections").textContent=total+" section"+(total===1?"":"s")+" · "+(g.piece.overall_width||"—")+" × "+(g.piece.overall_height||"—")+" × "+(g.piece.overall_depth||"—")+" mm";
+  const bad=(ws||[]).filter(x=>x[0]!=="ok").length;
+  const wEl=$("sbWarn"); wEl.hidden=!bad;
+  wEl.textContent=bad?("⚠ "+bad+" thing"+(bad===1?"":"s")+" to check in the list below"):"";
+}
+
+/* ---- section inspector: mirror controls over the real bay fields ---- */
+function bayElFor(run,idx){const p=runPanels()[run]; if(!p)return null; return panelBays(p)[idx]||null;}
+function setBayField(run,idx,cls,val){
+  const b=bayElFor(run,idx); if(!b)return;
+  const el=b.querySelector(cls); if(!el)return;
+  el.value=val; el.dispatchEvent(new Event("input",{bubbles:true}));
+}
+function syncSelControl(sel,pairs,val){
+  if(!sel)return;
+  const cur=[...sel.options].map(o=>o.value).join(",");
+  const want=pairs.map(p2=>p2[0]).join(",");
+  if(cur!==want&&document.activeElement!==sel){
+    sel.innerHTML=pairs.map(([v,t])=>`<option value="${v}">${t}</option>`).join("");
+  }
+  preserveSelectValue(sel,val===null||val===undefined?sel.value:String(val));
+}
+function legalDoorTypes(w){
+  // mirrors warnings(): sliding under ~600 mm and bifold over ~1200 mm are not offered
+  return DOOR_TYPES.filter(([v])=>!((v==="sliding"&&w&&w<600)||(v==="bifold"&&w&&w>1200)));
+}
+function legalDrawerCounts(H){
+  // mirrors warnings(): banks over 6 drawers in under 1800 mm of height are not offered
+  const max=(H&&H<1800)?6:8, out=[];
+  for(let n=2;n<=max;n++)out.push([String(n),n+" drawers"]);
+  return out;
+}
+function syncInspector(g){
+  const body=$("inspBody"), empty=$("inspEmpty"); if(!body)return;
+  // bay-row highlight follows the one selection state
+  runPanels().forEach((panel,ri)=>panelBays(panel).forEach((b,bi)=>b.classList.toggle("selbay",!!__sel&&__sel.run===ri&&__sel.idx===bi)));
+  const run=__sel?(g.layout.runs||[])[__sel.run]:null;
+  const b=run?(run.sections||[])[__sel.idx]:null;
+  if(!__sel||!b){body.hidden=true; if(empty)empty.hidden=false; return;}
+  if(empty)empty.hidden=true; body.hidden=false;
+  const ws=runWidthsFor(g,run), w=ws[__sel.idx]||0;
+  const typeName=((BAY_TYPES.find(x=>x[0]===b.type)||[])[1]||b.type);
+  $("inspTitle").textContent="Run "+(__sel.run+1)+" · Section "+(__sel.idx+1)+" — "+typeName+" · ≈"+Math.round(w)+" mm wide";
+  syncSelControl($("inspType"),BAY_TYPES,b.type);
+  const isBank=(b.type==="drawers"||b.type==="shelves_drawers");
+  $("inspBankRow").hidden=!isBank; $("inspExtraRow").hidden=isBank;
+  if(isBank)syncSelControl($("inspDrawers"),legalDrawerCounts(g.piece.overall_height),drawerCountOf(b));
+  const focused=document.activeElement;
+  const wEl=$("inspWidth");
+  const custom=(run.divide_mode||"custom")!=="equal";
+  wEl.disabled=!custom;
+  if(focused!==wEl)wEl.value=(b.width_mm===null||b.width_mm===undefined)?"":Math.round(b.width_mm);
+  const sEl=$("inspShelves"); if(focused!==sEl)sEl.value=b.shelves||0;
+  const xEl=$("inspDrawersX"); if(!isBank&&focused!==xEl)xEl.value=b.drawers||0;
+  syncSelControl($("inspDoorType"),legalDoorTypes(w),b.door_type||doorTypeFromDoors(b.doors||0));
+  syncSelControl($("inspDoorStyle"),[["slab","slab"],["shaker","shaker"]],b.door_style||"slab");
+  const withheld=[];
+  if(w&&w<600)withheld.push("sliding (needs ≈600 mm+)");
+  if(w&&w>1200)withheld.push("bifold (too wide over ≈1200 mm)");
+  if(isBank&&g.piece.overall_height&&g.piece.overall_height<1800)withheld.push("7–8 drawers (piece under 1800 mm high)");
+  $("inspNote").textContent=(custom?"Width is this section's own — blank means auto (it takes an equal share of what's left).":"This run divides equally, so width is automatic — switch the run to Custom below to set widths per section.")
+    +(withheld.length?(" Not offered here: "+withheld.join(", ")+"."):"");
+}
+
+/* ---- studio wiring ---- */
+document.querySelectorAll("#viewModes [data-vmode]").forEach(btn=>btn.addEventListener("click",()=>setViewMode(btn.dataset.vmode)));
+document.querySelectorAll("#layerModes [data-layer]").forEach(btn=>btn.addEventListener("click",()=>setLayerMode(btn.dataset.layer)));
+{const b=$("tbTurnL"); if(b)b.addEventListener("click",()=>{if(__t3)t3TweenTo({th:__t3.sph.th+Math.PI/4});});}
+{const b=$("tbTurnR"); if(b)b.addEventListener("click",()=>{if(__t3)t3TweenTo({th:__t3.sph.th-Math.PI/4});});}
+{const b=$("tbZoomIn"); if(b)b.addEventListener("click",()=>{if(__t3)t3TweenTo({r:Math.max(1.6,__t3.sph.r/1.25)});});}
+{const b=$("tbZoomOut"); if(b)b.addEventListener("click",()=>{if(__t3)t3TweenTo({r:Math.min(14,__t3.sph.r*1.25)});});}
+{const b=$("tbReset"); if(b)b.addEventListener("click",()=>{if(__t3&&__t3.defView){const d=__t3.defView;t3TweenTo({th:d.th,ph:d.ph,r:d.r,tx:d.tx,ty:d.ty,tz:d.tz},450);}else{window.__reset3d=true;refresh();}});}
+{const pu=$("pvUse"); if(pu)pu.addEventListener("click",()=>{if(__preview)applyPresetById(__preview.id);});}
+{const pb=$("pvBack"); if(pb)pb.addEventListener("click",exitPreview);}
+{const ss=$("sbSave"); if(ss)ss.addEventListener("click",()=>{const b=$("saveCloud"); if(b)b.click();});}
+{const sd=$("sbSend"); if(sd)sd.addEventListener("click",()=>{const b=$("sendIssue"); if(b)b.click();});}
+{const ic=$("inspClear"); if(ic)ic.addEventListener("click",clearSelection);}
+{const it=$("inspType"); if(it)it.addEventListener("input",()=>{if(__sel)setBayField(__sel.run,__sel.idx,".b-type",it.value);});}
+{const idr=$("inspDrawers"); if(idr)idr.addEventListener("input",()=>{if(__sel)setBayField(__sel.run,__sel.idx,".b-drawer-count",idr.value);});}
+{const idt=$("inspDoorType"); if(idt)idt.addEventListener("input",()=>{if(__sel)setBayField(__sel.run,__sel.idx,".b-door-type",idt.value);});}
+{const ids=$("inspDoorStyle"); if(ids)ids.addEventListener("input",()=>{if(__sel)setBayField(__sel.run,__sel.idx,".b-doorstyle",ids.value);});}
+{const iw=$("inspWidth"); if(iw)iw.addEventListener("change",()=>{if(!__sel)return; const v=parseFloat(iw.value); setBayField(__sel.run,__sel.idx,".b-width",isNaN(v)?"":String(Math.round((v/uf())*100)/100));});}
+{const ish=$("inspShelves"); if(ish)ish.addEventListener("change",()=>{if(__sel)setBayField(__sel.run,__sel.idx,".b-shelves",ish.value);});}
+{const ix=$("inspDrawersX"); if(ix)ix.addEventListener("change",()=>{if(__sel)setBayField(__sel.run,__sel.idx,".b-drawers",ix.value);});}
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Escape")return;
+  const tag=(e.target&&e.target.tagName)||"";
+  if(tag==="INPUT"||tag==="SELECT"||tag==="TEXTAREA")return; // don't fight form editing or the delete dialog
+  if(__preview)exitPreview(); else clearSelection();
+});
 // Bridges for the Firebase cloud module below — single source of truth stays
 // gather()/orderMD()/loadParams() above; the module never rebuilds params itself.
 window.__makoCollectParams=function(){const g=refresh();return {params:g,orderMd:orderMD(g)};};
 window.__makoLoadParams=loadParams;
-document.querySelectorAll("#formCol input,#formCol select,#formCol textarea").forEach(el=>el.addEventListener("input",refresh));
+document.querySelectorAll("#formCol input,#formCol select,#formCol textarea,#formColB input,#formColB select,#formColB textarea,#studioSection input,#studioSection select,#studioSection textarea").forEach(el=>el.addEventListener("input",refresh));
 bayRow({type:"double_hang",doors:2});bayRow({type:"shelves_drawers",shelves:4,drawers:3,doors:0});bayRow({type:"single_hang",doors:2});
 buildMatUI();buildStyleUI();buildPresetUI();
 $("ptype").addEventListener("change",()=>{setGalleryFilter($("ptype").value==="kitchen"?"kitchen":"closet");});
 runPanels().forEach((pn,i)=>wireRunPanel(pn,i));
-{const shSel=$("layoutShape"); if(shSel)shSel.addEventListener("change",()=>{ensureRunPanels(shSel.value);activeRun=0;refresh();});}
-{const o3=$("open3d"); if(o3)o3.addEventListener("change",()=>{window.__open3d=o3.checked;refresh();});}
+{const shSel=$("layoutShape"); if(shSel)shSel.addEventListener("change",()=>{__preview=null;ensureRunPanels(shSel.value);activeRun=0;refresh();});}
+/* v8: the open-doors checkbox became the three-state view-mode control — wired in the studio block below. */
 {const r3=$("reset3d"); if(r3)r3.addEventListener("click",()=>{window.__reset3d=true;refresh();});}
 refresh();
 /* EVE-009: settle the 3D library state. The three.js script executes AFTER
